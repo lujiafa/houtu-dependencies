@@ -3,6 +3,9 @@ package com.houtu.springcloud.loadbalancer.support;
 import com.alibaba.cloud.commons.lang.StringUtils;
 import com.alibaba.cloud.nacos.NacosDiscoveryProperties;
 import com.alibaba.cloud.nacos.balancer.NacosBalancer;
+import com.alibaba.cloud.nacos.loadbalancer.LoadBalancerAlgorithm;
+import com.alibaba.cloud.nacos.loadbalancer.ServiceInstanceFilter;
+import com.alibaba.cloud.nacos.util.InetIPv6Utils;
 import com.alibaba.nacos.client.naming.utils.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +20,7 @@ import org.springframework.cloud.loadbalancer.core.ServiceInstanceListSupplier;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class NacosLoadBalancer extends com.alibaba.cloud.nacos.loadbalancer.NacosLoadBalancer {
@@ -25,8 +29,9 @@ public class NacosLoadBalancer extends com.alibaba.cloud.nacos.loadbalancer.Naco
     private ObjectProvider<ServiceInstanceListSupplier> serviceInstanceListSupplierProvider;
     private final NacosDiscoveryProperties nacosDiscoveryProperties;
 
-    public NacosLoadBalancer(ObjectProvider<ServiceInstanceListSupplier> serviceInstanceListSupplierProvider, String serviceId, NacosDiscoveryProperties nacosDiscoveryProperties) {
-        super(serviceInstanceListSupplierProvider, serviceId, nacosDiscoveryProperties);
+    public NacosLoadBalancer(ObjectProvider<ServiceInstanceListSupplier> serviceInstanceListSupplierProvider, String serviceId, NacosDiscoveryProperties nacosDiscoveryProperties,
+                             InetIPv6Utils inetIPv6Utils, List<ServiceInstanceFilter> serviceInstanceFilters, Map<String, LoadBalancerAlgorithm> loadBalancerAlgorithmMap) {
+        super(serviceInstanceListSupplierProvider, serviceId, nacosDiscoveryProperties, inetIPv6Utils, serviceInstanceFilters, loadBalancerAlgorithmMap);
         this.serviceInstanceListSupplierProvider = serviceInstanceListSupplierProvider;
         this.serviceId = serviceId;
         this.nacosDiscoveryProperties = nacosDiscoveryProperties;

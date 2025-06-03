@@ -12,10 +12,10 @@ import org.springframework.boot.autoconfigure.task.TaskExecutionAutoConfiguratio
 import org.springframework.boot.autoconfigure.task.TaskExecutionProperties;
 import org.springframework.boot.autoconfigure.task.TaskSchedulingProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.boot.task.TaskExecutorBuilder;
-import org.springframework.boot.task.TaskExecutorCustomizer;
-import org.springframework.boot.task.TaskSchedulerBuilder;
-import org.springframework.boot.task.TaskSchedulerCustomizer;
+import org.springframework.boot.task.ThreadPoolTaskExecutorBuilder;
+import org.springframework.boot.task.ThreadPoolTaskExecutorCustomizer;
+import org.springframework.boot.task.ThreadPoolTaskSchedulerBuilder;
+import org.springframework.boot.task.ThreadPoolTaskSchedulerCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.task.TaskDecorator;
@@ -34,9 +34,9 @@ public class CoreTaskExecutionAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     @ConditionalOnClass({ThreadPoolTaskExecutor.class})
-    public TaskExecutorBuilder taskExecutorBuilder(TaskExecutionProperties properties, ObjectProvider<TaskExecutorCustomizer> taskExecutorCustomizers, ObjectProvider<TaskDecorator> taskDecorator) {
+    public ThreadPoolTaskExecutorBuilder threadPoolTaskExecutorBuilder(TaskExecutionProperties properties, ObjectProvider<ThreadPoolTaskExecutorCustomizer> threadPoolTaskExecutorCustomizers, ObjectProvider<TaskDecorator> taskDecorator) {
         TaskExecutionProperties.Pool pool = properties.getPool();
-        TaskExecutorBuilder builder = new TransferTaskExecutorBuilder();
+        ThreadPoolTaskExecutorBuilder builder = new TransferTaskExecutorBuilder();
         builder = builder.queueCapacity(pool.getQueueCapacity());
         builder = builder.corePoolSize(pool.getCoreSize());
         builder = builder.maxPoolSize(pool.getMaxSize());
@@ -46,7 +46,7 @@ public class CoreTaskExecutionAutoConfiguration {
         builder = builder.awaitTermination(shutdown.isAwaitTermination());
         builder = builder.awaitTerminationPeriod(shutdown.getAwaitTerminationPeriod());
         builder = builder.threadNamePrefix(properties.getThreadNamePrefix());
-        Stream var10001 = taskExecutorCustomizers.orderedStream();
+        Stream var10001 = threadPoolTaskExecutorCustomizers.orderedStream();
         var10001.getClass();
         builder = builder.customizers(var10001::iterator);
         builder = builder.taskDecorator((TaskDecorator)taskDecorator.getIfUnique());
@@ -56,14 +56,14 @@ public class CoreTaskExecutionAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     @ConditionalOnClass({ThreadPoolTaskScheduler.class})
-    public TaskSchedulerBuilder taskSchedulerBuilder(TaskSchedulingProperties properties, ObjectProvider<TaskSchedulerCustomizer> taskSchedulerCustomizers) {
-        TaskSchedulerBuilder builder = new TransferTaskSchedulerBuilder();
+    public ThreadPoolTaskSchedulerBuilder threadPoolTaskSchedulerBuilder(TaskSchedulingProperties properties, ObjectProvider<ThreadPoolTaskSchedulerCustomizer> threadPoolTaskSchedulerCustomizers) {
+        ThreadPoolTaskSchedulerBuilder builder = new TransferTaskSchedulerBuilder();
         builder = builder.poolSize(properties.getPool().getSize());
         TaskSchedulingProperties.Shutdown shutdown = properties.getShutdown();
         builder = builder.awaitTermination(shutdown.isAwaitTermination());
         builder = builder.awaitTerminationPeriod(shutdown.getAwaitTerminationPeriod());
         builder = builder.threadNamePrefix(properties.getThreadNamePrefix());
-        builder = builder.customizers(taskSchedulerCustomizers);
+        builder = builder.customizers(threadPoolTaskSchedulerCustomizers);
         return builder;
     }
 

@@ -3,7 +3,10 @@ package com.houtu.springcloud.loadbalancer.support;
 import com.alibaba.cloud.nacos.ConditionalOnNacosDiscoveryEnabled;
 import com.alibaba.cloud.nacos.NacosDiscoveryProperties;
 import com.alibaba.cloud.nacos.loadbalancer.ConditionalOnLoadBalancerNacos;
+import com.alibaba.cloud.nacos.loadbalancer.LoadBalancerAlgorithm;
 import com.alibaba.cloud.nacos.loadbalancer.LoadBalancerNacosAutoConfiguration;
+import com.alibaba.cloud.nacos.loadbalancer.ServiceInstanceFilter;
+import com.alibaba.cloud.nacos.util.InetIPv6Utils;
 import com.houtu.springcloud.loadbalancer.support.hint.HintBasedServiceInstanceListSupplier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -25,6 +28,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.env.Environment;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 @Configuration(
         proxyBeanMethods = false
 )
@@ -40,9 +47,17 @@ public class SpringCloudLoadBalancerClientConfiguration {
     public static class NacosLoadBalancerConfiguration {
         @Bean
         @ConditionalOnMissingBean(name = "nacosLoadBalancer")
-        public ReactorLoadBalancer<ServiceInstance> nacosLoadBalancer(Environment environment, LoadBalancerClientFactory loadBalancerClientFactory, NacosDiscoveryProperties nacosDiscoveryProperties) {
+        public ReactorLoadBalancer<ServiceInstance> nacosLoadBalancer(Environment environment, LoadBalancerClientFactory loadBalancerClientFactory, NacosDiscoveryProperties nacosDiscoveryProperties,
+                InetIPv6Utils inetIPv6Utils, List<ServiceInstanceFilter> serviceInstanceFilters, List<LoadBalancerAlgorithm> loadBalancerAlgorithms) {
             String name = environment.getProperty("loadbalancer.client.name");
-            return new NacosLoadBalancer(loadBalancerClientFactory.getLazyProvider(name, ServiceInstanceListSupplier.class), name, nacosDiscoveryProperties);
+            Map<String, LoadBalancerAlgorithm> loadBalancerAlgorithmMap = new HashMap();
+            loadBalancerAlgorithms.forEach((loadBalancerAlgorithm) -> {
+                if (!loadBalancerAlgorithmMap.containsKey(loadBalancerAlgorithm.getServiceId())) {
+                    loadBalancerAlgorithmMap.put(loadBalancerAlgorithm.getServiceId(), loadBalancerAlgorithm);
+                }
+
+            });
+            return new NacosLoadBalancer(loadBalancerClientFactory.getLazyProvider(name, ServiceInstanceListSupplier.class), name, nacosDiscoveryProperties, inetIPv6Utils, serviceInstanceFilters, loadBalancerAlgorithmMap);
         }
     }
 

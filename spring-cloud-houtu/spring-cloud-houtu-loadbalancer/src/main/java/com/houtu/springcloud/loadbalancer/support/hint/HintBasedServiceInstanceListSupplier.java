@@ -20,11 +20,6 @@ public class HintBasedServiceInstanceListSupplier extends org.springframework.cl
 
     private final LoadBalancerProperties properties;
 
-    public HintBasedServiceInstanceListSupplier(ServiceInstanceListSupplier delegate, LoadBalancerProperties properties) {
-        super(delegate, properties);
-        this.properties = properties;
-    }
-
     public HintBasedServiceInstanceListSupplier(ServiceInstanceListSupplier delegate, ReactiveLoadBalancer.Factory<ServiceInstance> factory) {
         super(delegate, factory);
         this.properties = factory.getProperties(this.getServiceId());

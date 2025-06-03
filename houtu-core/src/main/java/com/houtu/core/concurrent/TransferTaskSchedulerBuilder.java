@@ -1,9 +1,9 @@
 package com.houtu.core.concurrent;
 
-import org.springframework.boot.task.TaskSchedulerBuilder;
+import org.springframework.boot.task.ThreadPoolTaskSchedulerBuilder;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
-public class TransferTaskSchedulerBuilder extends TaskSchedulerBuilder {
+public class TransferTaskSchedulerBuilder extends ThreadPoolTaskSchedulerBuilder {
 
     @Override
     public ThreadPoolTaskScheduler build() {
