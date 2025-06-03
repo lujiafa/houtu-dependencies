@@ -1,0 +1,2 @@
+com.houtu.core.autoconfigure.CoreAutoConfiguration
+com.houtu.core.autoconfigure.CoreTaskExecutionAutoConfiguration
