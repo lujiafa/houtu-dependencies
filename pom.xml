@@ -6,7 +6,7 @@
 
     <groupId>com.houtu</groupId>
     <artifactId>houtu-dependencies</artifactId>
-    <version>3.2.2-SNAPSHOT</version>
+    <version>3.5.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <properties>
@@ -16,7 +16,7 @@
         <skipTests>true</skipTests>
         <spring-boot-starter-parent.version>3.5.0</spring-boot-starter-parent.version>
         <jakarta.xml.bind-api.version>4.0.2</jakarta.xml.bind-api.version>
-        <com.houtu.version>3.2.2-SNAPSHOT</com.houtu.version>
+        <com.houtu.version>3.5.1-SNAPSHOT</com.houtu.version>
     </properties>
 
     <modules>
