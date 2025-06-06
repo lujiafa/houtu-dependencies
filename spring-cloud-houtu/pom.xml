@@ -14,7 +14,7 @@
 
     <properties>
         <spring-cloud-dependencies.version>2025.0.0</spring-cloud-dependencies.version>
-        <spring-cloud-alibaba-dependencies.version>2023.0.3.3</spring-cloud-alibaba-dependencies.version>
+        <spring-cloud-alibaba-dependencies.version>2023.0.1.2</spring-cloud-alibaba-dependencies.version>
     </properties>
 
     <modules>
@@ -47,6 +47,22 @@
                 <version>${spring-cloud-alibaba-dependencies.version}</version>
                 <scope>import</scope>
                 <type>pom</type>
+            </dependency>
+
+            <dependency>
+                <groupId>com.houtu</groupId>
+                <artifactId>spring-cloud-houtu-loadbalancer</artifactId>
+                <version>${com.houtu.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.houtu</groupId>
+                <artifactId>spring-cloud-houtu-feign</artifactId>
+                <version>${com.houtu.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.houtu</groupId>
+                <artifactId>spring-cloud-houtu-nacos</artifactId>
+                <version>${com.houtu.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
