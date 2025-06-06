@@ -67,4 +67,15 @@
         </dependencies>
     </dependencyManagement>
 
+    <developers>
+        <developer>
+            <id>jon</id>
+            <name>Jon Lu</name>
+            <email>lujiafayx@163.com</email>
+            <roles>
+                <role>Project lead</role>
+            </roles>
+        </developer>
+    </developers>
+
 </project>
