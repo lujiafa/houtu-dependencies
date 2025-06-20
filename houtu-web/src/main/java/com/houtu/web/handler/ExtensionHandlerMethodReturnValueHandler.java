@@ -1,5 +1,7 @@
 package com.houtu.web.handler;
 
+import com.houtu.web.model.BaseDTO;
+import com.houtu.web.model.BaseVO;
 import com.houtu.web.model.response.EmbedResponseData;
 import com.houtu.web.model.response.ResponseData;
 import org.springframework.core.MethodParameter;
@@ -30,7 +32,9 @@ public class ExtensionHandlerMethodReturnValueHandler extends RequestResponseBod
     @Override
     public boolean supportsReturnType(MethodParameter returnType) {
         if (ResponseData.class.isAssignableFrom(returnType.getParameterType())
-                || EmbedResponseData.class.isAssignableFrom(returnType.getParameterType())) {
+                || EmbedResponseData.class.isAssignableFrom(returnType.getParameterType())
+                || BaseDTO.class.isAssignableFrom(returnType.getParameterType())
+                || BaseVO.class.isAssignableFrom(returnType.getParameterType())) {
             return true;
         }
         return false;

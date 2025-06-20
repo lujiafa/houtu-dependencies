@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>spring-cloud-houtu-nacos</artifactId>
+    <artifactId>spring-cloud-houtu-discovery</artifactId>
 
     <dependencies>
         <dependency>
@@ -19,25 +19,20 @@
         </dependency>
 
         <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-loadbalancer</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-openfeign</artifactId>
-            <scope>provided</scope>
+            <groupId>com.houtu</groupId>
+            <artifactId>houtu-core</artifactId>
+            <version>${com.houtu.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.alibaba.cloud</groupId>
             <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
+            <scope>provided</scope>
         </dependency>
-
         <dependency>
-            <groupId>com.houtu</groupId>
-            <artifactId>houtu-core</artifactId>
-            <version>${com.houtu.version}</version>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>

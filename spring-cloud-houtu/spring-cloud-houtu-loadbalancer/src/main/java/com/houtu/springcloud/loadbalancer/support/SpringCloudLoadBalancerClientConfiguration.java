@@ -1,9 +1,5 @@
 package com.houtu.springcloud.loadbalancer.support;
 
-import com.alibaba.cloud.nacos.ConditionalOnNacosDiscoveryEnabled;
-import com.alibaba.cloud.nacos.NacosDiscoveryProperties;
-import com.alibaba.cloud.nacos.loadbalancer.ConditionalOnLoadBalancerNacos;
-import com.alibaba.cloud.nacos.loadbalancer.LoadBalancerNacosAutoConfiguration;
 import com.houtu.springcloud.loadbalancer.support.hint.HintBasedServiceInstanceListSupplier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -34,13 +30,14 @@ public class SpringCloudLoadBalancerClientConfiguration {
     private static final int REACTIVE_SERVICE_INSTANCE_SUPPLIER_ORDER = 173827465;
 
 
-    @ConditionalOnClass({LoadBalancerNacosAutoConfiguration.class})
-    @ConditionalOnLoadBalancerNacos
-    @ConditionalOnNacosDiscoveryEnabled
+    @ConditionalOnClass({com.alibaba.cloud.nacos.loadbalancer.LoadBalancerNacosAutoConfiguration.class})
+    @com.alibaba.cloud.nacos.loadbalancer.ConditionalOnLoadBalancerNacos
+    @com.alibaba.cloud.nacos.ConditionalOnNacosDiscoveryEnabled
     public static class NacosLoadBalancerConfiguration {
         @Bean
         @ConditionalOnMissingBean(name = "nacosLoadBalancer")
-        public ReactorLoadBalancer<ServiceInstance> nacosLoadBalancer(Environment environment, LoadBalancerClientFactory loadBalancerClientFactory, NacosDiscoveryProperties nacosDiscoveryProperties) {
+        public ReactorLoadBalancer<ServiceInstance> nacosLoadBalancer(Environment environment, LoadBalancerClientFactory loadBalancerClientFactory,
+                                                                      com.alibaba.cloud.nacos.NacosDiscoveryProperties nacosDiscoveryProperties) {
             String name = environment.getProperty("loadbalancer.client.name");
             return new NacosLoadBalancer(loadBalancerClientFactory.getLazyProvider(name, ServiceInstanceListSupplier.class), name, nacosDiscoveryProperties);
         }

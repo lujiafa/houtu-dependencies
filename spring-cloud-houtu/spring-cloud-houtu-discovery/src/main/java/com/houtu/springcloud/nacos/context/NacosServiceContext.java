@@ -23,11 +23,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class ServiceContext implements ApplicationContextAware, ApplicationListener<ApplicationEvent> {
+public class NacosServiceContext implements ServiceContext, ApplicationContextAware, ApplicationListener<ApplicationEvent> {
 	
-	private final static Logger logger = LoggerFactory.getLogger(ServiceContext.class);
+	private final static Logger logger = LoggerFactory.getLogger(NacosServiceContext.class);
 
-	public static final ServiceContext SINGLETON = new ServiceContext();
+	public static final NacosServiceContext SINGLETON = new NacosServiceContext();
 
 	private volatile ServiceStatus serviceState = ServiceStatus.DOWN;
 
@@ -35,9 +35,7 @@ public class ServiceContext implements ApplicationContextAware, ApplicationListe
 	private NacosServiceManager nacosServiceManager;
 	private NacosDiscoveryProperties nacosDiscoveryProperties;
 	private Registration registration;
-	private
-
-	ServiceContext() {}
+	private NacosServiceContext() {}
 
 	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
@@ -85,15 +83,20 @@ public class ServiceContext implements ApplicationContextAware, ApplicationListe
 	 * 获取当前服务注册状态。
 	 * @return ServiceStatus UP-在线 DOWN-离线
 	 */
-	public static ServiceStatus getServiceState() {
+	public ServiceStatus getServiceState() {
 		return SINGLETON.serviceState;
+	}
+
+	@Override
+	public boolean isServiceUp() {
+		return ServiceStatus.UP.equals(serviceState);
 	}
 
 	/**
 	 * 修改当前服务注册元数据
 	 * @param metaData 函数接口参数
 	 */
-	public static void setServiceMetaData(Map<String, String> metaData) {
+	public void setServiceMetaData(Map<String, String> metaData) {
 		try {
 			NacosServiceManager nacosServiceManager = SINGLETON.nacosServiceManager;
 			Registration registration = SINGLETON.registration;

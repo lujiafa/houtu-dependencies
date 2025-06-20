@@ -35,12 +35,10 @@ public class FeignHandlerMethodReturnValueHandler extends RequestResponseBodyMet
     @Override
     protected <T> void writeWithMessageConverters(T value, MethodParameter returnType, NativeWebRequest webRequest) throws IOException, HttpMediaTypeNotAcceptableException, HttpMessageNotWritableException {
         super.writeWithMessageConverters(value, returnType, webRequest);
-        // WebUtils.getRequest().removeAttribute(FeignConstant.USE_FEIGN_HANDLER);
     }
 
     @Override
     protected <T> void writeWithMessageConverters(T value, MethodParameter returnType, ServletServerHttpRequest inputMessage, ServletServerHttpResponse outputMessage) throws IOException, HttpMediaTypeNotAcceptableException, HttpMessageNotWritableException {
         super.writeWithMessageConverters(value, returnType, inputMessage, outputMessage);
-        // WebUtils.getRequest().removeAttribute(FeignConstant.USE_FEIGN_HANDLER);
     }
 }

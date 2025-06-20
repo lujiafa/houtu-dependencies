@@ -18,9 +18,9 @@
     </properties>
 
     <modules>
-        <module>spring-cloud-houtu-feign</module>
         <module>spring-cloud-houtu-loadbalancer</module>
-        <module>spring-cloud-houtu-nacos</module>
+        <module>spring-cloud-houtu-feign</module>
+        <module>spring-cloud-houtu-discovery</module>
     </modules>
 
     <dependencyManagement>
@@ -61,7 +61,7 @@
             </dependency>
             <dependency>
                 <groupId>com.houtu</groupId>
-                <artifactId>spring-cloud-houtu-nacos</artifactId>
+                <artifactId>spring-cloud-houtu-discovery</artifactId>
                 <version>${com.houtu.version}</version>
             </dependency>
         </dependencies>
