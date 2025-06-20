@@ -1,36 +1,52 @@
 package com.houtu.web.view;
 
 import com.houtu.core.exception.ErrorCode;
-import com.houtu.web.constan.WebSupportConstant;
+import com.houtu.util.web.WebUtils;
+import com.houtu.web.constant.WebSupportConstant;
+import com.houtu.web.model.response.ResponseData;
 import com.houtu.web.util.SupportDefaultErrorPageTemplate;
+import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.MediaType;
+
+import java.io.IOException;
+import java.util.Map;
 
 public class SmartErrorView extends SmartView {
 	
 	private ErrorCode errorCode;
-	
-	public SmartErrorView(ErrorCode errorCode, MediaType mediaType) {
-		super(errorCode, mediaType, true);
+
+	public SmartErrorView(ErrorCode errorCode) {
+		super(errorCode == null ? null : ResponseData.fail(errorCode));
 		this.errorCode = errorCode;
 	}
-	
+
 	@Override
-	public String getContentType() {
+	public void render(Map<String, ?> model, HttpServletRequest request, HttpServletResponse response) throws Exception {
+		// 错误码数据为空时，表无需任何响应
+		if (errorCode == null) {
+			return;
+		}
+		// 根据响应类型确定是否以HTML响应
+		MediaType mediaType = WebUtils.getResponseMediaType(request);
 		if (MediaType.TEXT_HTML.includes(mediaType)
 				|| MediaType.APPLICATION_XHTML_XML.includes(mediaType)) {
-			return mediaType.toString();
+			String responseContent = SupportDefaultErrorPageTemplate.getPage(errorCode.getMessage(), (String) request.getAttribute(WebSupportConstant.ERROR_REDIRECT_PAGE_ATTR_NAME));
+			ServletOutputStream out = response.getOutputStream();
+			try {
+				response.setContentType(mediaType.toString());
+				out.write(responseContent.getBytes(charset.name()));
+				out.flush();
+			} finally {
+				try {
+					out.close();
+				} catch (IOException ex) {
+				}
+			}
+			return;
 		}
-		return super.getContentType();
-	}
-	
-	@Override
-	protected String getContent(HttpServletRequest request) {
-		if (MediaType.TEXT_HTML.includes(mediaType)
-				|| MediaType.APPLICATION_XHTML_XML.includes(mediaType)) {
-			return SupportDefaultErrorPageTemplate.getPage(errorCode.getMessage(), (String) request.getAttribute(WebSupportConstant.ERROR_REDIRECT_PAGE_ATTR_NAME));
-		}
-		return super.getContent(request);
+		super.render(model, request, response);
 	}
 
 }

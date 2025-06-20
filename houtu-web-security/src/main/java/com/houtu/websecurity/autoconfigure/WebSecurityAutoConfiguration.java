@@ -16,7 +16,7 @@ import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.Ordered;
-import org.springframework.core.annotation.Order;
+import org.springframework.core.env.Environment;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -29,21 +29,20 @@ import java.beans.Introspector;
 @Import({SessionConfiguration.class, PermissionConfiguration.class, SignatureConfiguration.class})
 public class WebSecurityAutoConfiguration {
 
-
     @Bean
-    @Order(Ordered.HIGHEST_PRECEDENCE)
     @ConditionalOnMissingBean(WebSecurityHandlerInterceptor.class)
-    public WebSecurityHandlerInterceptor webSecurityHandlerInterceptor(SecurityProperties securityProperties,
+    public WebSecurityHandlerInterceptor webSecurityHandlerInterceptor(Environment env,
+                                                                       SecurityProperties securityProperties,
                                                                        SessionValidator sessionValidator,
-                                                                       PermissionValidator permissionValidator,
                                                                        SignatureValidator signatureValidator,
+                                                                       PermissionValidator permissionValidator,
                                                                        RedisTemplate redisTemplate) {
-        return new WebSecurityHandlerInterceptor(securityProperties, sessionValidator, permissionValidator, signatureValidator, redisTemplate);
+        return new WebSecurityHandlerInterceptor(env, securityProperties, sessionValidator, signatureValidator, permissionValidator, redisTemplate);
     }
 
     @Bean
     public FilterRegistrationBean<WebSecurityHandlerInterceptor> webSecurityHandlerInterceptorRegistrationBean(WebSecurityHandlerInterceptor webSecurityHandlerInterceptor) {
-        FilterRegistrationBean<WebSecurityHandlerInterceptor> requestSerialRegistration = new FilterRegistrationBean<WebSecurityHandlerInterceptor>();
+        FilterRegistrationBean<WebSecurityHandlerInterceptor> requestSerialRegistration = new FilterRegistrationBean();
         requestSerialRegistration.setFilter(webSecurityHandlerInterceptor);
         requestSerialRegistration.addUrlPatterns("/*");
         requestSerialRegistration.setName(Introspector.decapitalize(WebSecurityHandlerInterceptor.class.getSimpleName()));

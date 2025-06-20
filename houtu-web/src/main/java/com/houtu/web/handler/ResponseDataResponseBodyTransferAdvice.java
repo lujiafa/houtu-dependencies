@@ -1,9 +1,9 @@
 package com.houtu.web.handler;
 
-import com.houtu.util.common.JsonUtils;
 import com.houtu.web.model.response.EmbedResponseData;
 import com.houtu.web.model.response.ResponseData;
 import com.houtu.web.prop.WebProperties;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -11,9 +11,6 @@ import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
-
-import jakarta.validation.constraints.NotNull;
-import java.util.Map;
 
 /**
  * @author jon
@@ -43,9 +40,7 @@ public class ResponseDataResponseBodyTransferAdvice implements ResponseBodyAdvic
 	public Object beforeBodyWrite(Object body, MethodParameter returnType,
 			MediaType selectedContentType, Class<? extends HttpMessageConverter<?>> selectedConverterType,
 			ServerHttpRequest request, ServerHttpResponse response) {
-		if (webProperties.getResponse().isSerializationIgnoreNull() && body != null) {
-			return JsonUtils.convertValueIgnoreNull(body, Map.class);
-		}
+		// 某些情况下可以对body进行进一步处理后返回
 		return body;
 	}
 

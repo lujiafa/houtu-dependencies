@@ -1,9 +1,6 @@
 package com.houtu.util.web;
 
-import com.houtu.util.common.JsonUtils;
-import com.houtu.util.common.XmlUtils;
 import com.houtu.util.constant.SeparatorChar;
-import jakarta.servlet.ServletInputStream;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -13,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
+import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -20,22 +18,17 @@ import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 public class WebUtils extends org.springframework.web.util.WebUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(WebUtils.class);
 
-    private final static String ATTREBUTE_REQUEST_MEDIA_TYPE_READED = "_REQUEST_MEDIA_TYPE_READED_";
-    private final static String ATTREBUTE_RESPONSE_MEDIA_TYPE_READED = "_RESPONSE_MEDIA_TYPE_READED_";
-    private final static String ATTREBUTE_REQUEST_URLENCODE_READED = "_REQUEST_URLENCODE_READED_DATA_";
-    private final static String ATTREBUTE_REQUEST_STREAM_READED = "_REQUEST_STREAM_READED_DATA_";
+    private final static String ATTRIBUTE_NAME_REQUEST_MEDIA_TYPE = "::REQUEST_MEDIA_TYPE::";
+    private final static String ATTREBUTE_NAME_RESPONSE_MEDIA_TYPE = "::RESPONSE_MEDIA_TYPE::";
     private final static String IP_UNKNOWN = "unknown";
     private final static String IP_LOCAL = "127.0.0.1";
 
@@ -116,76 +109,26 @@ public class WebUtils extends org.springframework.web.util.WebUtils {
     }
 
     /**
-     * @param request
-     * @Title getRequestBodyParameters
-     * @Description 获取请求body中参数集合
+     * @Title getUrlEncodedParams 获取urlencoded参数集合
+     * @param request 请求对象
+     * @return Map<String, String> urlencoded参数集合
+     * @throws IOException
      */
-    @SuppressWarnings("unchecked")
-    public static Map<String, Object> getRequestAllParameters(HttpServletRequest request) throws IOException {
-        Map<String, Object> cacheMap = (Map<String, Object>) request.getAttribute(ATTREBUTE_REQUEST_STREAM_READED);
-        if (cacheMap != null) {
-            return cacheMap;
-        }
-        Charset charset = StandardCharsets.UTF_8;
-        String characterEncoding = request.getCharacterEncoding();
-        if (StringUtils.hasLength(characterEncoding)) {
-            charset = Charset.forName(characterEncoding);
-        }
-        boolean allowCache = false;
-        MediaType mediaType = null;
-        if (isHttpGet(request) || MediaType.APPLICATION_FORM_URLENCODED.includes(mediaType = WebUtils.getRequestMediaType(request))) {
-            final  Map<String, Object> tmpCacheMap = (cacheMap = new LinkedHashMap<String, Object>());
-            request.getParameterNames().asIterator().forEachRemaining(name -> {
-                tmpCacheMap.put(name, request.getParameter(name));
-            });
-        } else if (MediaType.APPLICATION_JSON.includes(mediaType)) {
-            String tempStr = new String(getRequestBodyStream(request), charset).trim();
-            cacheMap = JsonUtils.parseObject(tempStr, LinkedHashMap.class);
-            allowCache = true;
-        } else if (MediaType.APPLICATION_XML.includes(mediaType)) {
-            String tempStr = new String(getRequestBodyStream(request), charset).trim();
-            cacheMap = new LinkedHashMap<String, Object>(XmlUtils.parseToMap(tempStr));
-            allowCache = true;
-        } else {
-            logger.warn("unsupported request media type get data: {}", mediaType);
-            cacheMap = Collections.EMPTY_MAP;
-        }
-        if (allowCache) {
-            request.setAttribute(ATTREBUTE_REQUEST_STREAM_READED, cacheMap);
+    public static Map<String, String> getUrlEncodedParams(HttpServletRequest request) throws IOException {
+        Map<String, String> cacheMap = new LinkedHashMap<>();
+        Enumeration<String> paramNames = request.getParameterNames();
+        while (paramNames.hasMoreElements()) {
+            String name = paramNames.nextElement();
+            cacheMap.put(name, request.getParameter(name));
         }
         return cacheMap;
     }
 
-    /**
-     * 获取请求体流数据
-     *
-     * @param request
-     * @throws IOException
-     */
     public static byte[] getRequestBodyStream(HttpServletRequest request) throws IOException {
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
-        ServletInputStream is = request.getInputStream();
-        if (is.markSupported()) {
-            is.mark(Integer.MAX_VALUE);
-            StreamUtils.copy(is, os);
-            is.reset();
-        } else {
-            StreamUtils.copy(is, os);
+        if (isHttpGet(request)) {
+            throw new RuntimeException("getRequestBodyParams failed, please check the request method.");
         }
-        byte[] bs = os.toByteArray();
-        is = null;
-        os = null;
-        return bs;
-    }
-
-    /**
-     * @param request
-     * @Title clearRequestCacheParameters
-     * @Description 清楚请求缓存参数信息
-     */
-    public static void clearRequestCacheParameters(HttpServletRequest request) {
-        request.removeAttribute(ATTREBUTE_REQUEST_URLENCODE_READED);
-        request.removeAttribute(ATTREBUTE_REQUEST_STREAM_READED);
+        return StreamUtils.copyToByteArray(request.getInputStream());
     }
 
     /**
@@ -323,10 +266,10 @@ public class WebUtils extends org.springframework.web.util.WebUtils {
      * @Description 获取客户端请求MIME类型
      */
     public static MediaType getRequestMediaType(ServletRequest request) {
-        MediaType mediaType = (MediaType) request.getAttribute(ATTREBUTE_REQUEST_MEDIA_TYPE_READED);
+        MediaType mediaType = (MediaType) request.getAttribute(ATTRIBUTE_NAME_REQUEST_MEDIA_TYPE);
         if (mediaType == null) {
             mediaType = getRequestMediaTypes(request).get(0);
-            request.setAttribute(ATTREBUTE_REQUEST_MEDIA_TYPE_READED, mediaType);
+            request.setAttribute(ATTRIBUTE_NAME_REQUEST_MEDIA_TYPE, mediaType);
         }
         return mediaType;
     }
@@ -359,10 +302,10 @@ public class WebUtils extends org.springframework.web.util.WebUtils {
      * @Description 获取客户端需要的响应Media类型
      */
     public static MediaType getResponseMediaType(HttpServletRequest request) {
-        MediaType mediaType = (MediaType) request.getAttribute(ATTREBUTE_RESPONSE_MEDIA_TYPE_READED);
+        MediaType mediaType = (MediaType) request.getAttribute(ATTREBUTE_NAME_RESPONSE_MEDIA_TYPE);
         if (mediaType == null) {
             mediaType = getResponseMediaTypes(request).get(0);
-            request.setAttribute(ATTREBUTE_RESPONSE_MEDIA_TYPE_READED, mediaType);
+            request.setAttribute(ATTREBUTE_NAME_RESPONSE_MEDIA_TYPE, mediaType);
         }
         return mediaType;
     }
@@ -379,7 +322,7 @@ public class WebUtils extends org.springframework.web.util.WebUtils {
             try {
                 List<MediaType> mediaTypes = MediaType.parseMediaTypes(headerAccept);
                 if (mediaTypes != null && mediaTypes.size() > 0) {
-                    MediaType.sortBySpecificityAndQuality(mediaTypes);
+                    MimeTypeUtils.sortBySpecificity(mediaTypes);
                     return mediaTypes;
                 }
             } catch (Exception e) {

@@ -6,15 +6,9 @@ public interface LogFilterHandler {
 	
 	/**
 	 * @Description 此过滤仅对日志输出生效
-	 * @param queryString queryString参数集合
+	 * @param params 全量复合参数集合
 	 */
-	default void filterQueryParam(String queryString) {}
-	
-	/**
-	 * @Description 此过滤仅对日志输出生效
-	 * @param bodyString request body 数据字符串
-	 */
-	default void filterRequestBody(StringBuilder bodyString) {}
+	default void filter(Map params) {}
 	
 	/**
 	 * @Description 此过滤仅对日志输出生效

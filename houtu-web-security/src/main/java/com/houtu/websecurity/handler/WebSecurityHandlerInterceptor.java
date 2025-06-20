@@ -5,11 +5,11 @@ import com.houtu.core.exception.ErrorCode;
 import com.houtu.util.common.AnnotationUtils;
 import com.houtu.util.common.MapUtils;
 import com.houtu.util.constant.CommonConstant;
+import com.houtu.util.constant.SeparatorChar;
 import com.houtu.util.web.WebUtils;
+import com.houtu.web.util.WebCombineModelMapSupport;
 import com.houtu.web.view.SmartErrorView;
-import com.houtu.websecurity.annotation.CheckRepeatRequest;
-import com.houtu.websecurity.annotation.CheckSession;
-import com.houtu.websecurity.annotation.CheckSign;
+import com.houtu.websecurity.annotation.*;
 import com.houtu.websecurity.constant.SecurityConstant;
 import com.houtu.websecurity.exception.SessionException;
 import com.houtu.websecurity.exception.SignatureException;
@@ -21,8 +21,11 @@ import com.houtu.websecurity.sign.SignatureValidator;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.core.Ordered;
+import org.springframework.core.env.Environment;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.MediaType;
+import org.springframework.ui.ModelMap;
 import org.springframework.util.StringUtils;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -35,24 +38,27 @@ import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-public class WebSecurityHandlerInterceptor implements HandlerInterceptor, Filter  {
+public class WebSecurityHandlerInterceptor implements HandlerInterceptor, Filter, Ordered {
 
     private SecurityProperties securityProperties;
     private SessionValidator sessionValidator;
     private PermissionValidator permissionValidator;
     private SignatureValidator signatureValidator;
     private RedisTemplate redisTemplate;
+    private String applicationName;
 
-    public WebSecurityHandlerInterceptor(SecurityProperties securityProperties,
+    public WebSecurityHandlerInterceptor(Environment env,
+                                         SecurityProperties securityProperties,
                                          SessionValidator sessionValidator,
-                                         PermissionValidator permissionValidator,
                                          SignatureValidator signatureValidator,
+                                         PermissionValidator permissionValidator,
                                          RedisTemplate redisTemplate) {
         this.securityProperties = securityProperties;
         this.sessionValidator = sessionValidator;
         this.permissionValidator = permissionValidator;
         this.signatureValidator = signatureValidator;
         this.redisTemplate = redisTemplate;
+        applicationName = env.getProperty("spring.application.name", SeparatorChar.HYPHEN);
     }
 
     @Override
@@ -72,18 +78,20 @@ public class WebSecurityHandlerInterceptor implements HandlerInterceptor, Filter
                 }
                 Map<String, String> parameterMap = null;
                 if (securityProperties.isCheckSign()) {
-                    parameterMap = MapUtils.toStringMap(WebUtils.getRequestAllParameters(request));
+                    ModelMap modelMap = WebCombineModelMapSupport.getCombineModelMap(request, response);
+                    parameterMap = MapUtils.toStringMap(modelMap);
                     checkSign(request, response, method, parameterMap);
                 }
-                if (securityProperties.isCheckRepeat()) {
+                if (securityProperties.isCheckRepeat() && redisTemplate != null) {
                     if (parameterMap == null) {
-                        parameterMap = MapUtils.toStringMap(WebUtils.getRequestAllParameters(request));
+                        ModelMap modelMap = WebCombineModelMapSupport.getCombineModelMap(request, response);
+                        parameterMap = MapUtils.toStringMap(modelMap);
                     }
                     checkRepeatRequest(request, response, method, parameterMap);
                 }
             } catch (SessionException e) {
             } catch (SignatureException e) {
-                throw new ModelAndViewDefiningException(new ModelAndView(new SmartErrorView(e.getErrorCode(), WebUtils.getResponseMediaType(request))));
+                throw new ModelAndViewDefiningException(new ModelAndView(new SmartErrorView(e.getErrorCode())));
             }
         }
         return true;
@@ -102,6 +110,11 @@ public class WebSecurityHandlerInterceptor implements HandlerInterceptor, Filter
         }
         try {
             sessionValidator.verify(request, method, checkSession);
+            if (securityProperties.isCheckPermission()) {
+                RequiresRole requiresRole = AnnotationUtils.getAnnotation(method, RequiresRole.class);
+                RequiresPermission requiresPermission = AnnotationUtils.getAnnotation(method, RequiresPermission.class);
+                permissionValidator.verify(request, method, requiresRole, requiresPermission);
+            }
             request.setAttribute(SecurityConstant.SESSION_VALIDATOR_HANDLED_ATTR_NAME, true);
         } catch (SessionException e) {
             if (ErrorCodeConstant.SESSION_EXPIRED.equals(e.getErrorCode().getCode())
@@ -115,7 +128,7 @@ public class WebSecurityHandlerInterceptor implements HandlerInterceptor, Filter
                         pw.write("<html><script type=\"text/javascript\">top.location.href=" + securityProperties.getSession().getLoginUrl().trim() + "</script></html>");
                         pw.flush();
                         pw.close();
-                    } catch (IOException e1) {}
+                    } catch (IOException ie) {}
                 }
             }
         }
@@ -134,19 +147,21 @@ public class WebSecurityHandlerInterceptor implements HandlerInterceptor, Filter
         if (checkRepeatRequest == null) {
             return;
         }
-        String requestId = null;
-        if (securityProperties.isEnableHeader()) {
+        String requestId = parameterMap.get(SecurityConstant.PARAM_REQUEST_ID_NAME);
+        if (requestId == null) {
             requestId = request.getHeader(SecurityConstant.PARAM_REQUEST_ID_NAME);
-        } else {
-            requestId = parameterMap.get(SecurityConstant.PARAM_REQUEST_ID_NAME);
         }
         if (!StringUtils.hasLength(requestId)) {
             throw new SignatureException(ErrorCode.build(ErrorCodeConstant.PARAMETER_ERROR, request.getLocale(), new Object[]{SecurityConstant.PARAM_REQUEST_ID_NAME}));
         }
         // 防重放验证
-        String cacheKey = String.format("common:repeat-request:%s", requestId);
+        String cacheKey = String.format("web:security:request:repeat:check:%s:%s", applicationName, requestId);
         if (redisTemplate.boundValueOps(cacheKey).setIfAbsent(CommonConstant.EMPTY, 900, TimeUnit.SECONDS)) {
             throw new SignatureException(ErrorCode.build(ErrorCodeConstant.REQUEST_REPEAT, request.getLocale()));
         }
+    }
+
+    public int getOrder() {
+        return Ordered.HIGHEST_PRECEDENCE;
     }
 }

@@ -1,13 +1,19 @@
 package com.houtu.accesslog.aspect;
 
 import com.houtu.accesslog.annotation.AccessLog;
+import com.houtu.accesslog.handler.AccessLogCombineModelMapProcessor;
 import com.houtu.accesslog.handler.LogFilterHandler;
 import com.houtu.accesslog.handler.SimpleLogFilterHandler;
+import com.houtu.core.context.SpringApplicationContext;
 import com.houtu.util.common.AnnotationUtils;
 import com.houtu.util.common.JsonUtils;
 import com.houtu.util.constant.CommonConstant;
 import com.houtu.util.constant.SeparatorChar;
 import com.houtu.util.web.WebUtils;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -15,26 +21,30 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.http.HttpHeaders;
-import org.springframework.web.context.request.RequestAttributes;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
 
-import jakarta.servlet.ServletRequest;
-import jakarta.servlet.ServletResponse;
-import jakarta.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
+import java.util.Map;
 
 @Aspect
-public class AccessLogAspect {
+public class AccessLogAspect implements InitializingBean {
 	
 	private final static Logger logger = LoggerFactory.getLogger("accessLog");
+
+	private AccessLogCombineModelMapProcessor accessLogCombineModelMapProcessor;
+
 	@Pointcut("@within(com.houtu.accesslog.annotation.AccessLog) || @annotation(com.houtu.accesslog.annotation.AccessLog)")
 	public void pointcut() {}
 
 
-	//httpMehtod|path|requestIp|user-agent|queryString|fullParams|methodName|arg1, arg2, ...|responseArg|exception|耗时
+	/**
+	 * 输出日志：httpMehtod|path|requestIp|user-agent|queryString|allParams|methodName|arg1, arg2, ...|responseArg|exception|耗时
+	 * @param pjp 切点
+	 * @return Object
+	 * @throws Throwable
+	 */
     @Around("pointcut()")
     public Object doAround(ProceedingJoinPoint pjp) throws Throwable {
     	long inTime = System.currentTimeMillis();
@@ -48,14 +58,14 @@ public class AccessLogAspect {
     	StringBuilder builder = new StringBuilder();
     	LogFilterHandler logFilterHandler = getLogFilterHandler(accessLog.logFilterHandler());
     	if (request == null) {
-    		builder.append("|||||");
+    		builder.append("|-|-|-|-|");
     	} else {
     		String httpMethod = request.getMethod();
     		String path = request.getServletPath();
     		String requestIp = getRequestIp(request);
     		String userAgent = getRequestUserAgent(request);
     		String parameterString = getQueryParamString(request, logFilterHandler);
-    		String requestBody = accessLog.fullParams() ? getRequestAllParams(request, logFilterHandler) : CommonConstant.EMPTY;
+    		String requestBody = accessLog.params() ? getRequestAllParams(request, getHttpServletResponse(), logFilterHandler) : SeparatorChar.HYPHEN;
     		builder.append(httpMethod)
     		.append(SeparatorChar.VERTICAL_BAR).append(path)
     		.append(SeparatorChar.VERTICAL_BAR).append(requestIp)
@@ -76,7 +86,7 @@ public class AccessLogAspect {
     		builder.append(SeparatorChar.VERTICAL_BAR);
     		return resultObject;
     	} catch (Throwable e) {
-    		builder.append("||").append(e.getMessage());
+    		builder.append("|-|").append(e.getMessage());
     		throw e;
     	} finally {
     		long outTime = System.currentTimeMillis();
@@ -85,15 +95,15 @@ public class AccessLogAspect {
     		logger.info(builder.toString());
     	}
     }
-    
+
     private HttpServletRequest getHttpServletRequest() {
-		RequestAttributes reqAttr = RequestContextHolder.getRequestAttributes();
-		if (reqAttr != null && reqAttr instanceof ServletRequestAttributes) {
-			return ((ServletRequestAttributes) reqAttr).getRequest();
-		}
-		return null;
+		return WebUtils.getRequest();
     }
-    
+
+    private HttpServletResponse getHttpServletResponse() {
+		return WebUtils.getResponse();
+    }
+
     /**
      * @Title getRequestIp
      * @Description 获取请求IP
@@ -131,9 +141,7 @@ public class AccessLogAspect {
      * @return String 参数json字符串
      */
     private String getQueryParamString(HttpServletRequest request, LogFilterHandler logHandler) {
-		String queryString = request.getQueryString();
-		logHandler.filterQueryParam(queryString);
-		return queryString;
+		return request.getQueryString();
     }
     
     /**
@@ -143,15 +151,16 @@ public class AccessLogAspect {
      * @param logFilterHandler 参数过滤处理器 
      * @return String body解析后参数集合字符串
      */
-    private String getRequestAllParams(HttpServletRequest request, LogFilterHandler logFilterHandler) {
+    private String getRequestAllParams(HttpServletRequest request, HttpServletResponse response, LogFilterHandler logFilterHandler) {
     	try {
-	    	String bodyString = JsonUtils.toString(WebUtils.getRequestAllParameters(request));
-	    	if (logFilterHandler != null) {
-				StringBuilder stringBuilder = new StringBuilder(bodyString);
-				logFilterHandler.filterRequestBody(stringBuilder);
-				return stringBuilder.toString();
+			if (accessLogCombineModelMapProcessor == null) {
+				return SeparatorChar.HYPHEN;
 			}
-	    	return bodyString;
+			Map combineModelMap = accessLogCombineModelMapProcessor.getCombineModelMap(request, response);
+	    	if (logFilterHandler != null) {
+				logFilterHandler.filter(combineModelMap);
+			}
+			return JsonUtils.toString(combineModelMap);
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 		}
@@ -244,5 +253,9 @@ public class AccessLogAspect {
 		}
 		return null;
 	}
-	
+
+	@Override
+	public void afterPropertiesSet() throws Exception {
+		accessLogCombineModelMapProcessor = SpringApplicationContext.getBean(AccessLogCombineModelMapProcessor.class);
+	}
 }

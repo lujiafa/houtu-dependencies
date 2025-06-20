@@ -12,12 +12,8 @@ public class SecurityProperties {
 	private boolean checkRepeat = false;
 	/** 是否开启签名验证 **/
 	private boolean checkSign = true;
-	/** 是否开启会话验证模块 **/
-	private boolean checkPermission = true;
-	/**
-	 * 启用通过头部传递关键参数。true-是 false-普通请求传递
-	 **/
-	private boolean enableHeader = true;
+	/** 是否开启会话权限验证模块 **/
+	private boolean checkPermission = false;
 
 	private SessionProperties session = new SessionProperties();
 	private SignProperties sign = new SignProperties();
@@ -68,14 +64,6 @@ public class SecurityProperties {
 
 	public void setSign(SignProperties sign) {
 		this.sign = sign;
-	}
-
-	public boolean isEnableHeader() {
-		return enableHeader;
-	}
-
-	public void setEnableHeader(boolean enableHeader) {
-		this.enableHeader = enableHeader;
 	}
 
 	public static class SignProperties {

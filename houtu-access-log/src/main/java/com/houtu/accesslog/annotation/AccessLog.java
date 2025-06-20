@@ -2,12 +2,14 @@ package com.houtu.accesslog.annotation;
 
 import com.houtu.accesslog.handler.LogFilterHandler;
 import com.houtu.accesslog.handler.SimpleLogFilterHandler;
+import com.houtu.core.annotation.CachingParam;
 
 import java.lang.annotation.*;
 
 @Documented
 @Target(value={ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
+@CachingParam
 public @interface AccessLog {
 	
 	/**
@@ -20,7 +22,7 @@ public @interface AccessLog {
 	 * 是否启用输出所有参数数据
 	 * @return true-开启 false-关闭
 	 */
-	boolean fullParams() default false;
+	boolean params() default false;
 	
 	/**
 	 * @Title logFilterHandler

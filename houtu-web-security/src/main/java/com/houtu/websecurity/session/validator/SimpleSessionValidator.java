@@ -10,7 +10,6 @@ import com.houtu.websecurity.session.SessionValidator;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.StringUtils;
 
 import java.lang.reflect.Method;
 
@@ -19,20 +18,13 @@ public class SimpleSessionValidator implements SessionValidator {
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 	
 	public void verify(HttpServletRequest request, Method method, CheckSession checkSession) throws SessionException {
-		String sessionId = SessionContext.getSessionId();
-		if (!StringUtils.hasLength(sessionId)) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("会话已过期，sessionId不存在({})", sessionId);
-			}
-			throw new SessionException(ErrorCode.build(ErrorCodeConstant.SESSION_EXPIRED, request.getLocale()));
-		}
 		Session session = SessionContext.get();
 		if (session == null) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("会话已过期({})", sessionId);
+				logger.debug("会话已过期，获取会话对象失败({})", SessionContext.getSessionId());
 			}
 			throw new SessionException(ErrorCode.build(ErrorCodeConstant.SESSION_EXPIRED, request.getLocale()));
 		}
-		SessionContext.delay();
+		SessionContext.delay(session.getId());
 	}
 }

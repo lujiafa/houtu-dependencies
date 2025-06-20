@@ -6,6 +6,8 @@ import org.springframework.beans.BeanInstantiationException;
 import org.springframework.beans.BeansException;
 import org.springframework.util.Assert;
 
+import java.lang.reflect.Field;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -35,6 +37,24 @@ public class BeanUtils extends org.springframework.beans.BeanUtils {
         } catch (BeansException e) {
             throw new RuntimeException(e.getMessage(), e);
         }
+    }
+
+    /**
+     * @param source 源对象
+     * @param target 目标对象
+     * @param nonNullProperties 复制过程是否对空字段跳过
+     * @description 将源对象属性复制到指定目标对象
+     */
+    public static void smartCopyProperties(Object source, Object target, boolean nonNullProperties) {
+        if (source == null) {
+            logger.info("parameter source is null");
+            return;
+        }
+        if (target == null) {
+            logger.info("parameter target is null");
+            return;
+        }
+        copyProperties(source, target, nonNullProperties);
     }
 
     /**
@@ -131,6 +151,32 @@ public class BeanUtils extends org.springframework.beans.BeanUtils {
             return null;
         }
         return copyProperties(source, targetClass, ignoreProperties);
+    }
+
+    /**
+     * @param source 源对象
+     * @param target 目标对象
+     * @param nonNullProperties 复制过程是否对空字段跳过
+     * @description 将源对象属性复制到指定目标对象
+     */
+    public static void copyProperties(Object source, Object target, boolean nonNullProperties) {
+        if (nonNullProperties && source != null) {
+            Field[] fields = source.getClass().getDeclaredFields();
+            String[] ignoreProperties = Arrays.stream(fields).parallel().filter(f -> {
+                try {
+                    if (!f.isAccessible()) {
+                        f.setAccessible(true);
+                    }
+                    return f.get(source) == null;
+                } catch (IllegalAccessException e) {
+                    throw new RuntimeException(e.getMessage(), e);
+                }
+            }).map(f -> f.getName()).toArray(String[]::new);
+            copyProperties(source, target, ignoreProperties);
+        } else {
+            copyProperties(source, target);
+
+        }
     }
 
     /**

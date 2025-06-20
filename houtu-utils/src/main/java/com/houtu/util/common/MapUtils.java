@@ -15,7 +15,7 @@ import java.util.Map.Entry;
  * @Description Bean对象转Map
  */
 public final class MapUtils {
-	
+
 	/**
 	 * @description 通过键key从Map集合中获取指定对象，忽略key大小写
 	 * @param map 源Map对象

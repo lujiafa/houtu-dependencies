@@ -11,7 +11,7 @@ import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 public class JsonUtils {
 
 	// 启用忽略空值序列化"objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);"
-	static ObjectMapper defaultObjectMapper;
+	static ObjectMapper nonNullObjectMapper;
 	static ObjectMapper objectMapper;
 
 	static {
@@ -21,9 +21,9 @@ public class JsonUtils {
 		// 禁用序列化空属性对象时抛异常
 		objectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
 
-		defaultObjectMapper = objectMapper.copy();
+		nonNullObjectMapper = objectMapper.copy();
 		// 序列化时忽略空值
-		defaultObjectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+		nonNullObjectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
 	}
 
 	public JsonUtils(ObjectMapper objectMapper) {
@@ -33,9 +33,9 @@ public class JsonUtils {
 		// 禁用序列化空属性对象时抛异常
 		objectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
 
-		JsonUtils.defaultObjectMapper = objectMapper.copy();
+		JsonUtils.nonNullObjectMapper = objectMapper.copy();
 		// 序列化时忽略空值
-		defaultObjectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+		nonNullObjectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
 	}
 
 
@@ -68,7 +68,7 @@ public class JsonUtils {
 	 */
 	public static String toStringIgnoreNull(Object bean) {
 		try {
-			return defaultObjectMapper.writeValueAsString(bean);
+			return nonNullObjectMapper.writeValueAsString(bean);
 		} catch (JsonProcessingException e) {
 			throw new RuntimeException(e.getMessage(), e);
 		}
@@ -123,7 +123,7 @@ public class JsonUtils {
 	 * @return T
 	 */
 	public static <T> T convertValueIgnoreNull(Object fromValue, Class<T> toValueType) {
-		return defaultObjectMapper.convertValue(fromValue, toValueType);
+		return nonNullObjectMapper.convertValue(fromValue, toValueType);
 	}
 
 	/**
@@ -145,7 +145,7 @@ public class JsonUtils {
 	 * @return T
 	 */
 	 public static <T> T convertValueIgnoreNull(Object fromValue, TypeReference<T> toValueTypeRef) {
-		return defaultObjectMapper.convertValue(fromValue, toValueTypeRef);
+		return nonNullObjectMapper.convertValue(fromValue, toValueTypeRef);
 	}
 
 	/**
