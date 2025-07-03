@@ -6,7 +6,7 @@ import com.houtu.web.handler.DefaultHandlerExceptionResolver;
 import com.houtu.web.handler.ExtensionHandlerMethodReturnValueHandler;
 import com.houtu.web.handler.ResponseDataResponseBodyTransferAdvice;
 import com.houtu.web.prop.WebProperties;
-import com.houtu.web.util.WebCombineModelMapSupport;
+import com.houtu.web.util.WebCombineParametersSupport;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -56,7 +56,7 @@ public class WebAutoConfiguration {
     @Order(Ordered.HIGHEST_PRECEDENCE + 10)
     public CombineHandlerMethodArgumentResolver defaultHandlerMethodArgumentResolver(List<HttpMessageConverter<?>> messageConverters,
                                                                                      ApplicationContext applicationContext) {
-        return new CombineHandlerMethodArgumentResolver(getMessageConverters(messageConverters), getRequestBodyAdvice(applicationContext));
+        return new CombineHandlerMethodArgumentResolver(getMessageConverters(messageConverters), getRequestBodyAdvice(applicationContext), webProperties.getCombineFormResolverType());
     }
 
     @Bean
@@ -94,8 +94,8 @@ public class WebAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public WebCombineModelMapSupport webCombineModelMapSupport() {
-        return new WebCombineModelMapSupport();
+    public WebCombineParametersSupport webCombineModelMapSupport() {
+        return new WebCombineParametersSupport();
     }
 
     /**

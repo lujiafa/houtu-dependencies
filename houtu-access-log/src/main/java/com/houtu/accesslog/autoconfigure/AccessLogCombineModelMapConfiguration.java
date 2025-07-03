@@ -1,10 +1,11 @@
 package com.houtu.accesslog.autoconfigure;
 
 import com.houtu.accesslog.handler.AccessLogCombineModelMapProcessor;
+import com.houtu.web.util.WebCombineParametersSupport;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.annotation.Bean;
 
-@ConditionalOnClass({com.houtu.web.util.WebCombineModelMapSupport.class, com.houtu.web.handler.CombineHandlerMethodArgumentResolver.class})
+@ConditionalOnClass({WebCombineParametersSupport.class, com.houtu.web.handler.CombineHandlerMethodArgumentResolver.class})
 public class AccessLogCombineModelMapConfiguration {
 
     @Bean

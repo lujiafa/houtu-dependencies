@@ -25,7 +25,7 @@ public enum ServiceStatus {
         } else if (NACOS_SERVICE_STATUS_UP.equals(status)) {
             return UP;
         }
-        logger.error("arg status ");
+        logger.error("arg status");
         return DOWN;
     }
 

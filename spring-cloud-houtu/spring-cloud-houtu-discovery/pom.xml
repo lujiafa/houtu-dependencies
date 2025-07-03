@@ -21,7 +21,10 @@
         <dependency>
             <groupId>com.houtu</groupId>
             <artifactId>houtu-core</artifactId>
-            <version>${com.houtu.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.houtu</groupId>
+            <artifactId>houtu-utils</artifactId>
         </dependency>
 
         <dependency>
@@ -33,12 +36,6 @@
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
             <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.houtu</groupId>
-            <artifactId>houtu-utils</artifactId>
-            <version>${com.houtu.version}</version>
         </dependency>
     </dependencies>
 

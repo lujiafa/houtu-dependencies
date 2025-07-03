@@ -1,26 +1,26 @@
 package com.houtu.web.util;
 
-import com.houtu.core.context.SpringApplicationContext;
 import com.houtu.core.annotation.CachingParam;
+import com.houtu.core.context.SpringApplicationContext;
 import com.houtu.web.handler.CombineHandlerMethodArgumentResolver;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.MethodParameter;
-import org.springframework.ui.ModelMap;
 import org.springframework.util.Assert;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.support.RequestContextUtils;
 
 import java.lang.reflect.Method;
+import java.util.LinkedHashMap;
 
 /**
  * 工具类，辅助获取复合参数的ModelMap
  * @author jonlu
  * @date 2022/9/5
  */
-public final class WebCombineModelMapSupport implements InitializingBean {
+public final class WebCombineParametersSupport implements InitializingBean {
 
     private static final MethodParameter METHOD_PARAMETER;
 
@@ -28,7 +28,7 @@ public final class WebCombineModelMapSupport implements InitializingBean {
 
     static {
         try {
-            Method method = ParameterMapWrapper.class.getMethod(ParameterMapWrapper.METHOD_NAME, ModelMap.class);
+            Method method = ParameterMapWrapper.class.getMethod(ParameterMapWrapper.METHOD_NAME, LinkedHashMap.class);
             METHOD_PARAMETER = new MethodParameter(method, 0);
         } catch (NoSuchMethodException e) {
             throw new RuntimeException(e.getMessage(), e);
@@ -41,13 +41,13 @@ public final class WebCombineModelMapSupport implements InitializingBean {
      * @param response 响应对象
      * @return ModelMap
      */
-    public static ModelMap getCombineModelMap(HttpServletRequest request, HttpServletResponse response) {
+    public static LinkedHashMap getCombineParameterMap(HttpServletRequest request, HttpServletResponse response) {
         Assert.notNull(combineHandlerMethodArgumentResolver, "CombineHandlerMethodArgumentResolver must not be null");
         try {
             ModelAndViewContainer mavContainer = new ModelAndViewContainer();
             mavContainer.addAllAttributes(RequestContextUtils.getInputFlashMap(request));
             ServletWebRequest servletWebRequest = new ServletWebRequest(request, response);
-            return (ModelMap) combineHandlerMethodArgumentResolver.resolveArgument(METHOD_PARAMETER, mavContainer, servletWebRequest, null);
+            return (LinkedHashMap) combineHandlerMethodArgumentResolver.resolveArgument(METHOD_PARAMETER, mavContainer, servletWebRequest, null);
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
         }
@@ -61,6 +61,6 @@ public final class WebCombineModelMapSupport implements InitializingBean {
     class ParameterMapWrapper {
         final static String METHOD_NAME = "get";
         @CachingParam
-        public void get(ModelMap modelMap) {}
+        public void get(LinkedHashMap<String, Object> parameterMap) {}
     }
 }

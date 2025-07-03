@@ -30,7 +30,6 @@
         <dependency>
             <groupId>com.houtu</groupId>
             <artifactId>houtu-utils</artifactId>
-            <version>${com.houtu.version}</version>
         </dependency>
     </dependencies>
 

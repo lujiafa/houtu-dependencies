@@ -7,7 +7,7 @@ import com.houtu.util.common.MapUtils;
 import com.houtu.util.constant.CommonConstant;
 import com.houtu.util.constant.SeparatorChar;
 import com.houtu.util.web.WebUtils;
-import com.houtu.web.util.WebCombineModelMapSupport;
+import com.houtu.web.util.WebCombineParametersSupport;
 import com.houtu.web.view.SmartErrorView;
 import com.houtu.websecurity.annotation.*;
 import com.houtu.websecurity.constant.SecurityConstant;
@@ -25,7 +25,6 @@ import org.springframework.core.Ordered;
 import org.springframework.core.env.Environment;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.MediaType;
-import org.springframework.ui.ModelMap;
 import org.springframework.util.StringUtils;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -78,14 +77,14 @@ public class WebSecurityHandlerInterceptor implements HandlerInterceptor, Filter
                 }
                 Map<String, String> parameterMap = null;
                 if (securityProperties.isCheckSign()) {
-                    ModelMap modelMap = WebCombineModelMapSupport.getCombineModelMap(request, response);
-                    parameterMap = MapUtils.toStringMap(modelMap);
+                    Map paramsMap = WebCombineParametersSupport.getCombineParameterMap(request, response);
+                    parameterMap = MapUtils.toStringMap(paramsMap);
                     checkSign(request, response, method, parameterMap);
                 }
                 if (securityProperties.isCheckRepeat() && redisTemplate != null) {
                     if (parameterMap == null) {
-                        ModelMap modelMap = WebCombineModelMapSupport.getCombineModelMap(request, response);
-                        parameterMap = MapUtils.toStringMap(modelMap);
+                        Map paramsMap = WebCombineParametersSupport.getCombineParameterMap(request, response);
+                        parameterMap = MapUtils.toStringMap(paramsMap);
                     }
                     checkRepeatRequest(request, response, method, parameterMap);
                 }

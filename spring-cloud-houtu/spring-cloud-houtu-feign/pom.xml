@@ -17,27 +17,24 @@
             <artifactId>spring-boot-starter-web</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>com.houtu</groupId>
+            <artifactId>houtu-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.houtu</groupId>
+            <artifactId>houtu-utils</artifactId>
+        </dependency>
 
         <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-loadbalancer</artifactId>
+            <groupId>com.houtu</groupId>
+            <artifactId>spring-cloud-houtu-loadbalancer</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-openfeign</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>com.houtu</groupId>
-            <artifactId>houtu-core</artifactId>
-            <version>${com.houtu.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.houtu</groupId>
-            <artifactId>houtu-utils</artifactId>
-            <version>${com.houtu.version}</version>
-        </dependency>
     </dependencies>
 
 </project>

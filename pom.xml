@@ -25,6 +25,7 @@
         <module>houtu-access-log</module>
         <module>houtu-web</module>
         <module>houtu-web-security</module>
+        <module>houtu-web-swagger</module>
         <module>spring-cloud-houtu</module>
         <module>houtu-data-security</module>
     </modules>
@@ -68,6 +69,11 @@
             <dependency>
                 <groupId>com.houtu</groupId>
                 <artifactId>houtu-web-security</artifactId>
+                <version>${com.houtu.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.houtu</groupId>
+                <artifactId>houtu-web-swagger</artifactId>
                 <version>${com.houtu.version}</version>
             </dependency>
         </dependencies>

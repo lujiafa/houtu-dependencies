@@ -47,12 +47,10 @@
         <dependency>
             <groupId>com.houtu</groupId>
             <artifactId>houtu-core</artifactId>
-            <version>${com.houtu.version}</version>
         </dependency>
         <dependency>
             <groupId>com.houtu</groupId>
             <artifactId>houtu-utils</artifactId>
-            <version>${com.houtu.version}</version>
         </dependency>
     </dependencies>
 

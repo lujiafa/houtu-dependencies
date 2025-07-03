@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.http.HttpHeaders;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.lang.reflect.Method;
@@ -54,7 +55,9 @@ public class AccessLogAspect implements InitializingBean {
     	if (accessLog == null || !accessLog.value()) {
     		return pjp.proceed(args);
     	}
-    	HttpServletRequest request = getHttpServletRequest();
+		ServletRequestAttributes servletRequestAttributes = WebUtils.getServletRequestAttributes();
+		HttpServletRequest request = servletRequestAttributes.getRequest();
+		HttpServletResponse response =servletRequestAttributes.getResponse();
     	StringBuilder builder = new StringBuilder();
     	LogFilterHandler logFilterHandler = getLogFilterHandler(accessLog.logFilterHandler());
     	if (request == null) {
@@ -65,7 +68,7 @@ public class AccessLogAspect implements InitializingBean {
     		String requestIp = getRequestIp(request);
     		String userAgent = getRequestUserAgent(request);
     		String parameterString = getQueryParamString(request, logFilterHandler);
-    		String requestBody = accessLog.params() ? getRequestAllParams(request, getHttpServletResponse(), logFilterHandler) : SeparatorChar.HYPHEN;
+    		String requestBody = accessLog.params() ? getRequestAllParams(request, response, logFilterHandler) : SeparatorChar.HYPHEN;
     		builder.append(httpMethod)
     		.append(SeparatorChar.VERTICAL_BAR).append(path)
     		.append(SeparatorChar.VERTICAL_BAR).append(requestIp)
@@ -94,14 +97,6 @@ public class AccessLogAspect implements InitializingBean {
     		builder.append(SeparatorChar.VERTICAL_BAR).append(elapsedTime);
     		logger.info(builder.toString());
     	}
-    }
-
-    private HttpServletRequest getHttpServletRequest() {
-		return WebUtils.getRequest();
-    }
-
-    private HttpServletResponse getHttpServletResponse() {
-		return WebUtils.getResponse();
     }
 
     /**

@@ -1,6 +1,6 @@
 package com.houtu.accesslog.handler;
 
-import com.houtu.web.util.WebCombineModelMapSupport;
+import com.houtu.web.util.WebCombineParametersSupport;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -14,6 +14,6 @@ import java.util.Map;
 public class AccessLogCombineModelMapProcessor {
 
     public Map getCombineModelMap(HttpServletRequest request, HttpServletResponse response) {
-        return WebCombineModelMapSupport.getCombineModelMap(request, response);
+        return WebCombineParametersSupport.getCombineParameterMap(request, response);
     }
 }

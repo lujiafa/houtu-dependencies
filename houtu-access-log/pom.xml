@@ -32,13 +32,11 @@
         <dependency>
             <groupId>com.houtu</groupId>
             <artifactId>houtu-utils</artifactId>
-            <version>${com.houtu.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.houtu</groupId>
             <artifactId>houtu-web</artifactId>
-            <version>${com.houtu.version}</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>

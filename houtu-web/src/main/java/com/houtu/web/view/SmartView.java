@@ -15,37 +15,37 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 public class SmartView implements View {
-	
-	protected static Logger logger = LoggerFactory.getLogger(SmartView.class);
 
-	protected Object data;
-	protected Charset charset = StandardCharsets.UTF_8;
+    protected static Logger logger = LoggerFactory.getLogger(SmartView.class);
 
-	protected static ExtensionHandlerMethodReturnValueHandler returnValueHandler;
+    protected Object data;
+    protected Charset charset = StandardCharsets.UTF_8;
 
-	public SmartView(Object data) {
-		this.data = data;
-	}
-	
-	@Override
-	public void render(Map<String, ?> model, HttpServletRequest request, HttpServletResponse response)
-			throws Exception {
-		response.setHeader("Pragma", "no-cache");
-		response.setHeader("Cache-Control", "no-cache");
-		getReturnValueHandler().write(data, new ServletServerHttpRequest(request), new ServletServerHttpResponse(response));
-	}
+    protected static ExtensionHandlerMethodReturnValueHandler returnValueHandler;
 
-	private ExtensionHandlerMethodReturnValueHandler getReturnValueHandler() {
-		if (returnValueHandler != null) {
-			return returnValueHandler;
-		}
-		synchronized (SmartView.class) {
-			if (returnValueHandler != null) {
-				return returnValueHandler;
-			}
-			returnValueHandler = SpringApplicationContext.getBean(ExtensionHandlerMethodReturnValueHandler.class);
-		}
-		return returnValueHandler;
-	}
+    public SmartView(Object data) {
+        this.data = data;
+    }
+
+    @Override
+    public void render(Map<String, ?> model, HttpServletRequest request, HttpServletResponse response)
+            throws Exception {
+        response.setHeader("Pragma", "no-cache");
+        response.setHeader("Cache-Control", "no-cache");
+        getReturnValueHandler().write(data, new ServletServerHttpRequest(request), new ServletServerHttpResponse(response));
+    }
+
+    private ExtensionHandlerMethodReturnValueHandler getReturnValueHandler() {
+        if (returnValueHandler != null) {
+            return returnValueHandler;
+        }
+        synchronized (SmartView.class) {
+            if (returnValueHandler != null) {
+                return returnValueHandler;
+            }
+            returnValueHandler = SpringApplicationContext.getBean(ExtensionHandlerMethodReturnValueHandler.class);
+        }
+        return returnValueHandler;
+    }
 
 }

@@ -3,10 +3,12 @@ package com.houtu.web.handler;
 import com.houtu.core.annotation.CachingParam;
 import com.houtu.util.common.AnnotationUtils;
 import com.houtu.util.common.BeanUtils;
+import com.houtu.util.common.JsonUtils;
 import com.houtu.util.web.WebUtils;
 import com.houtu.web.constant.WebSupportConstant;
 import com.houtu.web.model.BaseDTO;
 import com.houtu.web.model.BaseForm;
+import com.houtu.web.type.CombineFormResolverType;
 import com.houtu.web.util.CachingStreamHttpServletRequest;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
@@ -19,7 +21,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.server.ServletServerHttpRequest;
-import org.springframework.ui.ModelMap;
 import org.springframework.util.Assert;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
@@ -35,6 +36,7 @@ import org.springframework.web.servlet.mvc.method.annotation.AbstractMessageConv
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -48,9 +50,13 @@ public class CombineHandlerMethodArgumentResolver extends AbstractMessageConvert
 
     private final List<MediaType> formMediaTypes = new ArrayList<>();
 
+    private CombineFormResolverType combineFormArgumentResolverType;
+
     public CombineHandlerMethodArgumentResolver(List<HttpMessageConverter<?>> converters,
-                                                List<Object> requestResponseBodyAdvice) {
+                                                List<Object> requestResponseBodyAdvice,
+                                                CombineFormResolverType combineFormArgumentResolverType) {
         super(converters, requestResponseBodyAdvice);
+        this.combineFormArgumentResolverType = combineFormArgumentResolverType;
         formMediaTypes.addAll(new FormHttpMessageConverter().getSupportedMediaTypes());
     }
 
@@ -59,7 +65,7 @@ public class CombineHandlerMethodArgumentResolver extends AbstractMessageConvert
         Class<?> parameterType = parameter.getParameterType();
         if (BaseForm.class.isAssignableFrom(parameterType)
                 || BaseDTO.class.isAssignableFrom(parameterType)
-                || ModelMap.class.isAssignableFrom(parameterType)) {
+                || HashMap.class.isAssignableFrom(parameterType)) {
             return true;
         }
         return false;
@@ -72,8 +78,8 @@ public class CombineHandlerMethodArgumentResolver extends AbstractMessageConvert
         Assert.state(mavContainer != null, "CombineHandlerMethodArgumentResolver requires ModelAndViewContainer");
         HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
 
-        if (ModelMap.class.isAssignableFrom(parameter.getParameterType())) {
-            ModelMap arg = mavContainer.getModel();
+        if (HashMap.class.isAssignableFrom(parameter.getParameterType())) {
+            HashMap arg = (HashMap) parameter.getParameterType().getDeclaredConstructor().newInstance();
             arg.putAll(WebUtils.getUrlEncodedParams(request));
             if (supportResolverRequestBody(request, parameter)) {
                 request.setAttribute(WebSupportConstant.CACHING_STREAM_ENABLE_ATTR_NAME, AnnotationUtils.getAnnotationByPriorityMethod(parameter.getMethod(), CachingParam.class) != null);
@@ -86,16 +92,25 @@ public class CombineHandlerMethodArgumentResolver extends AbstractMessageConvert
         }
 
         Assert.state(binderFactory != null, "CombineHandlerMethodArgumentResolver requires WebDataBinderFactory");
-        /**
-         * 参考 ServletModelAttributeMethodProcessor与ModelAttributeMethodProcessor
-         */
         String name = ModelFactory.getNameForParameter(parameter);
         ResolvableType type = ResolvableType.forMethodParameter(parameter);
-        WebDataBinder binder = binderFactory.createBinder(webRequest, null, name, type);
-        ServletRequestDataBinder servletBinder = (ServletRequestDataBinder) binder;
-        servletBinder.construct(request);
-        Object arg = binder.getTarget();
-        servletBinder.bind(request);
+
+        WebDataBinder binder;
+        Object arg;
+        if (CombineFormResolverType.JSON.equals(combineFormArgumentResolverType)) {
+            Map<String, String> urlEncodedParams = WebUtils.getUrlEncodedParams(request);
+            arg = JsonUtils.convertValue(urlEncodedParams, parameter.getParameterType());
+            binder = binderFactory.createBinder(webRequest, arg, name, type);
+        } else {
+            /**
+             * 参考 ServletModelAttributeMethodProcessor与ModelAttributeMethodProcessor
+             */
+            binder = binderFactory.createBinder(webRequest, null, name, type);
+            ServletRequestDataBinder servletBinder = (ServletRequestDataBinder) binder;
+            servletBinder.construct(request);
+            arg = binder.getTarget();
+            servletBinder.bind(request);
+        }
 
         if (supportResolverRequestBody(request, parameter)) {
             request.setAttribute(WebSupportConstant.CACHING_STREAM_ENABLE_ATTR_NAME, AnnotationUtils.getAnnotationByPriorityMethod(parameter.getMethod(), CachingParam.class) != null);
@@ -126,7 +141,9 @@ public class CombineHandlerMethodArgumentResolver extends AbstractMessageConvert
             }
         }
 
-        return adaptArgumentIfNecessary(arg, parameter);
+        return
+
+                adaptArgumentIfNecessary(arg, parameter);
     }
 
     @Override
@@ -134,13 +151,13 @@ public class CombineHandlerMethodArgumentResolver extends AbstractMessageConvert
         HttpServletRequest servletRequest = webRequest.getNativeRequest(HttpServletRequest.class);
         Assert.state(servletRequest != null, "No HttpServletRequest");
         Boolean cachingEnable = (Boolean) servletRequest.getAttribute(WebSupportConstant.CACHING_STREAM_ENABLE_ATTR_NAME);
-        if (cachingEnable == null || !cachingEnable) {
+        if (!Boolean.TRUE.equals(cachingEnable)) {
             return new ServletServerHttpRequest(servletRequest);
         }
         HttpServletRequest request = (HttpServletRequest) servletRequest.getAttribute(WebSupportConstant.REPEAT_STREAM_HTTP_SERVLET_REQUEST_ATTR_NAME);
         if (request == null) {
             request = new CachingStreamHttpServletRequest(servletRequest);
-            servletRequest.setAttribute(WebSupportConstant.REPEAT_STREAM_HTTP_SERVLET_REQUEST_ATTR_NAME,  request);
+            servletRequest.setAttribute(WebSupportConstant.REPEAT_STREAM_HTTP_SERVLET_REQUEST_ATTR_NAME, request);
         }
         return new ServletServerHttpRequest(request);
     }
@@ -164,7 +181,7 @@ public class CombineHandlerMethodArgumentResolver extends AbstractMessageConvert
 
         // 若启用缓存，则移除缓存的HttpServletRequest
         Boolean cachingEnable = (Boolean) servletRequest.getAttribute(WebSupportConstant.CACHING_STREAM_ENABLE_ATTR_NAME);
-        if (cachingEnable != null && cachingEnable) {
+        if (Boolean.TRUE.equals(cachingEnable)) {
             servletRequest.removeAttribute(WebSupportConstant.REPEAT_STREAM_HTTP_SERVLET_REQUEST_ATTR_NAME);
         }
     }

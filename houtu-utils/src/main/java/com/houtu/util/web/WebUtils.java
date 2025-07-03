@@ -33,29 +33,34 @@ public class WebUtils extends org.springframework.web.util.WebUtils {
     private final static String IP_LOCAL = "127.0.0.1";
 
     /**
-     * @return HttpServletRequest
      * @Title getRequest
      * @Description 应用中获取request对象
+     * @return HttpServletRequest
      */
     public static HttpServletRequest getRequest() {
-        RequestAttributes reqAttr = RequestContextHolder.getRequestAttributes();
-        if (reqAttr != null && reqAttr instanceof ServletRequestAttributes) {
-            return ((ServletRequestAttributes) reqAttr).getRequest();
-        }
-        throw new RuntimeException("request fetch failed, please check the configuration is correct.");
+        return getServletRequestAttributes().getRequest();
     }
 
     /**
-     * @return HttpServletResponse
      * @Title getResponse
      * @Description 应用中获取response对象
+     * @return HttpServletResponse
      */
     public static HttpServletResponse getResponse() {
+        return getServletRequestAttributes().getResponse();
+    }
+
+    /**
+     * @Description 获取ServletRequestAttributes对象
+     * @Title getServletRequestAttributes
+     * @return ServletRequestAttributes
+     */
+    public static ServletRequestAttributes getServletRequestAttributes() {
         RequestAttributes reqAttr = RequestContextHolder.getRequestAttributes();
         if (reqAttr != null && reqAttr instanceof ServletRequestAttributes) {
-            return ((ServletRequestAttributes) reqAttr).getResponse();
+            return (ServletRequestAttributes) reqAttr;
         }
-        throw new RuntimeException("response fetch failed, please check the configuration is correct.");
+        throw new RuntimeException("ServletRequestAttributes fetch failed, please check the configuration is correct.");
     }
 
     /**
@@ -421,6 +426,26 @@ public class WebUtils extends org.springframework.web.util.WebUtils {
             return ip;
         }
         return "";
+    }
+
+    /**
+     * @Description HttpServlet对象属性
+     * @Title HttpServletAttr
+     */
+    static class HttpServletAttr {
+        private HttpServletRequest request;
+        private HttpServletResponse response;
+        HttpServletAttr(HttpServletRequest request, HttpServletResponse response) {
+            this.request = request;
+            this.response = response;
+        }
+
+        public HttpServletRequest getRequest() {
+            return request;
+        }
+        public HttpServletResponse getResponse() {
+            return response;
+        }
     }
 
 }

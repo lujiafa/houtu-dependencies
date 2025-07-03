@@ -34,7 +34,6 @@
         <dependency>
             <groupId>com.houtu</groupId>
             <artifactId>houtu-web</artifactId>
-            <version>${com.houtu.version}</version>
         </dependency>
     </dependencies>
 
