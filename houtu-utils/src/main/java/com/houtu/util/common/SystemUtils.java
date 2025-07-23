@@ -4,25 +4,19 @@ import com.houtu.util.data.HexUtils;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
+import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
-import java.util.Enumeration;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class SystemUtils {
 
 	private static final int PROCESS_ID;
-	private static final List<String> DEFAULT_MAC_LIST;
-	private static final List<byte[]> DEFAULT_MAC_BYTE_LIST;
 
 	static {
 		try {
-			DEFAULT_MAC_LIST = getMacList(true, true);
-			DEFAULT_MAC_BYTE_LIST = DEFAULT_MAC_LIST.stream().map((p) -> HexUtils.toBinary(p)).collect(Collectors.toList());
 			RuntimeMXBean runtime = ManagementFactory.getRuntimeMXBean();
 			PROCESS_ID = Integer.valueOf(runtime.getName().split("@")[0]);
 		} catch (Exception e) {
@@ -41,24 +35,6 @@ public class SystemUtils {
 		return PROCESS_ID;
 	}
 	
-	/**
-	 * @Title getDefaultMacByteList
-	 * @Description 获取默认mac地址
-	 * @return List<byte[]>
-	 */
-	public static List<byte[]> getDefaultMacByteList() {
-		return DEFAULT_MAC_BYTE_LIST;
-	}
-	
-	/**
-	 * @Title getDefaultMacList
-	 * @Description 获取默认mac地址
-	 * @return List<String>
-	 */
-	public static List<String> getDefaultMacList() {
-		return DEFAULT_MAC_LIST;
-	}
-
 	/**
 	 * @Title getMacByteList
 	 * @Description 获取启用并且当前服务可用的网卡mac地址
@@ -90,7 +66,7 @@ public class SystemUtils {
 	
 	/**
 	 * @Title getMacList
-	 * @Description 是否为
+	 * @Description 获取Mac集合
 	 * @param onlyUp 是否仅返回启用网卡mac地址
 	 * @param onlySiteLocalAddress 是否仅返回当前服务可用的网卡mac地址
 	 * @return List<String> mac地址16进制集合
@@ -125,6 +101,51 @@ public class SystemUtils {
 			if (e instanceof RuntimeException) {
 				throw (RuntimeException) e;
 			}
+			throw new RuntimeException(e.getMessage(), e);
+		}
+	}
+
+	/**
+	 * 获取当前服务器的IP地址
+	 * @return String IP地址
+	 */
+	public static String getServerIp() {
+		List<String> serverIps = getServerIps();
+		return serverIps.isEmpty() ? "" : serverIps.get(0);
+	}
+
+	/**
+	 * 获取当前服务器的IP地址列表
+	 * @return List<String> IP地址集合，不排除为EMPTY
+	 */
+	public static List<String> getServerIps() {
+		try {
+			List<String> candidateIps = new ArrayList<>();
+			Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
+
+			while (interfaces.hasMoreElements()) {
+				NetworkInterface networkInterface = interfaces.nextElement();
+				// 跳过虚拟接口和未启用的接口
+				if (networkInterface.isLoopback() || !networkInterface.isUp() || networkInterface.isVirtual()) {
+					continue;
+				}
+				// 排除常见虚拟接口（按名称模式匹配）
+				String displayName = networkInterface.getDisplayName().toLowerCase();
+				if (displayName.contains("docker") // 排除Docker接口
+						|| displayName.contains("br-") // 排除Docker容器的接口
+						|| displayName.contains("veth")) {
+					continue;
+				}
+				// 遍历该接口的所有IP地址
+				for (InetAddress addr : Collections.list(networkInterface.getInetAddresses())) {
+					// 仅处理IPv4地址
+					if (addr instanceof Inet4Address) {
+						candidateIps.add(addr.getHostAddress());
+					}
+				}
+			}
+			return candidateIps;
+		} catch (Exception e) {
 			throw new RuntimeException(e.getMessage(), e);
 		}
 	}

@@ -22,22 +22,22 @@ public class SimplePermissionValidator implements PermissionValidator {
 	
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 
-	public void verify(HttpServletRequest request, Method method, RequiresRole requiresRole, RequiresPermission requiresPermission) throws PermissionException {
+	public void verify(Method method, RequiresRole requiresRole, RequiresPermission requiresPermission) throws PermissionException {
 		Session session = SessionContext.get();
 		if (session == null) {
 			logger.debug("权限验证失败，会话已过期");
-			throw new SessionException(ErrorCode.build(ErrorCodeConstant.SESSION_EXPIRED, request.getLocale()));
+			throw new SessionException(ErrorCode.build(ErrorCodeConstant.SESSION_EXPIRED));
 		}
 		if (requiresRole != null && requiresRole.value().length > 0) {
 			if (!verify(session.getRoles(), requiresRole.value(), requiresRole.logic())) {
 				logger.debug("权限验证|角色权限验证失败[sessionId={}, method={}]", session.getId(), method.getName());
-				throw new PermissionException(ErrorCode.build(ErrorCodeConstant.ACCESS_PERMISSIONS_DENIED, request.getLocale()));
+				throw new PermissionException(ErrorCode.build(ErrorCodeConstant.ACCESS_PERMISSIONS_DENIED));
 			}
 		}
 		if (requiresPermission != null && requiresPermission.value().length > 0) {
 			if (!verify(session.getPermissions(), requiresPermission.value(), requiresPermission.logic())) {
 				logger.debug("权限验证|权限验证失败[sessionId={}, method={}]", session.getId(), method);
-				throw new PermissionException(ErrorCode.build(ErrorCodeConstant.ACCESS_PERMISSIONS_DENIED, request.getLocale()));
+				throw new PermissionException(ErrorCode.build(ErrorCodeConstant.ACCESS_PERMISSIONS_DENIED));
 			}
 		}
 	}

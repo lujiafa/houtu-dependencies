@@ -1,4 +1,4 @@
-package com.houtu.web.model.response;
+package com.houtu.core.web;
 
 import com.houtu.core.constant.ErrorCodeConstant;
 import com.houtu.core.exception.ErrorCode;
@@ -15,18 +15,17 @@ public class ResponseData<T> implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 
-	/** 当响应为失败/错误内容时，可忽略字段名称 **/
-	public final static String DATA_FILTER_FIELD = "data";
-	
-	int code = ErrorCodeConstant.SUCCESS;
-	String message = ErrorCodeConstant.SUCCESS_MESSAGE;
+	private int code = ErrorCodeConstant.SUCCESS;
+	private String message = ErrorCodeConstant.SUCCESS_MESSAGE;
 	private T data;
+
+	ResponseData() {}
 	
 	public int getCode() {
 		return code;
 	}
 
-	public void setCode(int code) {
+	void setCode(int code) {
 		this.code = code;
 	}
 
@@ -34,7 +33,7 @@ public class ResponseData<T> implements Serializable {
 		return message;
 	}
 
-	public void setMessage(String message) {
+	void setMessage(String message) {
 		this.message = message;
 	}
 
@@ -42,7 +41,7 @@ public class ResponseData<T> implements Serializable {
 		return data;
 	}
 
-	public void setData(T data) {
+	void setData(T data) {
 		this.data = data;
 	}
 	

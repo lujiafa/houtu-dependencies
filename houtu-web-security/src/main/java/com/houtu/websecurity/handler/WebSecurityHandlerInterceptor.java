@@ -1,6 +1,7 @@
 package com.houtu.websecurity.handler;
 
 import com.houtu.core.constant.ErrorCodeConstant;
+import com.houtu.core.exception.BusinessException;
 import com.houtu.core.exception.ErrorCode;
 import com.houtu.util.common.AnnotationUtils;
 import com.houtu.util.common.MapUtils;
@@ -36,8 +37,14 @@ import java.io.PrintWriter;
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class WebSecurityHandlerInterceptor implements HandlerInterceptor, Filter, Ordered {
+
+    private static final Map<Method, MethodSecurityAnnotationInfo> CACHE_MAP = new java.util.HashMap<>();
+    private static final MethodSecurityAnnotationInfo EMPTY_ANNOTATION_INFO = new MethodSecurityAnnotationInfo(null);
+    private static final ReentrantLock CACHE_LOCK = new ReentrantLock();
+    private static final int CACHE_MAX_SIZE = 1000;
 
     private SecurityProperties securityProperties;
     private SessionValidator sessionValidator;
@@ -63,7 +70,8 @@ public class WebSecurityHandlerInterceptor implements HandlerInterceptor, Filter
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain) throws IOException, ServletException {
         filterChain.doFilter(request, response);
-        SessionContext.releaseSession();
+        if (Boolean.TRUE.equals(request.getAttribute(SecurityConstant.SESSION_VALIDATOR_HANDLED_ATTR_NAME)))
+            SessionContext.releaseSession();
     }
 
     @Override
@@ -72,24 +80,24 @@ public class WebSecurityHandlerInterceptor implements HandlerInterceptor, Filter
             try {
                 HandlerMethod handlerMethod = (HandlerMethod) handler;
                 Method method = handlerMethod.getMethod();
-                if (securityProperties.isCheckSession()) {
-                    checkSession(request, response, method);
+                MethodSecurityAnnotationInfo annotationInfo = getAnnotationInfo(method);
+                if (annotationInfo.getCheckSession() != null && annotationInfo.getCheckSession().value()) {
+                    checkSession(request, response, annotationInfo);
                 }
                 Map<String, String> parameterMap = null;
-                if (securityProperties.isCheckSign()) {
+                if (annotationInfo.getCheckSign() != null && annotationInfo.getCheckSign().value()) {
                     Map paramsMap = WebCombineParametersSupport.getCombineParameterMap(request, response);
                     parameterMap = MapUtils.toStringMap(paramsMap);
-                    checkSign(request, response, method, parameterMap);
+                    checkSign(request, annotationInfo, parameterMap);
                 }
-                if (securityProperties.isCheckRepeat() && redisTemplate != null) {
+                if (annotationInfo.getCheckRepeatRequest() != null) {
                     if (parameterMap == null) {
                         Map paramsMap = WebCombineParametersSupport.getCombineParameterMap(request, response);
                         parameterMap = MapUtils.toStringMap(paramsMap);
                     }
-                    checkRepeatRequest(request, response, method, parameterMap);
+                    checkRepeatRequest(request, parameterMap);
                 }
-            } catch (SessionException e) {
-            } catch (SignatureException e) {
+            } catch (BusinessException e) {
                 throw new ModelAndViewDefiningException(new ModelAndView(new SmartErrorView(e.getErrorCode())));
             }
         }
@@ -98,21 +106,16 @@ public class WebSecurityHandlerInterceptor implements HandlerInterceptor, Filter
 
     /**
      * 处理检查会话信息
+     *
      * @param request
      * @param response
-     * @param method
+     * @param annotationInfo
      */
-    protected void checkSession(HttpServletRequest request, HttpServletResponse response, Method method) {
-        CheckSession checkSession = AnnotationUtils.getAnnotationByPriorityMethod(method, CheckSession.class);
-        if (checkSession == null || !checkSession.value()) {
-            return;
-        }
+    protected void checkSession(HttpServletRequest request, HttpServletResponse response, MethodSecurityAnnotationInfo annotationInfo) {
         try {
-            sessionValidator.verify(request, method, checkSession);
-            if (securityProperties.isCheckPermission()) {
-                RequiresRole requiresRole = AnnotationUtils.getAnnotation(method, RequiresRole.class);
-                RequiresPermission requiresPermission = AnnotationUtils.getAnnotation(method, RequiresPermission.class);
-                permissionValidator.verify(request, method, requiresRole, requiresPermission);
+            sessionValidator.verify(request, annotationInfo.getMethod(), annotationInfo.getCheckSession());
+            if (annotationInfo.getRequiresRole() != null || annotationInfo.getRequiresPermission() != null) {
+                permissionValidator.verify(annotationInfo.getMethod(), annotationInfo.getRequiresRole(), annotationInfo.getRequiresPermission());
             }
             request.setAttribute(SecurityConstant.SESSION_VALIDATOR_HANDLED_ATTR_NAME, true);
         } catch (SessionException e) {
@@ -127,25 +130,18 @@ public class WebSecurityHandlerInterceptor implements HandlerInterceptor, Filter
                         pw.write("<html><script type=\"text/javascript\">top.location.href=" + securityProperties.getSession().getLoginUrl().trim() + "</script></html>");
                         pw.flush();
                         pw.close();
-                    } catch (IOException ie) {}
+                    } catch (IOException ie) {
+                    }
                 }
             }
         }
     }
 
-    protected void checkSign(HttpServletRequest request, HttpServletResponse response, Method method, Map<String, String> parameterMap) {
-        CheckSign checkSign = AnnotationUtils.getAnnotationByPriorityMethod(method, CheckSign.class);
-        if (checkSign == null || !checkSign.value()) {
-            return;
-        }
-        signatureValidator.verify(request, method, checkSign, parameterMap);
+    protected void checkSign(HttpServletRequest request, MethodSecurityAnnotationInfo annotationInfo, Map<String, String> parameterMap) {
+        signatureValidator.verify(request, annotationInfo.getMethod(), annotationInfo.getCheckSign(), parameterMap);
     }
 
-    protected void checkRepeatRequest(HttpServletRequest request, HttpServletResponse response, Method method, Map<String, String> parameterMap) {
-        CheckRepeatRequest checkRepeatRequest = AnnotationUtils.getAnnotationByPriorityMethod(method, CheckRepeatRequest.class);
-        if (checkRepeatRequest == null) {
-            return;
-        }
+    protected void checkRepeatRequest(HttpServletRequest request, Map<String, String> parameterMap) {
         String requestId = parameterMap.get(SecurityConstant.PARAM_REQUEST_ID_NAME);
         if (requestId == null) {
             requestId = request.getHeader(SecurityConstant.PARAM_REQUEST_ID_NAME);
@@ -155,12 +151,122 @@ public class WebSecurityHandlerInterceptor implements HandlerInterceptor, Filter
         }
         // 防重放验证
         String cacheKey = String.format("web:security:request:repeat:check:%s:%s", applicationName, requestId);
-        if (redisTemplate.boundValueOps(cacheKey).setIfAbsent(CommonConstant.EMPTY, 900, TimeUnit.SECONDS)) {
+        if (!redisTemplate.boundValueOps(cacheKey).setIfAbsent(CommonConstant.EMPTY, 900, TimeUnit.SECONDS)) {
             throw new SignatureException(ErrorCode.build(ErrorCodeConstant.REQUEST_REPEAT, request.getLocale()));
         }
     }
 
     public int getOrder() {
         return Ordered.HIGHEST_PRECEDENCE;
+    }
+
+    /**
+     * 获取方法上的关键注解信息
+     *
+     * @param method 方法
+     * @return MethodSecurityAnnotationInfo
+     */
+    private MethodSecurityAnnotationInfo getAnnotationInfo(Method method) {
+        MethodSecurityAnnotationInfo annotationInfo = CACHE_MAP.get(method);
+        if (annotationInfo != null) {
+            if (EMPTY_ANNOTATION_INFO.isEmpty())
+                return new MethodSecurityAnnotationInfo(method);
+            return annotationInfo;
+        }
+        annotationInfo = new MethodSecurityAnnotationInfo(method);
+        CheckSession checkSession = AnnotationUtils.getAnnotationByPriorityMethod(method, CheckSession.class);
+        annotationInfo.setCheckSession(checkSession);
+        CheckRepeatRequest checkRepeatRequest = AnnotationUtils.getAnnotationByPriorityMethod(method, CheckRepeatRequest.class);
+        annotationInfo.setCheckRepeatRequest(checkRepeatRequest);
+        CheckSign checkSign = AnnotationUtils.getAnnotationByPriorityMethod(method, CheckSign.class);
+        annotationInfo.setCheckSign(checkSign);
+        RequiresRole requiresRole = AnnotationUtils.getAnnotationByPriorityMethod(method, RequiresRole.class);
+        annotationInfo.setRequiresRole(requiresRole);
+        RequiresPermission requiresPermission = AnnotationUtils.getAnnotationByPriorityMethod(method, RequiresPermission.class);
+        annotationInfo.setRequiresPermission(requiresPermission);
+        if (CACHE_MAP.size() <= CACHE_MAX_SIZE) {
+            if (CACHE_LOCK.tryLock()) {
+                if (CACHE_MAP.size() <= CACHE_MAX_SIZE) {
+                    CACHE_MAP.put(method, annotationInfo.isEmpty() ? EMPTY_ANNOTATION_INFO : annotationInfo);
+                }
+                CACHE_LOCK.unlock();
+            }
+        }
+        return annotationInfo;
+    }
+
+
+    /**
+     * 注解信息类
+     */
+    static class MethodSecurityAnnotationInfo {
+
+        private Method method;
+
+        private CheckSession checkSession;
+
+        private CheckRepeatRequest checkRepeatRequest;
+
+        private CheckSign checkSign;
+
+        private RequiresRole requiresRole;
+
+        private RequiresPermission requiresPermission;
+
+        MethodSecurityAnnotationInfo(Method method) {
+            this.method = method;
+        }
+
+        public Method getMethod() {
+            return method;
+        }
+
+        public CheckSession getCheckSession() {
+            return checkSession;
+        }
+
+        public void setCheckSession(CheckSession checkSession) {
+            this.checkSession = checkSession;
+        }
+
+        public CheckRepeatRequest getCheckRepeatRequest() {
+            return checkRepeatRequest;
+        }
+
+        public void setCheckRepeatRequest(CheckRepeatRequest checkRepeatRequest) {
+            this.checkRepeatRequest = checkRepeatRequest;
+        }
+
+        public CheckSign getCheckSign() {
+            return checkSign;
+        }
+
+        public void setCheckSign(CheckSign checkSign) {
+            this.checkSign = checkSign;
+        }
+
+        public RequiresRole getRequiresRole() {
+            return requiresRole;
+        }
+
+        public void setRequiresRole(RequiresRole requiresRole) {
+            this.requiresRole = requiresRole;
+        }
+
+        public RequiresPermission getRequiresPermission() {
+            return requiresPermission;
+        }
+
+        public void setRequiresPermission(RequiresPermission requiresPermission) {
+            this.requiresPermission = requiresPermission;
+        }
+
+        public boolean isEmpty() {
+            return checkSession == null
+                    && checkSign == null
+                    && checkRepeatRequest == null
+                    && requiresRole == null
+                    && requiresPermission == null;
+        }
     }
 }

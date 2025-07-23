@@ -2,10 +2,10 @@ package com.houtu.web.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.houtu.core.context.SpringApplicationContext;
+import com.houtu.core.web.EmbedResponseData;
+import com.houtu.core.web.ResponseData;
 import com.houtu.web.model.BaseDTO;
 import com.houtu.web.model.BaseVO;
-import com.houtu.web.model.response.EmbedResponseData;
-import com.houtu.web.model.response.ResponseData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;

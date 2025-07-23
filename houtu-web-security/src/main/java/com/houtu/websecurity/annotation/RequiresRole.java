@@ -10,8 +10,8 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface RequiresRole {
 	
-	public String[] value();
+	String[] value();
 	
-	public Logic logic() default Logic.OR;
+	Logic logic() default Logic.OR;
 	
 }

@@ -14,7 +14,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <skipTests>true</skipTests>
-        <spring-boot-starter-parent.version>3.5.0</spring-boot-starter-parent.version>
+        <spring-boot-starter-parent.version>3.5.3</spring-boot-starter-parent.version>
         <jakarta.xml.bind-api.version>4.0.2</jakarta.xml.bind-api.version>
         <com.houtu.version>3.5.1-SNAPSHOT</com.houtu.version>
     </properties>
@@ -26,6 +26,7 @@
         <module>houtu-web</module>
         <module>houtu-web-security</module>
         <module>houtu-web-swagger</module>
+        <module>houtu-monitor</module>
         <module>spring-cloud-houtu</module>
         <module>houtu-data-security</module>
     </modules>
@@ -49,6 +50,11 @@
             <dependency>
                 <groupId>com.houtu</groupId>
                 <artifactId>houtu-core</artifactId>
+                <version>${com.houtu.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.houtu</groupId>
+                <artifactId>houtu-monitor</artifactId>
                 <version>${com.houtu.version}</version>
             </dependency>
             <dependency>

@@ -1,5 +1,7 @@
 package com.houtu.util.web;
 
+import com.houtu.util.common.JsonUtils;
+import com.houtu.util.common.XmlUtils;
 import com.houtu.util.constant.SeparatorChar;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.http.Cookie;
@@ -19,8 +21,10 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 public class WebUtils extends org.springframework.web.util.WebUtils {
@@ -28,7 +32,7 @@ public class WebUtils extends org.springframework.web.util.WebUtils {
     private static final Logger logger = LoggerFactory.getLogger(WebUtils.class);
 
     private final static String ATTRIBUTE_NAME_REQUEST_MEDIA_TYPE = "::REQUEST_MEDIA_TYPE::";
-    private final static String ATTREBUTE_NAME_RESPONSE_MEDIA_TYPE = "::RESPONSE_MEDIA_TYPE::";
+    private final static String ATTRIBUTE_NAME_RESPONSE_MEDIA_TYPE = "::RESPONSE_MEDIA_TYPE::";
     private final static String IP_UNKNOWN = "unknown";
     private final static String IP_LOCAL = "127.0.0.1";
 
@@ -307,10 +311,10 @@ public class WebUtils extends org.springframework.web.util.WebUtils {
      * @Description 获取客户端需要的响应Media类型
      */
     public static MediaType getResponseMediaType(HttpServletRequest request) {
-        MediaType mediaType = (MediaType) request.getAttribute(ATTREBUTE_NAME_RESPONSE_MEDIA_TYPE);
+        MediaType mediaType = (MediaType) request.getAttribute(ATTRIBUTE_NAME_RESPONSE_MEDIA_TYPE);
         if (mediaType == null) {
             mediaType = getResponseMediaTypes(request).get(0);
-            request.setAttribute(ATTREBUTE_NAME_RESPONSE_MEDIA_TYPE, mediaType);
+            request.setAttribute(ATTRIBUTE_NAME_RESPONSE_MEDIA_TYPE, mediaType);
         }
         return mediaType;
     }
@@ -429,22 +433,54 @@ public class WebUtils extends org.springframework.web.util.WebUtils {
     }
 
     /**
-     * @Description HttpServlet对象属性
-     * @Title HttpServletAttr
+     * @Description 输出json
+     * @param response 响应对象
+     * @param value 待输出对象
      */
-    static class HttpServletAttr {
-        private HttpServletRequest request;
-        private HttpServletResponse response;
-        HttpServletAttr(HttpServletRequest request, HttpServletResponse response) {
-            this.request = request;
-            this.response = response;
+    public static void writeJson(HttpServletResponse response, Object value) {
+        String json;
+        if (value instanceof CharSequence) {
+            json = value.toString();
+        } else {
+            json = JsonUtils.toStringIgnoreNull(value);
         }
+        write(response, json);
+    }
 
-        public HttpServletRequest getRequest() {
-            return request;
+    /**
+     * @Description 输出json
+     * @param response 响应对象
+     * @param value 待输出对象
+     */
+    public static void writeXml(HttpServletResponse response, Object value) {
+        String json;
+        if (value instanceof CharSequence) {
+            json = value.toString();
+        } else {
+            json = XmlUtils.toXml(value, StandardCharsets.UTF_8);
         }
-        public HttpServletResponse getResponse() {
-            return response;
+        write(response, json);
+    }
+
+    /**
+     * @Description 输出json
+     * @param response 响应对象
+     * @param value 待输出对象
+     */
+    public static void write(HttpServletResponse response, String value) {
+        Assert.notNull(response, "response cannot be null");
+        Assert.notNull(value, "value cannot be null");
+        response.setContentType(MediaType.APPLICATION_JSON_UTF8.toString());
+        PrintWriter writer = null;
+        try {
+            writer = response.getWriter();
+            writer.write(value);
+            writer.flush();
+        } catch (IOException e) {
+        } finally {
+            if (writer != null) {
+                writer.close();
+            }
         }
     }
 

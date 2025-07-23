@@ -6,6 +6,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 
 public class JsonUtils {
@@ -26,8 +27,11 @@ public class JsonUtils {
 		nonNullObjectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
 	}
 
-	public JsonUtils(ObjectMapper objectMapper) {
-		JsonUtils.objectMapper = objectMapper;
+	public JsonUtils(ObjectProvider<ObjectMapper> objectMapperObjectProvider) {
+		ObjectMapper availableObjectMapper = objectMapperObjectProvider.getIfAvailable();
+		if (availableObjectMapper != null) {
+			JsonUtils.objectMapper = objectMapper;
+		}
 		// mapper在反序列化时，忽略类对象中没有的属性
 		objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		// 禁用序列化空属性对象时抛异常

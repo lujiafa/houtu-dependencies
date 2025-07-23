@@ -21,8 +21,6 @@ public interface SecurityConstant {
 
 	/** 会话验证器处理状态 属性名 **/
 	String SESSION_VALIDATOR_HANDLED_ATTR_NAME = "::web_security_session_validator_handled::";
-	/** 签名验证器处理状态 属性名 **/
-	String PERMISSION_VALIDATOR_HANDLED_ATTR_NAME = "::web_security_permission_validator_handled::";
 
 
 	

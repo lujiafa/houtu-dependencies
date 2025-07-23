@@ -1,9 +1,10 @@
-package com.houtu.web.model.response;
+package com.houtu.core.web;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.houtu.core.constant.ErrorCodeConstant;
+import com.houtu.core.context.SpringApplicationContext;
 import com.houtu.core.exception.ErrorCode;
-import com.houtu.util.common.JsonUtils;
 import org.springframework.util.Assert;
 
 import java.util.LinkedHashMap;
@@ -20,6 +21,16 @@ public class EmbedResponseData extends LinkedHashMap<String, Object> {
 
 	public final static String CODE_NAME = "code";
 	public final static String MESSAGE_NAME = "message";
+
+	EmbedResponseData() {}
+
+	public int getCode() {
+		return (Integer) get(CODE_NAME);
+	}
+
+	public String getMessage() {
+		return (String) get(MESSAGE_NAME);
+	}
 
 	/**
 	 * @Title hasSuccess
@@ -51,7 +62,7 @@ public class EmbedResponseData extends LinkedHashMap<String, Object> {
 		if (data == null) {
 			return responseData;
 		}
-		responseData.putAll(JsonUtils.convertValue(data, new TypeReference<Map<? extends String, ?>>() {}));
+		responseData.putAll(getObjectMapper().convertValue(data, new TypeReference<Map<? extends String, ?>>() {}));
 		return responseData;
 	}
 
@@ -65,5 +76,16 @@ public class EmbedResponseData extends LinkedHashMap<String, Object> {
 		responseData.put(CODE_NAME, code);
 		responseData.put(MESSAGE_NAME, message);
 		return responseData;
+	}
+
+	static ObjectMapper objectMapper;
+	static ObjectMapper getObjectMapper() {
+		if (objectMapper != null)
+			return objectMapper;
+		objectMapper = SpringApplicationContext.getBean(ObjectMapper.class);
+		if (objectMapper == null) {
+			objectMapper = new ObjectMapper();
+		}
+		return objectMapper;
 	}
 }

@@ -6,49 +6,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class SecurityProperties {
 	public final static String PREFIX = "houtu.web.security";
 
-	/** 是否开启会话验证模块 **/
-	private boolean checkSession = true;
-	/** 是否开启重复请求验证 **/
-	private boolean checkRepeat = false;
-	/** 是否开启签名验证 **/
-	private boolean checkSign = true;
-	/** 是否开启会话权限验证模块 **/
-	private boolean checkPermission = false;
-
 	private SessionProperties session = new SessionProperties();
 	private SignProperties sign = new SignProperties();
-
-	public boolean isCheckSession() {
-		return checkSession;
-	}
-
-	public void setCheckSession(boolean checkSession) {
-		this.checkSession = checkSession;
-	}
-
-	public boolean isCheckRepeat() {
-		return checkRepeat;
-	}
-
-	public void setCheckRepeat(boolean checkRepeat) {
-		this.checkRepeat = checkRepeat;
-	}
-
-	public boolean isCheckSign() {
-		return checkSign;
-	}
-
-	public void setCheckSign(boolean checkSign) {
-		this.checkSign = checkSign;
-	}
-
-	public boolean isCheckPermission() {
-		return checkPermission;
-	}
-
-	public void setCheckPermission(boolean checkPermission) {
-		this.checkPermission = checkPermission;
-	}
 
 	public SessionProperties getSession() {
 		return session;

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.houtu.util.common.JsonUtils;
 import com.houtu.util.http.HttpClients;
 import com.houtu.util.prop.HttpClientProperties;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -28,7 +29,7 @@ public class UtilsAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     @Scope(value = "singleton")
-    public JsonUtils jsonUtils(ObjectMapper jacksonObjectMapper) {
-        return new JsonUtils(jacksonObjectMapper);
+    public JsonUtils jsonUtils(ObjectProvider<ObjectMapper> objectMapperObjectProvider) {
+        return new JsonUtils(objectMapperObjectProvider);
     }
 }

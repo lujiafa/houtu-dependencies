@@ -1,9 +1,9 @@
 package com.houtu.web.view;
 
 import com.houtu.core.exception.ErrorCode;
+import com.houtu.core.web.ResponseData;
 import com.houtu.util.web.WebUtils;
 import com.houtu.web.constant.WebSupportConstant;
-import com.houtu.web.model.response.ResponseData;
 import com.houtu.web.util.SupportDefaultErrorPageTemplate;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletRequest;
