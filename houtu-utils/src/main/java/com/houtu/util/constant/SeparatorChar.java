@@ -8,6 +8,11 @@ package com.houtu.util.constant;
  */
 public interface SeparatorChar {
 
+    /** 英文空''字符 **/
+    char EMPTY_CHAR = 0x00;
+    /** 英文空""字符串 **/
+    String EMPTY = Character.toString(EMPTY_CHAR);
+
     /** 英文空格" "字符 **/
     char SPACE_CHAR = 0x20;
     /** 英文空格" "字符串 **/
@@ -54,6 +59,21 @@ public interface SeparatorChar {
     char EQUAL_CHAR = 0x3D;
     /** 英文等号"="字符串 **/
     String EQUAL = Character.toString(EQUAL_CHAR);
+
+    /** 英文问号"?"字符 **/
+    char QUESTION_CHAR = 0x3F;
+    /** 英文问号"?"字符串 **/
+    String QUESTION = Character.toString(QUESTION_CHAR);
+
+    /** 英文和号"&"字符 **/
+    char AMPERSAND_CHAR = 0x26;
+    /** 英文和号"&"字符串 **/
+    String AMPERSAND = Character.toString(AMPERSAND_CHAR);
+
+    /** 英文井号"#"字符 **/
+    char HASH_CHAR = 0x23;
+    /** 英文井号"#"字符串 **/
+    String HASH = Character.toString(HASH_CHAR);
 
     /** 英文竖线"|"字符 **/
     char VERTICAL_BAR_CHAR = 0x7C;

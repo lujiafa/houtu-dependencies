@@ -7,7 +7,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author lujiafa
@@ -34,7 +33,7 @@ public class UrlUtils {
 	 * @return String
 	 */
 	public static String concat(String basePrefixUrl, String subPath, Map<String, String> paramMap) {
-		return concat(basePrefixUrl, subPath, paramMap, false);
+		return concat(basePrefixUrl, subPath, paramMap, true);
 	}
 	
 	/**
@@ -46,19 +45,17 @@ public class UrlUtils {
 	 * @return String
 	 */
 	public static String concat(String basePrefixUrl, String subPath, Map<String, String> paramMap, boolean encode) {
-		if (!StringUtils.hasText(basePrefixUrl)) {
-			throw new IllegalArgumentException("The parameter sourcePrefixUrl cannot be null.");
-		}
+		if (!StringUtils.hasText(basePrefixUrl))
+			throw new IllegalArgumentException("The parameter basePrefixUrl cannot be empty.");
 		String sourceUrl = basePrefixUrl.trim();
 		if (StringUtils.hasText(subPath)) {
+			subPath = subPath.trim();
 			boolean sourceEndSlash = sourceUrl.endsWith(SeparatorChar.SLASH);
 			boolean subStartSlash = subPath.startsWith(SeparatorChar.SLASH);
-			if (sourceEndSlash && subStartSlash) {
-				sourceUrl = sourceUrl + subPath.substring(1);
-			} else if (!sourceEndSlash && !subStartSlash) {
-				sourceUrl = sourceUrl + SeparatorChar.SLASH + subPath;
+			if (sourceEndSlash) {
+				sourceUrl = subStartSlash ? (sourceUrl + (subPath.length() > 1 ? subPath.substring(1) : SeparatorChar.EMPTY)) : (sourceUrl + subPath);
 			} else {
-				sourceUrl = sourceUrl + subPath;
+				sourceUrl = subStartSlash ? (sourceUrl + subPath) : (sourceUrl + SeparatorChar.SLASH + subPath);
 			}
 		}
 		return concat(sourceUrl, paramMap, encode);
@@ -71,7 +68,7 @@ public class UrlUtils {
 	 * @return String
 	 */
 	public static String concat(String sourceUrl, Map<String, String> paramMap) {
-		return concat(sourceUrl, paramMap, false);
+		return concat(sourceUrl, paramMap, true);
 	}
 	
 	/**
@@ -82,38 +79,48 @@ public class UrlUtils {
 	 * @return String
 	 */
 	public static String concat(String sourceUrl, Map<String, String> paramMap, boolean encode) {
-		if (!StringUtils.hasText(sourceUrl)) {
-			throw new IllegalArgumentException("The parameter sourceUrl cannot be empty.");
-		}
-		if (paramMap == null || paramMap.size() == 0) {
+		String slimUrl = sourceUrl.trim();
+		if (!StringUtils.hasText(slimUrl) || slimUrl.startsWith(SeparatorChar.HASH) || slimUrl.startsWith(SeparatorChar.QUESTION))
+			throw new IllegalArgumentException("sourceUrl is empty or starts with # or ?");
+		if (paramMap == null || paramMap.isEmpty())
 			return sourceUrl;
+		String fragment = null;
+		String query = null;
+		int fragmentSplitIndex = slimUrl.indexOf(SeparatorChar.HASH_CHAR);
+		if (fragmentSplitIndex > -1) {
+			if (fragmentSplitIndex == slimUrl.length() - 1)
+				fragment = SeparatorChar.EMPTY;
+			else
+				fragment = slimUrl.substring(fragmentSplitIndex + 1);
+			slimUrl = slimUrl.substring(0, fragmentSplitIndex);
 		}
-		String url = sourceUrl;
-		if (paramMap != null && paramMap.size() > 0) {
-			int sourceQuerySplitIndex = sourceUrl.indexOf('?');
-			AtomicBoolean existsSeparator = new AtomicBoolean(sourceQuerySplitIndex > -1);
-			AtomicBoolean existsQuery = new AtomicBoolean(existsSeparator.get() && sourceUrl.length() > (sourceQuerySplitIndex + 1));
-			
-			StringBuilder stringBuilder = new StringBuilder(sourceUrl);
-			if (existsSeparator.compareAndSet(false, true)) {
-				stringBuilder.append('?');
+		int querySplitIndex = slimUrl.indexOf(SeparatorChar.QUESTION_CHAR);
+		if (querySplitIndex > -1) {
+			if (querySplitIndex == slimUrl.length() - 1)
+				query = SeparatorChar.EMPTY;
+			else
+				query = slimUrl.substring(querySplitIndex + 1);
+			slimUrl = slimUrl.substring(0, querySplitIndex);
+		}
+		StringBuilder queryBuilder = new StringBuilder(query);
+		paramMap.entrySet().forEach(p -> {
+			try {
+				if (queryBuilder.length() > 0)
+					queryBuilder.append(SeparatorChar.AMPERSAND);
+				queryBuilder.append(encode ? URLEncoder.encode(p.getKey(), StandardCharsets.UTF_8.name()) : p.getKey())
+						.append(SeparatorChar.EQUAL);
+				if (p.getValue() != null)
+					queryBuilder.append(encode ? URLEncoder.encode(p.getValue(), StandardCharsets.UTF_8.name()) : p.getValue());
+			} catch (UnsupportedEncodingException e) {
+				throw new RuntimeException(e.getMessage(), e);
 			}
-			paramMap.entrySet().forEach(p -> {
-				try {
-					if (existsQuery.get()) {
-						stringBuilder.append('&');
-					}
-					stringBuilder.append(encode ? URLEncoder.encode(p.getKey(), StandardCharsets.UTF_8.name()) : p.getKey())
-						.append('=');
-					if (p.getValue() != null) {
-						stringBuilder.append(encode ? URLEncoder.encode(p.getValue(), StandardCharsets.UTF_8.name()) : p.getValue());
-					}
-					existsQuery.set(true);
-				} catch (UnsupportedEncodingException e) {}
-			});
-			url = stringBuilder.toString();
-		}
-		return url;
+		});
+		StringBuilder urlBuilder = new StringBuilder(slimUrl)
+				.append(SeparatorChar.QUESTION)
+				.append(queryBuilder);
+		if (fragment == null)
+			return urlBuilder.toString();
+		return urlBuilder.append(SeparatorChar.HASH).append(fragment).toString();
 	}
 	
 }
