@@ -26,16 +26,15 @@ public class SecurityProperties {
 	}
 
 	public static class SignProperties {
-		private final static String DEFAULT_SIGN_KEY = "d2VuZGFvcmVu";
 
-		private String defaultSignKey = DEFAULT_SIGN_KEY;
+		private String signKey;
 
-		public String getDefaultSignKey() {
-			return defaultSignKey;
+		public String getSignKey() {
+			return signKey;
 		}
 
-		public void setDefaultSignKey(String defaultSignKey) {
-			this.defaultSignKey = defaultSignKey;
+		public void setSignKey(String signKey) {
+			this.signKey = signKey;
 		}
 	}
 

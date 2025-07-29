@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.TimeZone;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.IntStream;
@@ -16,14 +15,13 @@ import java.util.stream.IntStream;
  */
 public class CodeUtils {
     private static final Logger logger = LoggerFactory.getLogger(CodeUtils.class);
-    private static final char[] CHAR64 = new char[]{'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
+    private static final char[] CHAR64 = new char[]{'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
             'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o',
-            'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '_', '-'};
-    private static final String DATA_REGEX = "^[-_A-Za-z0-9]{32}$";
+            'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '_', '-'};
+    private static final String DATA_REGEX = "^[-_0-9A-Za-z]{32}$";
     private static final byte[] DEFAULT_SALT = {0x1A, 0x2B, 0x3C, 0x4D};
     private static final byte[] MAC = new byte[6];
     private static final int PROCESS_ID;
-    private static final TimeZone TIME_ZONE = TimeZone.getTimeZone("GMT+8");
     private static final ReentrantLock Lock = new ReentrantLock();
 
     static {
@@ -46,8 +44,7 @@ public class CodeUtils {
         try {
             if ((val = incr.incr(millisecond)) > 0)
                 return val;
-            incr = new AtomicIncr(millisecond);
-            return incr.incr(millisecond);
+            return (incr = new AtomicIncr(millisecond)).incr(millisecond);
         } finally {
             Lock.unlock();
         }
@@ -199,10 +196,9 @@ public class CodeUtils {
     }
 
     static class RuleData {
-        RuleData() {
-        }
+        RuleData() {}
 
-        RuleData(boolean success, long timestamp, Long incr, byte[] mac, Integer processId) {
+        RuleData(boolean success, Long timestamp, Long incr, byte[] mac, Integer processId) {
             this.success = success;
             this.timestamp = timestamp;
             this.incr = incr;
