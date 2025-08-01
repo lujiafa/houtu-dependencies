@@ -8,7 +8,9 @@ import java.util.Set;
  * 会话对象
  */
 public interface Session extends Serializable {
-	
+
+	long serialVersionUID = 0L;
+
 	/**
 	 * @Title getId
 	 * @Description 获取Session的ID

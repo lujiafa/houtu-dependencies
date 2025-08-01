@@ -1,6 +1,7 @@
 package com.houtu.util.crypto;
 
 import com.houtu.util.data.HexUtils;
+import jakarta.annotation.Nonnull;
 import org.springframework.util.Assert;
 
 import java.io.UnsupportedEncodingException;
@@ -24,13 +25,13 @@ public class SignUtils {
 	 * @return 16进制签名字符串
 	 */
 	public static String signMd5(Map<String, String> paramMap, String key) {
-		return sign(paramMap, queryBuilder -> {
+		return sign(paramMap, queryStringBuilder -> {
 			if (key != null) {
-				if (queryBuilder.length() > 0)
-					queryBuilder.append("&");
-				queryBuilder.append("key=").append(key);
+				if (queryStringBuilder.length() > 0)
+					queryStringBuilder.append("&");
+				queryStringBuilder.append("key=").append(key);
 			}
-			return HexUtils.toHex(MD5Utils.encrypt(queryBuilder.toString(), StandardCharsets.UTF_8.name()));
+			return HexUtils.toHex(MD5Utils.encrypt(queryStringBuilder.toString(), StandardCharsets.UTF_8.name()));
 		});
 	}
 
@@ -41,26 +42,14 @@ public class SignUtils {
 	 * @return 验证结果
 	 */
 	public static boolean verifyMd5(Map<String, String> paramMap, String key, String sign) {
-		return verify(paramMap, queryBuilder -> {
+		return verify(paramMap, queryStringBuilder -> {
 			if (key != null) {
-				if (queryBuilder.length() > 0)
-					queryBuilder.append("&");
-				queryBuilder.append("key=").append(key);
+				if (queryStringBuilder.length() > 0)
+					queryStringBuilder.append("&");
+				queryStringBuilder.append("key=").append(key);
 			}
-			return Objects.equals(sign, HexUtils.toHex(MD5Utils.encrypt(queryBuilder.toString(), StandardCharsets.UTF_8.name())));
+			return Objects.equals(sign, HexUtils.toHex(MD5Utils.encrypt(queryStringBuilder.toString(), StandardCharsets.UTF_8.name())));
 		});
-	}
-
-	/**
-	 * @description 验证 Md5 方式签名
-	 * @param paramMap 参数集合
-	 * @param function 函数，参数为签名组装字符串queryString(不参与encode)，返回签名验证结果
-	 * @return 验证结果
-	 */
-	public static boolean verify(Map<String, String> paramMap, Function<StringBuilder, Boolean> function) {
-		Assert.isTrue(function != null && paramMap != null , "parameter supplier cannot be null and paramMap cannot be null.");
-		StringBuilder stringBuilder = buildParam(paramMap, false);
-		return Boolean.TRUE.equals(function.apply(stringBuilder));
 	}
 
 	/**
@@ -70,7 +59,7 @@ public class SignUtils {
 	 * @return 16进制字符串
 	 */
 	public static String signHMacMD5(Map<String, String> paramMap, String signKey) {
-		return sign(paramMap, queryBuilder -> HexUtils.toHex(HMacMD5Utils.encryptHMAC(queryBuilder.toString(), signKey, StandardCharsets.UTF_8.name())));
+		return sign(paramMap, queryStringBuilder -> HexUtils.toHex(HMacMD5Utils.encryptHMAC(queryStringBuilder.toString(), signKey, StandardCharsets.UTF_8.name())));
 	}
 
 	/**
@@ -97,9 +86,9 @@ public class SignUtils {
 	 * @return base64字符串
 	 */
 	public static String signSHA1WithRSA(Map<String, String> paramMap, String privateKeyBase64) {
-		return sign(paramMap, queryBuilder -> {
+		return sign(paramMap, queryStringBuilder -> {
 			try {
-				return Base64Utils.encode(RSAUtils.signSHA1WithRSA(queryBuilder.toString().getBytes(StandardCharsets.UTF_8), Base64Utils.decode(privateKeyBase64)))
+				return Base64Utils.encode(RSAUtils.signSHA1WithRSA(queryStringBuilder.toString().getBytes(StandardCharsets.UTF_8), Base64Utils.decode(privateKeyBase64)));
 			} catch(Exception e) {
 				throw new RuntimeException(e.getMessage(), e);
 			}
@@ -113,30 +102,13 @@ public class SignUtils {
 	 * @return base64字符串
 	 */
 	public static String signSHAWithRSA256(Map<String, String> paramMap, String privateKeyBase64) {
-		return sign(paramMap, queryBuilder -> {
+		return sign(paramMap, queryStringBuilder -> {
 			try {
-				return Base64Utils.encode(RSAUtils.signSHA256WithRSA(queryBuilder.toString().getBytes(StandardCharsets.UTF_8), Base64Utils.decode(privateKeyBase64)));
+				return Base64Utils.encode(RSAUtils.signSHA256WithRSA(queryStringBuilder.toString().getBytes(StandardCharsets.UTF_8), Base64Utils.decode(privateKeyBase64)));
 			} catch(Exception e) {
 				throw new RuntimeException(e.getMessage(), e);
 			}
 		});
-	}
-
-	/**
-	 * @description 数据通过 SHAWithRSA256 方式签名
-	 * @param paramMap 参数集合
-	 * @param function 函数。参数为拼装queryString后的参数（不参与encode），返回值为已签名字符串
-	 * @return base64字符串
-	 */
-	public static String sign(Map<String, String> paramMap, Function<StringBuilder, String> function) {
-		Assert.notNull(paramMap, "parameter paramMap cannot be null.");
-		Assert.notNull(function, "parameter function cannot be null.");
-		StringBuilder stringBuilder = buildParam(paramMap, false);
-		try {
-			return function.apply(stringBuilder);
-		} catch (Exception e) {
-			throw new RuntimeException(e.getMessage(), e);
-		}
 	}
 
 	/**
@@ -150,9 +122,8 @@ public class SignUtils {
 		Assert.notNull(paramMap, "parameter paramMap cannot be null.");
 		Assert.hasText(signKey, "parameter signKey cannot be empty.");
 		Assert.hasText(sign, "parameter sign cannot be empty.");
-		StringBuilder stringBuilder = buildParam(paramMap, false);
 		try {
-			return sign.equalsIgnoreCase(HexUtils.toHex(HMacMD5Utils.encryptHMAC(stringBuilder.toString(), signKey, StandardCharsets.UTF_8.name())));
+			return sign.equalsIgnoreCase(HexUtils.toHex(HMacMD5Utils.encryptHMAC(buildParam(paramMap, false).toString(), signKey, StandardCharsets.UTF_8.name())));
 		} catch (Exception e) {
 			throw new RuntimeException(e.getMessage(), e);
 		}
@@ -169,9 +140,8 @@ public class SignUtils {
 		Assert.notNull(paramMap, "parameter paramMap cannot be null.");
 		Assert.hasText(publicKey, "parameter publicKey cannot be empty.");
 		Assert.hasText(sign, "parameter sign cannot be empty.");
-		StringBuilder stringBuilder = buildParam(paramMap, false);
 		try {
-			return RSAUtils.signVerifyMD5WithRSA(stringBuilder.toString().getBytes(StandardCharsets.UTF_8), Base64Utils.decode(publicKey), Base64Utils.decode(sign));
+			return RSAUtils.signVerifyMD5WithRSA(buildParam(paramMap, false).toString().getBytes(StandardCharsets.UTF_8), Base64Utils.decode(publicKey), Base64Utils.decode(sign));
 		} catch (Exception e) {
 			throw new RuntimeException(e.getMessage(), e);
 		}
@@ -188,9 +158,8 @@ public class SignUtils {
 		Assert.notNull(paramMap, "parameter paramMap cannot be null.");
 		Assert.hasText(publicKey, "parameter publicKey cannot be empty.");
 		Assert.hasText(sign, "parameter sign cannot be empty.");
-		StringBuilder stringBuilder = buildParam(paramMap, false);
 		try {
-			return RSAUtils.signVerifySHA1WithRSA(stringBuilder.toString().getBytes(StandardCharsets.UTF_8), Base64Utils.decode(publicKey), Base64Utils.decode(sign));
+			return RSAUtils.signVerifySHA1WithRSA(buildParam(paramMap, false).toString().getBytes(StandardCharsets.UTF_8), Base64Utils.decode(publicKey), Base64Utils.decode(sign));
 		} catch (Exception e) {
 			throw new RuntimeException(e.getMessage(), e);
 		}
@@ -207,16 +176,43 @@ public class SignUtils {
 		Assert.notNull(paramMap, "parameter paramMap cannot be null.");
 		Assert.hasText(publicKey, "parameter publicKey cannot be empty.");
 		Assert.hasText(sign, "parameter sign cannot be empty.");
-		StringBuilder stringBuilder = buildParam(paramMap, false);
 		try {
-			return RSAUtils.signVerifySHA256WithRSA(stringBuilder.toString().getBytes(StandardCharsets.UTF_8), Base64Utils.decode(publicKey), Base64Utils.decode(sign));
+			return RSAUtils.signVerifySHA256WithRSA(buildParam(paramMap, false).toString().getBytes(StandardCharsets.UTF_8), Base64Utils.decode(publicKey), Base64Utils.decode(sign));
 		} catch (Exception e) {
 			throw new RuntimeException(e.getMessage(), e);
 		}
 	}
 
 	/**
-	 * @param paramMap json字符串字节流
+	 * @description 数据通过 SHAWithRSA256 方式签名
+	 * @param paramMap 参数集合【M】
+	 * @param function 函数。参数为拼装queryString后的参数（不参与encode），返回值为已签名字符串【M】
+	 * @return base64字符串【M】
+	 */
+	public static String sign(Map<String, String> paramMap, Function<StringBuilder, String> function) {
+		Assert.notNull(paramMap, "parameter paramMap cannot be null.");
+		Assert.notNull(function, "parameter function cannot be null.");
+		try {
+			return function.apply(buildParam(paramMap, false));
+		} catch (Exception e) {
+			throw new RuntimeException(e.getMessage(), e);
+		}
+	}
+
+	/**
+	 * @description 验证 Md5 方式签名
+	 * @param paramMap 参数集合【M】
+	 * @param function 函数，参数为签名组装字符串queryString(不参与encode)，返回签名验证结果【M】
+	 * @return 验证结果【M】
+	 */
+	public static boolean verify(Map<String, String> paramMap, Function<StringBuilder, Boolean> function) {
+		Assert.isTrue(function != null && paramMap != null , "parameter supplier cannot be null and paramMap cannot be null.");
+		return Boolean.TRUE.equals(function.apply(buildParam(paramMap, false)));
+	}
+
+	/**
+	 * @param paramMap 组装参数集合【M】
+	 * @param encode 是否进行URLEncode编码【M】
 	 * @desc 用于生成签名拼接字符串QueryString。
 	 *      1.按ASCII码从小到大排序，空键/值和空字符串不参与组串
 	 *      2.统一使用UTF8进行编码签名，防止编码方式或特殊字符不兼容问题
@@ -225,8 +221,10 @@ public class SignUtils {
 	 *      5.内嵌JSON或ARRAY解析拼接需转字符串且按紧凑方式，即内嵌各K/V或值之间不应有空格或换行符等等
 	 *      6.内部值中嵌套对象中空值或空字符串不做任何处理（即保留）【外部Jackson反序列化保障】
 	 *      7.内部值中的嵌套对象键值属性保持原有顺序，不做特殊排序处理【外部Jackson反序列化保障】
+	 *
+	 * @return 组装字符串【M】
 	 */
-	public static StringBuilder buildParam(Map<String, String> paramMap, boolean isEncode) {
+	public static StringBuilder buildParam(Map<String, String> paramMap, boolean encode) {
 		Assert.notNull(paramMap, "parameter paramMap cannot be null.");
 		StringBuilder stringBuilder = new StringBuilder();
 		Map<String, String> tmap = new TreeMap<String, String>(paramMap);
@@ -242,7 +240,7 @@ public class SignUtils {
 				stringBuilder.append("&");
 			}
 			try {
-				stringBuilder.append(k).append("=").append(isEncode ? URLEncoder.encode(val, StandardCharsets.UTF_8.toString()):val);
+				stringBuilder.append(k).append("=").append(encode ? URLEncoder.encode(val, StandardCharsets.UTF_8.toString()):val);
 			} catch (UnsupportedEncodingException e) {
 				throw new RuntimeException(e.getMessage(), e);
 			}

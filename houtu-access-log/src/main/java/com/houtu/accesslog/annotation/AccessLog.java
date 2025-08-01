@@ -2,7 +2,7 @@ package com.houtu.accesslog.annotation;
 
 import com.houtu.accesslog.handler.LogFilterHandler;
 import com.houtu.accesslog.handler.SimpleLogFilterHandler;
-import com.houtu.core.annotation.CachingParam;
+import com.houtu.core.web.annotation.CachingParam;
 
 import java.lang.annotation.*;
 

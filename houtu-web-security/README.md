@@ -1,5 +1,5 @@
 ### 一、功能描述
-* 登录Session会话跟踪、会话校验和会话数据获取等等能力；
+* 登录Session会话跟踪、会话校验和会话数据获取等等认证能力；
 * 会话用户的方法级功能鉴权能力，也可以自主实现数据级鉴权，可支持角色鉴权和权限鉴权；
 * 防重放检测与拦截；
 * 提供请求数据签名验证能力。
@@ -44,7 +44,7 @@ public ResponseData login(...) {
         Map<String, String> mutexMap = new HashMap<String, String>(3);
         mutexMap.put("userId", user.getUserId());
         Session session = SessionContext.create(sessionId, mutexMap);
-        session.setAttribute("xx", XX);
+        //session.setAttribute("xx", XX);
         SessionContext.save(session);
         ...
 }

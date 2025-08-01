@@ -7,9 +7,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 public class SimpleSession implements Session {
-	
-	private static final long serialVersionUID = 7803784600881193462L;
-	
+
 	// Session的Id
 	private String id;
 	// 创建时间

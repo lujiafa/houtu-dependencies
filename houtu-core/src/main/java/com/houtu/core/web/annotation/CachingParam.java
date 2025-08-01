@@ -1,9 +1,9 @@
-package com.houtu.core.annotation;
+package com.houtu.core.web.annotation;
 
 import java.lang.annotation.*;
 
 /**
- * @Description: 辅助缓存参数注解
+ * @Description: 注解支持检测需要缓存参数模块
  * @author jonlu
  * @date 2017/10/23
  */

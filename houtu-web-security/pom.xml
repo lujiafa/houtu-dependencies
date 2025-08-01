@@ -12,6 +12,7 @@
     <artifactId>houtu-web-security</artifactId>
 
     <properties>
+        <cache2k.version>2.6.1.Final</cache2k.version>
     </properties>
 
     <dependencies>
@@ -23,6 +24,19 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-redis</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <!-- Cache2k -->
+        <dependency>
+            <groupId>org.cache2k</groupId>
+            <artifactId>cache2k-api</artifactId>
+            <version>${cache2k.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.cache2k</groupId>
+            <artifactId>cache2k-spring</artifactId>
+            <version>${cache2k.version}</version>
             <scope>provided</scope>
         </dependency>
 

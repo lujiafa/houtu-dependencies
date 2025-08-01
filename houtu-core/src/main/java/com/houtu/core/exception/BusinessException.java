@@ -29,7 +29,7 @@ public class BusinessException extends RuntimeException {
     }
     
     public BusinessException(ErrorCode errorCode, Throwable cause) {
-        super(errorCode == null ? null : errorCode.getMessage(), cause);
+        super(errorCode == null ? cause.getMessage() : errorCode.getMessage(), cause);
         Assert.notNull(errorCode, "parameter object errorCode cannot be null");
         this.errorCode = errorCode;
     }

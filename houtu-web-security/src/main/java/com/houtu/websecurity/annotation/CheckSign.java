@@ -1,6 +1,6 @@
 package com.houtu.websecurity.annotation;
 
-import com.houtu.core.annotation.CachingParam;
+import com.houtu.core.web.annotation.CachingParam;
 
 import java.lang.annotation.*;
 

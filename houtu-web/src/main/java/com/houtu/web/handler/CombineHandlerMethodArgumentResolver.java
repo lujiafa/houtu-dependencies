@@ -1,6 +1,6 @@
 package com.houtu.web.handler;
 
-import com.houtu.core.annotation.CachingParam;
+import com.houtu.core.web.annotation.CachingParam;
 import com.houtu.util.common.AnnotationUtils;
 import com.houtu.util.common.BeanUtils;
 import com.houtu.util.common.JsonUtils;

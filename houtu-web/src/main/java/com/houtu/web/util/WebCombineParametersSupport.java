@@ -1,6 +1,6 @@
 package com.houtu.web.util;
 
-import com.houtu.core.annotation.CachingParam;
+import com.houtu.core.web.annotation.CachingParam;
 import com.houtu.core.context.SpringApplicationContext;
 import com.houtu.web.handler.CombineHandlerMethodArgumentResolver;
 import jakarta.servlet.http.HttpServletRequest;
