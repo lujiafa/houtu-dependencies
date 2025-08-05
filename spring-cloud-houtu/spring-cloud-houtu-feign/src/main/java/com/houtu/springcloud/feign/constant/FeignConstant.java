@@ -7,7 +7,14 @@ package com.houtu.springcloud.feign.constant;
 public interface FeignConstant {
 
     /**
-     * 是否使用Feign Mapping Handler
+     * Feign Provider场景中，是否使用Feign Mapping Handler
      */
-    String USE_FEIGN_HANDLER = "::use_feign_handler::";
+    String FEIGN_PROVIDER_AUTO_HANDLER_ATTR_NAME = "::use_feign_handler::";
+
+
+
+    /**
+     * Feign请求安全码名
+     */
+    String FEIGN_REQUEST_SECRET_CODE = "x-secret-code";
 }

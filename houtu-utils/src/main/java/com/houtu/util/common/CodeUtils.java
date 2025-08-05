@@ -89,6 +89,17 @@ public class CodeUtils {
      * <p>规则编码由32字符组成（即192 bit=24 byte），其生成规则：</p>
      * 192 bit = 44(timestamp) + 36bit(incr) + 48bit(mac) + 32bit(procId) + 32bit(verify_code)
      *
+     * @return 唯一编码
+     */
+    public static String get() {
+        return get(null);
+    }
+
+    /**
+     * <p>生成64进制唯一携带规则编码，具备唯一性、校验性、自主性</p>
+     * <p>规则编码由32字符组成（即192 bit=24 byte），其生成规则：</p>
+     * 192 bit = 44(timestamp) + 36bit(incr) + 48bit(mac) + 32bit(procId) + 32bit(verify_code)
+     *
      * @param slat 密钥、盐
      * @return 唯一编码
      */
@@ -140,6 +151,16 @@ public class CodeUtils {
             chars[n + 3] = CHAR64[b[m + 2] & 0x3F];
         });
         return new String(chars);
+    }
+
+    /**
+     * 解析并验证字符串
+     *
+     * @param rule 唯一编码
+     * @return 解析结果
+     */
+    public static RuleData parse(String rule) {
+        return parse(rule, null);
     }
 
     /**

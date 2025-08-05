@@ -1,4 +1,4 @@
-package com.houtu.springcloud.feign.handler;
+package com.houtu.springcloud.feign.provider;
 
 import com.houtu.springcloud.feign.anotation.AutoFeign;
 import com.houtu.springcloud.feign.constant.FeignConstant;
@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.util.List;
 
 /**
+ * @AutoFeign 注解的类方法执行结果处理器
  * @date 2019年7月13日
  * @author jonlu
  */
@@ -28,7 +29,7 @@ public class FeignHandlerMethodReturnValueHandler extends RequestResponseBodyMet
 
     @Override
     public boolean supportsReturnType(MethodParameter returnType) {
-        AutoFeign autoFeign = (AutoFeign) WebUtils.getRequest().getAttribute(FeignConstant.USE_FEIGN_HANDLER);
+        AutoFeign autoFeign = (AutoFeign) WebUtils.getRequest().getAttribute(FeignConstant.FEIGN_PROVIDER_AUTO_HANDLER_ATTR_NAME);
         return autoFeign != null && autoFeign.value() && autoFeign.responseBody();
     }
 

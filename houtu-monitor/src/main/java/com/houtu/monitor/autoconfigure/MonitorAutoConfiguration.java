@@ -1,11 +1,8 @@
 package com.houtu.monitor.autoconfigure;
 
-import com.houtu.monitor.handler.ReqMonitorAspectHandler;
-import com.houtu.monitor.handler.RequestFeignMonitorHandler;
-import com.houtu.monitor.handler.RequestMonitorHandler;
-import com.houtu.monitor.handler.RpcMonitorAspectHandler;
+import com.houtu.monitor.handler.*;
 import com.houtu.monitor.prop.MonitorProperties;
-import com.houtu.monitor.util.MonitorLog;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -17,6 +14,7 @@ import org.springframework.context.annotation.Configuration;
  * @date 2020年12月17日
  */
 @Configuration
+@ConditionalOnBean(MonitorWriter.class)
 @EnableConfigurationProperties(MonitorProperties.class)
 public class MonitorAutoConfiguration {
 

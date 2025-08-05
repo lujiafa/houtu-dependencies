@@ -1,4 +1,4 @@
-package com.houtu.springcloud.feign.handler;
+package com.houtu.springcloud.feign.consumer;
 
 import feign.Client;
 import feign.Request;

@@ -1,7 +1,6 @@
 package com.houtu.monitor.handler;
 
 import com.houtu.monitor.annotation.RpcMonitor;
-import com.houtu.monitor.util.MonitorLog;
 import com.houtu.util.common.AnnotationUtils;
 import com.houtu.util.constant.SeparatorChar;
 import org.aspectj.lang.annotation.Aspect;

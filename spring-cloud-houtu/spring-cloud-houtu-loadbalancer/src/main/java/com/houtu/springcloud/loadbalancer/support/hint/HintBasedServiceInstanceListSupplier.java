@@ -33,7 +33,7 @@ public class HintBasedServiceInstanceListSupplier extends org.springframework.cl
     }
 
     protected String getHint(Object requestContext) {
-        String hint = null;
+        String hint;
         if (requestContext instanceof RequestDataContext) {
             RequestDataContext context = (RequestDataContext) requestContext;
             if (context.getClientRequest() != null) {
@@ -56,13 +56,15 @@ public class HintBasedServiceInstanceListSupplier extends org.springframework.cl
 
         // 与注释代码等价
         hint = innerHintData.getXHint();
-        /*RequestDataContext context = (RequestDataContext)requestContext;
+        /**
+        RequestDataContext context = (RequestDataContext)requestContext;
         if (context.getClientRequest() != null) {
             HttpHeaders headers = context.getClientRequest().getHeaders();
             if (headers != null) {
                 hint = headers.getFirst(LoadBalancerConstant.REQUEST_CONTEXT_HINT_NAME);
             }
-        }*/
+        }
+        **/
         return hint;
     }
 
@@ -77,7 +79,7 @@ public class HintBasedServiceInstanceListSupplier extends org.springframework.cl
                     defaultInstances.add(serviceInstance);
                 }
             }
-            if (defaultInstances.size() > 0) {
+            if (!defaultInstances.isEmpty()) {
                 return defaultInstances;
             }
             return instances;
@@ -95,12 +97,12 @@ public class HintBasedServiceInstanceListSupplier extends org.springframework.cl
                 filteredInstances.add(serviceInstance);
             }
         }
-        if (filteredInstances.size() > 0) {
+        if (!filteredInstances.isEmpty()) {
             return filteredInstances;
-        } else if (defaultInstances.size() > 0) {
-            return defaultInstances;
-        } else {
-            return instances;
         }
+        if (!defaultInstances.isEmpty()) {
+            return defaultInstances;
+        }
+        return instances;
     }
 }

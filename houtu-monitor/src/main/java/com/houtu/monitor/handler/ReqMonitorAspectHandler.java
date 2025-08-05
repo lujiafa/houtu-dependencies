@@ -1,7 +1,6 @@
 package com.houtu.monitor.handler;
 
 import com.houtu.monitor.annotation.ReqMonitor;
-import com.houtu.monitor.util.MonitorLog;
 import com.houtu.util.common.AnnotationUtils;
 import io.micrometer.common.util.StringUtils;
 import org.aspectj.lang.annotation.Aspect;

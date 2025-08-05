@@ -1,4 +1,4 @@
-package com.houtu.springcloud.feign.handler;
+package com.houtu.springcloud.feign.provider;
 
 import com.houtu.springcloud.feign.anotation.AutoFeign;
 import com.houtu.springcloud.feign.constant.FeignConstant;
@@ -18,6 +18,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.mvc.condition.RequestCondition;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
@@ -44,9 +45,14 @@ public class FeignRequestMappingHandlerMapping extends RequestMappingHandlerMapp
 		if (handlerMethod != null &&
 				((actualHandlerMethod = handlerMethod.getResolvedFromHandlerMethod()) instanceof InternalHandlerMethod
 					|| (actualHandlerMethod = handlerMethod) instanceof InternalHandlerMethod)) {
-			request.setAttribute(FeignConstant.USE_FEIGN_HANDLER, ((InternalHandlerMethod) actualHandlerMethod).getAutoFeign());
+			request.setAttribute(FeignConstant.FEIGN_PROVIDER_AUTO_HANDLER_ATTR_NAME, ((InternalHandlerMethod) actualHandlerMethod).getAutoFeign());
 		}
 		return handlerMethod;
+	}
+
+	@Override
+	protected HandlerExecutionChain getHandlerExecutionChain(Object handler, HttpServletRequest request) {
+		return super.getHandlerExecutionChain(handler, request);
 	}
 
 	@Override

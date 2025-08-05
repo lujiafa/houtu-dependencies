@@ -38,7 +38,7 @@ public class SpringCloudLoadBalancerClientConfiguration {
         @ConditionalOnMissingBean(name = "nacosLoadBalancer")
         public ReactorLoadBalancer<ServiceInstance> nacosLoadBalancer(Environment environment, LoadBalancerClientFactory loadBalancerClientFactory,
                                                                       com.alibaba.cloud.nacos.NacosDiscoveryProperties nacosDiscoveryProperties) {
-            String name = environment.getProperty("loadbalancer.client.name");
+            String name = environment.getProperty("loadbalancer.consumer.name");
             return new NacosLoadBalancer(loadBalancerClientFactory.getLazyProvider(name, ServiceInstanceListSupplier.class), name, nacosDiscoveryProperties);
         }
     }

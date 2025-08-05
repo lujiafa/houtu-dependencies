@@ -11,6 +11,7 @@ import org.springframework.util.Assert;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -46,6 +47,23 @@ public class RedisSessionRepository implements SessionRepository {
             });
         }
         return true;
+    }
+
+    @Override
+    public boolean update(@Nonnull Session session, @Nonnull Function<Session, Map<String, String>> uniqueCompositeMutexFunction) {
+        String cachePrefix = this.securityProperties.getSession().getRedis().getPrefix();
+        Map<String, String> uniqueCompositeMutexMap = uniqueCompositeMutexFunction.apply(session);
+        if (uniqueCompositeMutexMap.isEmpty()) {
+            return redisTemplate.opsForValue().setIfPresent(cachePrefix, session);
+        }
+        if (uniqueCompositeMutexMap.entrySet()
+                .parallelStream().map(e -> String.format("%s:mutex:%s:%s", cachePrefix, e.getKey(), e.getValue()))
+                .collect(Collectors.toList())
+                .parallelStream()
+                .allMatch(k -> Objects.equals(session.getId(), redisTemplate.opsForValue().get(k)))) {
+            return redisTemplate.opsForValue().setIfPresent(cachePrefix, session);
+        }
+        return false;
     }
 
     @Override

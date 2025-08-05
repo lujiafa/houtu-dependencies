@@ -1,13 +1,16 @@
-package com.houtu.monitor.util;
+package com.houtu.monitor.handler;
 
 import com.houtu.core.context.SpringApplicationContext;
 import com.houtu.monitor.prop.MonitorProperties;
+import com.houtu.monitor.util.CalculatorUtils;
 import com.houtu.util.common.SystemUtils;
+import jakarta.annotation.Nonnull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.env.Environment;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 import java.util.*;
@@ -18,6 +21,10 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
+/**
+ * @author jon
+ * @date 2020年12月23日
+ */
 public final class MonitorLog implements InitializingBean, DisposableBean {
 
     static final Logger LOGGER = LoggerFactory.getLogger(MonitorLog.class);
@@ -116,9 +123,11 @@ public final class MonitorLog implements InitializingBean, DisposableBean {
         bizName = StringUtils.isEmpty(monitorProperties.getBusinessName()) ? applicationName : monitorProperties.getBusinessName();
         svrIp = StringUtils.isEmpty(monitorProperties.getSvrIp()) ? SystemUtils.getServerIp() : monitorProperties.getSvrIp();
         running = new AtomicBoolean(true);
+        MonitorWriter monitorWriter = SpringApplicationContext.getBean(MonitorWriter.class);
+        Assert.notNull(monitorWriter, "MonitorWriter is null");
         new CollectTask(running).start();
         new ProcTask(running).start();
-        new OutTask(running).start();
+        new OutTask(running, monitorWriter).start();
     }
 
     @Override
@@ -249,10 +258,12 @@ public final class MonitorLog implements InitializingBean, DisposableBean {
     }
 
     static class OutTask extends Thread {
-        private AtomicBoolean running;
+        private final AtomicBoolean running;
+        private final MonitorWriter writer;
 
-        public OutTask(AtomicBoolean running) {
+        public OutTask(@Nonnull AtomicBoolean running, @Nonnull MonitorWriter writer) {
             this.running = running;
+            this.writer = writer;
         }
 
         @Override
@@ -264,7 +275,8 @@ public final class MonitorLog implements InitializingBean, DisposableBean {
                         Thread.sleep(10);
                         continue;
                     }
-                    // TODO 待实现
+                    long timestamp = INSTANCE.period * out.getPeriodTime();
+                    writer.write(timestamp, out.getOut());
                 } catch (Exception e) {
                     LOGGER.info("out task error: {}", e.getMessage());
                 }

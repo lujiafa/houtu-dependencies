@@ -1,7 +1,6 @@
 package com.houtu.monitor.handler;
 
 import com.houtu.monitor.annotation.ReqMonitor;
-import com.houtu.monitor.util.MonitorLog;
 import com.houtu.monitor.util.WebMonitorUtils;
 import com.houtu.util.web.WebUtils;
 import jakarta.servlet.http.HttpServletResponse;

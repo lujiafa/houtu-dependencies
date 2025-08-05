@@ -133,10 +133,15 @@ public class SecurityProperties {
 
 	public static class SessionCacheProperties {
 		private final static String DEFAULT_SESSION_CACHE_NAME = "session";
+		private final static String DEFAULT_SESSION_REDIS_SYNC_CHANNEL = "session-sync";
 		/**
 		 * Session对象缓存名称
 		 **/
 		private String name = DEFAULT_SESSION_CACHE_NAME;
+		/**
+		 * Session对象多实例缓存同步频道，通过Redis发布订阅模式实现会话同步
+		 */
+		private String syncChannel = DEFAULT_SESSION_REDIS_SYNC_CHANNEL;
 
 		public String getName() {
 			return name;
@@ -144,6 +149,14 @@ public class SecurityProperties {
 
 		public void setName(String name) {
 			this.name = name;
+		}
+
+		public String getSyncChannel() {
+			return syncChannel;
+		}
+
+		public void setSyncChannel(String redisSyncChannel) {
+			this.syncChannel = redisSyncChannel;
 		}
 	}
 

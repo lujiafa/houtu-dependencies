@@ -13,7 +13,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -57,7 +56,6 @@ public class SessionContext {
 			logger.error("properties sessionIdName[{}] cannot be empty.", sessionIdName);
 			throw new SessionException(ErrorCode.build(ErrorCodeConstant.INTERNAL_ERROR, new Object[]{"web.security.session.sessionIdName"}));
 		}
-
 		HttpServletRequest request = WebUtils.getRequest();
 		String value = request.getHeader(sessionIdName);
 		if (value != null)
@@ -103,18 +101,37 @@ public class SessionContext {
 	 */
 	public static boolean save(Session session) {
 		Assert.notNull(session, "parameter session must cannot be null");
-		boolean success = INSTANCE.sessionRepository.save(session, s -> {
+		if (INSTANCE.sessionRepository.save(session, s -> {
 			if (s == null) return Collections.emptyMap();
 			Map<String, String> uniqueCompositeMutexMap = (Map<String, String>) session.getAttribute(SecurityConstant.SECURITY_SESSION_MUTEX_KEYS_ATTR_NAME);
 			return uniqueCompositeMutexMap == null ? Collections.emptyMap() : uniqueCompositeMutexMap;
-		});
-		if (success) {
+		})) {
 			sessionContextHolder.set(session);
 			HttpServletResponse response = WebUtils.getResponse();
 			response.setHeader(INSTANCE.securityProperties.getSession().getSessionIdName(), session.getId());
 			WebUtils.writeCookie(response, INSTANCE.securityProperties.getSession().getSessionIdName(), session.getId(), INSTANCE.securityProperties.getSession().getSessionCookiePath(), INSTANCE.securityProperties.getSession().getSessionCookieDomain(), INSTANCE.securityProperties.getSession().getExpire());
+			return true;
 		}
-		return success;
+		return false;
+	}
+
+	/**
+	 * @Title save
+	 * @Description: 更新Session
+	 * @param session
+	 * @return boolean
+	 */
+	public static boolean update(Session session) {
+		Assert.notNull(session, "parameter session must cannot be null");
+		if (INSTANCE.sessionRepository.update(session, s -> {
+			if (s == null) return Collections.emptyMap();
+			Map<String, String> uniqueCompositeMutexMap = (Map<String, String>) session.getAttribute(SecurityConstant.SECURITY_SESSION_MUTEX_KEYS_ATTR_NAME);
+			return uniqueCompositeMutexMap == null ? Collections.emptyMap() : uniqueCompositeMutexMap;
+		})) {
+			sessionContextHolder.set(session);
+			return true;
+		}
+		return false;
 	}
 	
 	/**
@@ -128,7 +145,7 @@ public class SessionContext {
 		String sessionId = getSessionId();
 		if (sessionId == null) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("sessionId(from {}) is empty.", INSTANCE.securityProperties.getSession().getSessionIdName());
+				logger.debug("未知的会话信息，sessionId为空");
 			}
 			return null;
 		}
@@ -170,7 +187,7 @@ public class SessionContext {
 	 */
 	public static boolean remove() {
 		remove(getSessionId());
-		releaseSession();
+		release();
 		WebUtils.removeCookie(WebUtils.getRequest(), WebUtils.getResponse(), INSTANCE.securityProperties.getSession().getSessionIdName());
 		return true;
 	}
@@ -190,10 +207,10 @@ public class SessionContext {
 	}
 	
 	/**
-	 * @Title releaseSession
+	 * @Title release
 	 * @Description 释放线程Session对象
 	 */
-	public static void releaseSession() {
+	public static void release() {
 		sessionContextHolder.remove();
 	}
 	

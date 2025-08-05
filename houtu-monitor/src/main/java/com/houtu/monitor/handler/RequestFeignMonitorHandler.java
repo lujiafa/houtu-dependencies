@@ -1,7 +1,6 @@
 package com.houtu.monitor.handler;
 
 import com.houtu.monitor.annotation.ReqMonitor;
-import com.houtu.monitor.util.MonitorLog;
 import com.houtu.monitor.util.WebMonitorUtils;
 import com.houtu.util.common.AnnotationUtils;
 import com.houtu.util.web.WebUtils;
@@ -22,8 +21,6 @@ import org.springframework.web.bind.annotation.*;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-
-import static jdk.internal.org.jline.utils.Status.getStatus;
 
 /**
  * @date 2019年5月29日

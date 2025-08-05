@@ -40,7 +40,7 @@ public class NacosLoadBalancer extends com.alibaba.cloud.nacos.loadbalancer.Naco
 
     private Response<ServiceInstance> getInstanceResponse(List<ServiceInstance> serviceInstances) {
         if (serviceInstances.isEmpty()) {
-            log.warn("No servers available for service: " + this.serviceId);
+            log.warn("No servers available for service: {}", this.serviceId);
             return new EmptyResponse();
         } else {
             try {

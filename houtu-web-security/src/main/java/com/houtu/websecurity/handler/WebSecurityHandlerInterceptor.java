@@ -71,7 +71,7 @@ public class WebSecurityHandlerInterceptor implements HandlerInterceptor, Filter
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain) throws IOException, ServletException {
         filterChain.doFilter(request, response);
         if (Boolean.TRUE.equals(request.getAttribute(SecurityConstant.SESSION_VALIDATOR_HANDLED_ATTR_NAME)))
-            SessionContext.releaseSession();
+            SessionContext.release();
     }
 
     @Override
