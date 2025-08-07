@@ -1,7 +1,6 @@
 package com.houtu.web.view;
 
 import com.houtu.core.exception.ErrorCode;
-import com.houtu.core.web.ResponseData;
 import com.houtu.util.web.WebUtils;
 import com.houtu.web.constant.WebSupportConstant;
 import com.houtu.web.util.SupportDefaultErrorPageTemplate;
@@ -17,17 +16,19 @@ public class SmartErrorView extends SmartView {
 	
 	private ErrorCode errorCode;
 
+	public SmartErrorView() {
+		super(null);
+	}
+
 	public SmartErrorView(ErrorCode errorCode) {
-		super(errorCode == null ? null : ResponseData.fail(errorCode));
+		super(errorCode);
 		this.errorCode = errorCode;
 	}
 
 	@Override
 	public void render(Map<String, ?> model, HttpServletRequest request, HttpServletResponse response) throws Exception {
 		// 错误码数据为空时，表无需任何响应
-		if (errorCode == null) {
-			return;
-		}
+		if (errorCode == null) return;
 		// 根据响应类型确定是否以HTML响应
 		MediaType mediaType = WebUtils.getResponseMediaType(request);
 		if (MediaType.TEXT_HTML.includes(mediaType)

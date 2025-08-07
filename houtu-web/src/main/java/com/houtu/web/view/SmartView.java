@@ -30,6 +30,7 @@ public class SmartView implements View {
     @Override
     public void render(Map<String, ?> model, HttpServletRequest request, HttpServletResponse response)
             throws Exception {
+        if (data == null) return;
         response.setHeader("Pragma", "no-cache");
         response.setHeader("Cache-Control", "no-cache");
         getReturnValueHandler().write(data, new ServletServerHttpRequest(request), new ServletServerHttpResponse(response));

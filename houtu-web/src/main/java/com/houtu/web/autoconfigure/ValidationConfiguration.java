@@ -1,15 +1,13 @@
 package com.houtu.web.autoconfigure;
 
-import com.houtu.web.handler.DefaultHandlerExceptionResolver;
+import com.houtu.web.handler.TransformerExceptionResolver;
 import com.houtu.web.prop.WebProperties;
-import com.houtu.web.validation.handler.ExtensionHandlerExceptionResolver;
+import com.houtu.web.validation.handler.ValidationTransformerExceptionResolver;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.validation.ValidationConfigurationCustomizer;
 import org.springframework.context.annotation.Bean;
-import org.springframework.core.Ordered;
-import org.springframework.core.annotation.Order;
 
 /**
  * @date 2019年5月30日
@@ -28,10 +26,9 @@ public class ValidationConfiguration {
 
 	@Bean
 	@ConditionalOnMissingBean
-	@Order(Ordered.HIGHEST_PRECEDENCE)
-	@ConditionalOnProperty(prefix = WebProperties.PROPERTIES_PREFIX, value = {"disableExceptionResolver", "disable-exception-resolver"}, havingValue = "false", matchIfMissing = true)
-	public DefaultHandlerExceptionResolver defaultHandlerExceptionResolver() {
-		return new ExtensionHandlerExceptionResolver();
+	@ConditionalOnProperty(prefix = WebProperties.PROPERTIES_PREFIX, value = {"exceptionResolver", "exception-resolver"}, havingValue = "true", matchIfMissing = true)
+	public TransformerExceptionResolver validationExceptionErrorCodeResolver() {
+		return new ValidationTransformerExceptionResolver();
 	}
 
 

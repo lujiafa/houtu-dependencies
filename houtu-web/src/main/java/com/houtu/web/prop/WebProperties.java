@@ -9,21 +9,21 @@ public class WebProperties {
 	public static final String PROPERTIES_PREFIX = "houtu.web";
 
 	/**
-	 * 是否禁用houtu异常处理器。true-禁用 true-不禁用
+	 * 是否启用异常解析器
 	 */
-	private boolean disableExceptionResolver = false;
+	private boolean exceptionResolver = true;
 
 	/**
 	 * 启用复合参数解析是如何处理Form参数
 	 */
 	private CombineFormResolverType combineFormResolverType = CombineFormResolverType.JSON;
 
-	public boolean isDisableExceptionResolver() {
-		return disableExceptionResolver;
+	public boolean isExceptionResolver() {
+		return exceptionResolver;
 	}
 
-	public void setDisableExceptionResolver(boolean disableExceptionResolver) {
-		this.disableExceptionResolver = disableExceptionResolver;
+	public void setExceptionResolver(boolean exceptionResolver) {
+		this.exceptionResolver = exceptionResolver;
 	}
 
 	public CombineFormResolverType getCombineFormResolverType() {

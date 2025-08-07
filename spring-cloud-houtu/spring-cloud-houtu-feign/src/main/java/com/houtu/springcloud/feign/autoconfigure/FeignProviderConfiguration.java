@@ -1,14 +1,12 @@
 package com.houtu.springcloud.feign.autoconfigure;
 
 import com.houtu.springcloud.feign.provider.FeignBeanPostProcessor;
+import com.houtu.springcloud.feign.provider.FeignTransformerExceptionResolver;
 import com.houtu.springcloud.feign.provider.FeignRequestMappingHandlerMapping;
-import com.houtu.springcloud.feign.provider.FeignSecurityHandlerInterceptor;
-import com.houtu.springcloud.feign.provider.prop.FeignProviderProperties;
 import com.houtu.util.common.ReflectionUtils;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.util.StringValueResolver;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
@@ -17,14 +15,7 @@ import java.util.Collections;
 import java.util.List;
 
 
-@EnableConfigurationProperties(FeignProviderProperties.class)
 public class FeignProviderConfiguration {
-
-    private FeignProviderProperties feignProviderProperties;
-
-    public FeignProviderConfiguration(ObjectProvider<FeignProviderProperties> feignProviderPropertiesProvider) {
-        this.feignProviderProperties = feignProviderPropertiesProvider.getIfAvailable();
-    }
 
     @Bean
     @ConditionalOnMissingBean(FeignBeanPostProcessor.class)
@@ -56,10 +47,14 @@ public class FeignProviderConfiguration {
         mapping.setUseSuffixPatternMatch(requestMappingHandlerMapping.useSuffixPatternMatch());
         mapping.setUseRegisteredSuffixPatternMatch(requestMappingHandlerMapping.useRegisteredSuffixPatternMatch());
 
-        if (feignProviderProperties.getSecret() != null && !feignProviderProperties.getSecret().isEmpty()) {
-            mapping.setInterceptors(new FeignSecurityHandlerInterceptor(feignProviderProperties.getSecret()));
-        }
         return mapping;
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    @ConditionalOnClass(com.houtu.web.handler.UnifiedHandlerExceptionResolver.class)
+    public FeignTransformerExceptionResolver feignHandlerExceptionResolver() {
+        return new FeignTransformerExceptionResolver();
     }
 
 }

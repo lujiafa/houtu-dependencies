@@ -19,6 +19,13 @@
         </dependency>
         <dependency>
             <groupId>com.houtu</groupId>
+            <artifactId>houtu-web</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+
+        <dependency>
+            <groupId>com.houtu</groupId>
             <artifactId>houtu-core</artifactId>
         </dependency>
         <dependency>

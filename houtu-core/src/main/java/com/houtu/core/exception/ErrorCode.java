@@ -156,7 +156,7 @@ public class ErrorCode implements Serializable {
 		}
 		if (SpringApplicationContext.getApplicationContext() != null) {
 			errorMessageSource = SpringApplicationContext.getBean("errorMessageSource", MessageSource.class);
-			CoreProperties coreProperties = SpringApplicationContext.getBean("coreProperties", CoreProperties.class);
+			CoreProperties coreProperties = SpringApplicationContext.getBean(CoreProperties.class);
 			if (coreProperties != null
 					&& coreProperties.getErrorCode() != null
 					&& coreProperties.getErrorCode().getLocale() != null) {

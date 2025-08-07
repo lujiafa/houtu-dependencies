@@ -1,10 +1,7 @@
 package com.houtu.web.autoconfigure;
 
 import com.houtu.web.config.WebMvcConfigurer;
-import com.houtu.web.handler.CombineHandlerMethodArgumentResolver;
-import com.houtu.web.handler.DefaultHandlerExceptionResolver;
-import com.houtu.web.handler.ExtensionHandlerMethodReturnValueHandler;
-import com.houtu.web.handler.ResponseDataResponseBodyTransferAdvice;
+import com.houtu.web.handler.*;
 import com.houtu.web.prop.WebProperties;
 import com.houtu.web.util.WebCombineParametersSupport;
 import org.springframework.beans.factory.ObjectProvider;
@@ -45,15 +42,24 @@ public class WebAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    @Order(Ordered.HIGHEST_PRECEDENCE)
-    @ConditionalOnProperty(prefix = WebProperties.PROPERTIES_PREFIX, value = {"disableExceptionResolver", "disable-exception-resolver"}, havingValue = "false", matchIfMissing = false)
-    public DefaultHandlerExceptionResolver defaultHandlerExceptionResolver() {
-        return new DefaultHandlerExceptionResolver();
+    @ConditionalOnProperty(prefix = WebProperties.PROPERTIES_PREFIX, value = {"exceptionResolver", "exception-resolver"}, havingValue = "true", matchIfMissing = true)
+    public UnifiedBasicHandlerExceptionResolver unifiedBasicHandlerExceptionResolver() {
+        return new UnifiedBasicHandlerExceptionResolver();
     }
 
     @Bean
     @ConditionalOnMissingBean
-    @Order(Ordered.HIGHEST_PRECEDENCE + 10)
+    @ConditionalOnProperty(prefix = WebProperties.PROPERTIES_PREFIX, value = {"exceptionResolver", "exception-resolver"}, havingValue = "true", matchIfMissing = true)
+    public UnifiedHandlerExceptionResolver unifiedHandlerExceptionResolver(ObjectProvider<List<TransformerExceptionResolver>> errorCodeResolversProvider) {
+        List<TransformerExceptionResolver> errorCodeResolvers = errorCodeResolversProvider.getIfAvailable();
+        if (errorCodeResolvers == null || errorCodeResolvers.isEmpty()) {
+            return new UnifiedHandlerExceptionResolver();
+        }
+        return new UnifiedHandlerExceptionResolver(errorCodeResolvers);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
     public CombineHandlerMethodArgumentResolver defaultHandlerMethodArgumentResolver(List<HttpMessageConverter<?>> messageConverters,
                                                                                      ApplicationContext applicationContext) {
         return new CombineHandlerMethodArgumentResolver(getMessageConverters(messageConverters), getRequestBodyAdvice(applicationContext), webProperties.getCombineFormResolverType());

@@ -15,7 +15,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.Ordered;
 import org.springframework.core.ResolvableType;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.FormHttpMessageConverter;
@@ -44,7 +46,7 @@ import java.util.Map;
  * @date 2016年6月4日
  * @Description 参数解析处理器
  */
-public class CombineHandlerMethodArgumentResolver extends AbstractMessageConverterMethodArgumentResolver implements HandlerMethodArgumentResolver, Filter {
+public class CombineHandlerMethodArgumentResolver extends AbstractMessageConverterMethodArgumentResolver implements HandlerMethodArgumentResolver, Filter, Ordered {
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -186,4 +188,8 @@ public class CombineHandlerMethodArgumentResolver extends AbstractMessageConvert
         }
     }
 
+    @Override
+    public int getOrder() {
+        return Ordered.HIGHEST_PRECEDENCE + 10;
+    }
 }
