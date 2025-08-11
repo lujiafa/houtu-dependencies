@@ -2,7 +2,7 @@ package com.houtu.web.validation.handler;
 
 import com.houtu.core.constant.ErrorCodeConstant;
 import com.houtu.core.exception.ErrorCode;
-import com.houtu.util.constant.SeparatorChar;
+import com.houtu.util.constant.CharConstant;
 import com.houtu.web.handler.TransformerExceptionResolver;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -25,7 +25,7 @@ public class ValidationTransformerExceptionResolver implements TransformerExcept
 			StringBuilder tempStringBuilder = new StringBuilder();
 			for (ConstraintViolation<?> item : violations) {
 				if (tempStringBuilder.length() == 0) {
-					tempStringBuilder.append(SeparatorChar.SEMICOLON);
+					tempStringBuilder.append(CharConstant.SEMICOLON);
 				}
 				tempStringBuilder.append(item.getMessage());
 			}

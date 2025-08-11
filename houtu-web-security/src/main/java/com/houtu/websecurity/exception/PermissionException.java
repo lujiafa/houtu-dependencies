@@ -3,14 +3,12 @@ package com.houtu.websecurity.exception;
 import com.houtu.core.exception.BusinessException;
 import com.houtu.core.exception.ErrorCode;
 
-import java.util.Locale;
-
 public class PermissionException extends BusinessException {
 
 	private static final long serialVersionUID = 1L;
 	
-    public PermissionException(Throwable cause, Locale locale) {
-        super(cause, locale);
+    public PermissionException(Throwable cause) {
+        super(cause);
     }
     
     public PermissionException(ErrorCode errorCode) {

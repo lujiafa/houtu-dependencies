@@ -13,8 +13,8 @@ public class SessionException extends BusinessException {
 
 	private static final long serialVersionUID = 1L;
 
-    public SessionException(Throwable cause, Locale locale) {
-        super(cause, locale);
+    public SessionException(Throwable cause) {
+        super(cause);
     }
 
     public SessionException(ErrorCode errorCode) {

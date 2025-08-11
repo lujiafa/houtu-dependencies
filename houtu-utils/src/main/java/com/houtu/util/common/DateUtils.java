@@ -2,9 +2,7 @@ package com.houtu.util.common;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
@@ -127,6 +125,89 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
      */
     public static LocalDateTime toDayEnd(LocalDateTime dateTime) {
         return LocalDateTime.of(dateTime.toLocalDate(), LocalTime.MAX);
+    }
+
+    /**
+     * 通过date获取指定当天结束时间
+     * @param dateTime 时间对象，默认使用当前时区
+     * @return Date
+     */
+    public static Date toDate(LocalDateTime dateTime) {
+        return toDate(dateTime, null);
+    }
+
+    /**
+     * 将LocalDateTime转为Date
+     * @param dateTime 时间对象，类型本身不包含时区信息，但其行为和显示结果会受到运行环境或指定时区影响。
+     * @param zoneId 时区
+     * @return Date
+     */
+    public static Date toDate(LocalDateTime dateTime, ZoneId zoneId) {
+        if (zoneId == null) {
+            zoneId = TimeZone.getDefault().toZoneId();
+        }
+        return Date.from(dateTime.atZone(zoneId).toInstant());
+    }
+
+    public static LocalDateTime toLocalDateTime(Date date) {
+        return toLocalDateTime(date, null);
+    }
+
+    /**
+     * Date 转 LocalDateTime
+     * @param date 时间对象，类型本身不包含时区信息，但其行为和显示结果会受到运行环境或指定时区影响。
+     * @param zoneId 时区
+     * @return LocalDateTime
+     */
+    public static LocalDateTime toLocalDateTime(Date date, ZoneId zoneId) {
+        if (zoneId == null) {
+            zoneId = TimeZone.getDefault().toZoneId();
+        }
+        return LocalDateTime.ofInstant(date.toInstant(), zoneId);
+    }
+
+    /**
+     * 通过时间戳获取时间对象
+     * @param timestamp UTC时间戳
+     * @return Date
+     */
+    public static Date toDate(long timestamp) {
+        return toDate(timestamp, null);
+    }
+
+    /**
+     * 通过时间戳获取时间对象
+     * @param timestamp UTC时间戳
+     * @param zoneId 时区
+     * @return Date
+     */
+    public static Date toDate(long timestamp, ZoneId zoneId) {
+        if (zoneId == null) {
+            zoneId = TimeZone.getDefault().toZoneId();
+        }
+        return Date.from(Instant.ofEpochMilli(timestamp).atZone(zoneId).toInstant());
+    }
+
+    /**
+     * 通过时间戳获取时间对象
+     * @param timestamp UTC时间戳
+     * @return LocalDateTime
+     */
+    public static LocalDateTime toLocalDateTime(long timestamp) {
+        return toLocalDateTime(timestamp, null);
+    }
+
+    /**
+     * 通过时间戳获取时间对象
+     * @param timestamp UTC时间戳
+     * @param zoneId 时区
+     * @return LocalDateTime
+     */
+    public static LocalDateTime toLocalDateTime(long timestamp, ZoneId zoneId) {
+        if (zoneId == null) {
+            zoneId = TimeZone.getDefault().toZoneId();
+        }
+        return LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp), zoneId);
     }
 
 }

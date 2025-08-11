@@ -187,7 +187,7 @@ public class SessionContext {
 	 */
 	public static boolean remove() {
 		remove(getSessionId());
-		release();
+		reset();
 		WebUtils.removeCookie(WebUtils.getRequest(), WebUtils.getResponse(), INSTANCE.securityProperties.getSession().getSessionIdName());
 		return true;
 	}
@@ -207,10 +207,10 @@ public class SessionContext {
 	}
 	
 	/**
-	 * @Title release
+	 * @Title reset
 	 * @Description 释放线程Session对象
 	 */
-	public static void release() {
+	public static void reset() {
 		sessionContextHolder.remove();
 	}
 	

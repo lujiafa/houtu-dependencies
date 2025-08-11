@@ -1,9 +1,9 @@
 package com.houtu.core.exception;
 
+import com.houtu.core.constant.ErrorCodeConstant;
 import com.houtu.core.context.SpringApplicationContext;
-import com.houtu.core.prop.CoreProperties;
 import org.springframework.context.MessageSource;
-import org.springframework.context.NoSuchMessageException;
+import org.springframework.context.i18n.LocaleContextHolder;
 
 import java.io.Serializable;
 import java.util.Locale;
@@ -18,7 +18,6 @@ public class ErrorCode implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	// 默认本地化语音
-	static Locale defaultLocale = Locale.CHINA;
 	static MessageSource errorMessageSource;
 
 	// 状态码
@@ -132,20 +131,13 @@ public class ErrorCode implements Serializable {
 		MessageSource errorMessageSource = getErrorMessageSource();
 		if (errorMessageSource != null) {
 			String propCode = args != null && args.length > 0 ? (code + "_P") :String.valueOf(code);
-			if (defaultMessage == null) {
-				if (locale == null) {
-					locale = defaultLocale;
-				}
-				try {
-					message = errorMessageSource.getMessage(propCode, args, locale);
-				} catch(NoSuchMessageException e) {
-					if (!defaultLocale.equals(locale)) {
-						message = errorMessageSource.getMessage(propCode, args, null, locale);
-					}
-				}
-			} else {
-				message = errorMessageSource.getMessage(propCode, args, defaultMessage, locale);
+			if (locale == null) {
+				locale = LocaleContextHolder.getLocale();
 			}
+			if (defaultMessage == null) {
+				defaultMessage = ErrorCodeConstant.SUCCESS.equals(code) ? ErrorCodeConstant.SUCCESS_MESSAGE : ErrorCodeConstant.UNKNOWN_ERROR_MESSAGE;
+			}
+			message = errorMessageSource.getMessage(propCode, args, defaultMessage, locale);
 		}
 		return new ErrorCode(code, message);
 	}
@@ -156,12 +148,6 @@ public class ErrorCode implements Serializable {
 		}
 		if (SpringApplicationContext.getApplicationContext() != null) {
 			errorMessageSource = SpringApplicationContext.getBean("errorMessageSource", MessageSource.class);
-			CoreProperties coreProperties = SpringApplicationContext.getBean(CoreProperties.class);
-			if (coreProperties != null
-					&& coreProperties.getErrorCode() != null
-					&& coreProperties.getErrorCode().getLocale() != null) {
-				defaultLocale = coreProperties.getErrorCode().getLocale();
-			}
 			return errorMessageSource;
 		}
 		return null;

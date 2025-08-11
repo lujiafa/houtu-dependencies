@@ -5,8 +5,8 @@ import com.houtu.core.exception.BusinessException;
 import com.houtu.core.exception.ErrorCode;
 import com.houtu.util.common.AnnotationUtils;
 import com.houtu.util.common.MapUtils;
-import com.houtu.util.constant.CommonConstant;
-import com.houtu.util.constant.SeparatorChar;
+import com.houtu.util.constant.CharConstant;
+import com.houtu.util.constant.CharConstant;
 import com.houtu.util.web.WebUtils;
 import com.houtu.web.util.WebCombineParametersSupport;
 import com.houtu.web.view.SmartErrorView;
@@ -64,14 +64,14 @@ public class WebSecurityHandlerInterceptor implements HandlerInterceptor, Filter
         this.permissionValidator = permissionValidator;
         this.signatureValidator = signatureValidator;
         this.redisTemplate = redisTemplate;
-        applicationName = env.getProperty("spring.application.name", SeparatorChar.HYPHEN);
+        applicationName = env.getProperty("spring.application.name", CharConstant.HYPHEN);
     }
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain) throws IOException, ServletException {
         filterChain.doFilter(request, response);
         if (Boolean.TRUE.equals(request.getAttribute(SecurityConstant.SESSION_VALIDATOR_HANDLED_ATTR_NAME)))
-            SessionContext.release();
+            SessionContext.reset();
     }
 
     @Override
@@ -151,7 +151,7 @@ public class WebSecurityHandlerInterceptor implements HandlerInterceptor, Filter
         }
         // 防重放验证
         String cacheKey = String.format("web:security:request:repeat:check:%s:%s", applicationName, requestId);
-        if (!redisTemplate.boundValueOps(cacheKey).setIfAbsent(CommonConstant.EMPTY, 900, TimeUnit.SECONDS)) {
+        if (!redisTemplate.boundValueOps(cacheKey).setIfAbsent(CharConstant.EMPTY, 900, TimeUnit.SECONDS)) {
             throw new SignatureException(ErrorCode.build(ErrorCodeConstant.REQUEST_REPEAT, request.getLocale()));
         }
     }

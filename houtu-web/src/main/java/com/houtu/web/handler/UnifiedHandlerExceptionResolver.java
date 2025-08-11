@@ -3,7 +3,7 @@ package com.houtu.web.handler;
 import com.houtu.core.constant.ErrorCodeConstant;
 import com.houtu.core.exception.BusinessException;
 import com.houtu.core.exception.ErrorCode;
-import com.houtu.util.constant.SeparatorChar;
+import com.houtu.util.constant.CharConstant;
 import com.houtu.web.view.SmartErrorView;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -56,7 +56,7 @@ public class UnifiedHandlerExceptionResolver implements HandlerExceptionResolver
             StringBuilder tempStringBuilder = new StringBuilder();
             for (ObjectError oe : allErrors) {
                 if (tempStringBuilder.length() > 0) {
-                    tempStringBuilder.append(SeparatorChar.SEMICOLON);
+                    tempStringBuilder.append(CharConstant.SEMICOLON);
                 }
                 tempStringBuilder.append(oe.getDefaultMessage());
             }
@@ -69,7 +69,7 @@ public class UnifiedHandlerExceptionResolver implements HandlerExceptionResolver
             StringBuilder tempStringBuilder = new StringBuilder();
             for (MessageSourceResolvable messageSourceResolvable : allErrors) {
                 if (tempStringBuilder.length() > 0) {
-                    tempStringBuilder.append(SeparatorChar.SEMICOLON);
+                    tempStringBuilder.append(CharConstant.SEMICOLON);
                 }
                 tempStringBuilder.append(messageSourceResolvable.getDefaultMessage());
             }

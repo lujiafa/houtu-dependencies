@@ -1,7 +1,6 @@
 package com.houtu.util.file;
 
-import com.houtu.util.constant.CommonConstant;
-import com.houtu.util.constant.SeparatorChar;
+import com.houtu.util.constant.CharConstant;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
@@ -9,7 +8,7 @@ import java.util.Arrays;
 /**
  * 文件名、路径相关工具类
  */
-public class FileUtils {
+public class FilePathUtils {
 
     /**
      * 标准化输出文件路径，以正斜杠“/”作为目录分隔符
@@ -22,7 +21,7 @@ public class FileUtils {
      */
     public static String standard(String path) {
         if (path != null) {
-            path = path.replaceAll("\\\\+", SeparatorChar.SLASH).replaceAll("/+", SeparatorChar.SLASH);
+            path = path.replaceAll("\\\\+", CharConstant.SLASH).replaceAll("/+", CharConstant.SLASH);
         }
         return path;
     }
@@ -43,11 +42,11 @@ public class FileUtils {
                 && (subPaths == null || subPaths.length == 0 || Arrays.stream(subPaths).allMatch(sp -> sp == null))) {
             throw new IllegalArgumentException("参数不能同时为空");
         }
-        final StringBuilder targetPath = new StringBuilder(StringUtils.isBlank(basePath) ? CommonConstant.EMPTY : basePath.trim());
+        final StringBuilder targetPath = new StringBuilder(StringUtils.isBlank(basePath) ? CharConstant.EMPTY : basePath.trim());
         Arrays.stream(subPaths).forEach(sp -> {
             if (sp != null) {
                 if (targetPath.length() > 0) {
-                    targetPath.append(SeparatorChar.SLASH);
+                    targetPath.append(CharConstant.SLASH);
                 }
                 targetPath.append(sp);
             }
@@ -67,10 +66,10 @@ public class FileUtils {
             return new String[0];
         }
         String standardPath = standard(path.trim());
-        if (standardPath.endsWith(SeparatorChar.SLASH)) {
+        if (standardPath.endsWith(CharConstant.SLASH)) {
             standardPath = standardPath.substring(0, standardPath.length() - 1);
         }
-        return standardPath.split(SeparatorChar.SLASH);
+        return standardPath.split(CharConstant.SLASH);
     }
 
 }

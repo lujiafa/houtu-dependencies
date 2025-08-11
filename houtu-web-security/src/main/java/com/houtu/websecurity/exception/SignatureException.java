@@ -13,8 +13,8 @@ public class SignatureException extends BusinessException {
 
 	private static final long serialVersionUID = 1L;
 	
-    public SignatureException(Throwable cause, Locale locale) {
-        super(cause, locale);
+    public SignatureException(Throwable cause) {
+        super(cause);
     }
     
     public SignatureException(ErrorCode errorCode) {

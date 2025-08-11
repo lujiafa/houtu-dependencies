@@ -6,7 +6,7 @@ package com.houtu.util.constant;
  * @date 2017年4月19日
  * @Description 通用分隔符常量类
  */
-public interface SeparatorChar {
+public interface CharConstant {
 
     /** 英文空''字符 **/
     char EMPTY_CHAR = 0x00;

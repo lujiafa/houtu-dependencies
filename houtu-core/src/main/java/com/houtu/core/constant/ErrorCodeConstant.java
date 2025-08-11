@@ -34,4 +34,6 @@ public interface ErrorCodeConstant {
     Integer DATA_NOT_EXIST = 41;
     Integer DATA_ALREADY_EXIST = 41;
 
+    String UNKNOWN_ERROR_MESSAGE = "error";
+
 }

@@ -10,8 +10,8 @@ public class FeignThroughBusinessException extends BusinessException {
 
     private String serviceName;
 
-    public FeignThroughBusinessException(@Nonnull String serviceName, Throwable cause, Locale locale) {
-        super(cause, locale);
+    public FeignThroughBusinessException(@Nonnull String serviceName, Throwable cause) {
+        super(cause);
         this.serviceName = serviceName;
     }
 

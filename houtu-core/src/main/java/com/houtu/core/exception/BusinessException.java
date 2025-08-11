@@ -17,9 +17,9 @@ public class BusinessException extends RuntimeException {
 	
 	private ErrorCode errorCode;
     
-    public BusinessException(Throwable cause, Locale locale) {
+    public BusinessException(Throwable cause) {
         super(cause);
-        this.errorCode = ErrorCode.build(ErrorCodeConstant.SERVER_BUSY, locale);
+        this.errorCode = ErrorCode.build(ErrorCodeConstant.SERVER_BUSY);
     }
     
     public BusinessException(ErrorCode errorCode) {
@@ -32,6 +32,12 @@ public class BusinessException extends RuntimeException {
         super(errorCode == null ? cause.getMessage() : errorCode.getMessage(), cause);
         Assert.notNull(errorCode, "parameter object errorCode cannot be null");
         this.errorCode = errorCode;
+    }
+
+    public BusinessException(int code, String message) {
+        super(message);
+		Assert.notNull(message, "parameter error message cannot be null");
+        this.errorCode = new ErrorCode(code, message);
     }
 
     public BusinessException(int code, String message, Throwable cause) {

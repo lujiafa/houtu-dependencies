@@ -7,8 +7,7 @@ import com.houtu.accesslog.handler.SimpleLogFilterHandler;
 import com.houtu.core.context.SpringApplicationContext;
 import com.houtu.util.common.AnnotationUtils;
 import com.houtu.util.common.JsonUtils;
-import com.houtu.util.constant.CommonConstant;
-import com.houtu.util.constant.SeparatorChar;
+import com.houtu.util.constant.CharConstant;
 import com.houtu.util.web.WebUtils;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
@@ -68,25 +67,25 @@ public class AccessLogAspect implements InitializingBean {
     		String requestIp = getRequestIp(request);
     		String userAgent = getRequestUserAgent(request);
     		String parameterString = getQueryParamString(request, logFilterHandler);
-    		String requestBody = accessLog.params() ? getRequestAllParams(request, response, logFilterHandler) : SeparatorChar.HYPHEN;
+    		String requestBody = accessLog.params() ? getRequestAllParams(request, response, logFilterHandler) : CharConstant.HYPHEN;
     		builder.append(httpMethod)
-    		.append(SeparatorChar.VERTICAL_BAR).append(path)
-    		.append(SeparatorChar.VERTICAL_BAR).append(requestIp)
-    		.append(SeparatorChar.VERTICAL_BAR).append(userAgent)
-    		.append(SeparatorChar.VERTICAL_BAR).append(parameterString)
-    		.append(SeparatorChar.VERTICAL_BAR).append(requestBody);
+    		.append(CharConstant.VERTICAL_BAR).append(path)
+    		.append(CharConstant.VERTICAL_BAR).append(requestIp)
+    		.append(CharConstant.VERTICAL_BAR).append(userAgent)
+    		.append(CharConstant.VERTICAL_BAR).append(parameterString)
+    		.append(CharConstant.VERTICAL_BAR).append(requestBody);
     	}
-    	builder.append(SeparatorChar.VERTICAL_BAR).append(getMethodInfo(pjp));
-    	builder.append(SeparatorChar.VERTICAL_BAR).append(getArgs(args, logFilterHandler));
+    	builder.append(CharConstant.VERTICAL_BAR).append(getMethodInfo(pjp));
+    	builder.append(CharConstant.VERTICAL_BAR).append(getArgs(args, logFilterHandler));
     	try {
     		Object resultObject = pjp.proceed(args);
-    		builder.append(SeparatorChar.VERTICAL_BAR);
+    		builder.append(CharConstant.VERTICAL_BAR);
     		if (Void.TYPE.equals(method.getReturnType())) {
     			builder.append(Void.TYPE.getName());
     		} else {
     			builder.append(JsonUtils.toString(resultObject));
     		}
-    		builder.append(SeparatorChar.VERTICAL_BAR);
+    		builder.append(CharConstant.VERTICAL_BAR);
     		return resultObject;
     	} catch (Throwable e) {
     		builder.append("|-|").append(e.getMessage());
@@ -94,7 +93,7 @@ public class AccessLogAspect implements InitializingBean {
     	} finally {
     		long outTime = System.currentTimeMillis();
     		long elapsedTime = outTime - inTime;
-    		builder.append(SeparatorChar.VERTICAL_BAR).append(elapsedTime);
+    		builder.append(CharConstant.VERTICAL_BAR).append(elapsedTime);
     		logger.info(builder.toString());
     	}
     }
@@ -111,7 +110,7 @@ public class AccessLogAspect implements InitializingBean {
     	} catch (Exception e) {
     		logger.error(e.getMessage(), e);
     	}
-    	return CommonConstant.EMPTY;
+    	return CharConstant.EMPTY;
     }
 
     
@@ -124,9 +123,9 @@ public class AccessLogAspect implements InitializingBean {
     private String getRequestUserAgent(HttpServletRequest request) {
     	String userAgent = request.getHeader(HttpHeaders.USER_AGENT);
     	if (userAgent != null) {
-    		return userAgent.replaceAll(SeparatorChar.VERTICAL_BAR_REGEX, "%7c");
+    		return userAgent.replaceAll(CharConstant.VERTICAL_BAR_REGEX, "%7c");
     	}
-    	return CommonConstant.EMPTY;
+    	return CharConstant.EMPTY;
     }
     
     /**
@@ -149,7 +148,7 @@ public class AccessLogAspect implements InitializingBean {
     private String getRequestAllParams(HttpServletRequest request, HttpServletResponse response, LogFilterHandler logFilterHandler) {
     	try {
 			if (accessLogCombineModelMapProcessor == null) {
-				return SeparatorChar.HYPHEN;
+				return CharConstant.HYPHEN;
 			}
 			Map combineModelMap = accessLogCombineModelMapProcessor.getCombineModelMap(request, response);
 	    	if (logFilterHandler != null) {
@@ -159,7 +158,7 @@ public class AccessLogAspect implements InitializingBean {
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 		}
-    	return CommonConstant.EMPTY;
+    	return CharConstant.EMPTY;
     }
     
     /**
@@ -171,7 +170,7 @@ public class AccessLogAspect implements InitializingBean {
      */
     private String getArgs(Object[] args, LogFilterHandler logFilterHandler) {
     	if (args == null || args.length == 0) {
-    		return CommonConstant.EMPTY;
+    		return CharConstant.EMPTY;
     	}
     	StringBuilder stringBuilder = new StringBuilder();
     	for (int i = 0; i < args.length; i++) {
@@ -215,7 +214,7 @@ public class AccessLogAspect implements InitializingBean {
     	if (parameterTypes != null && parameterTypes.length > 0) {
     		for (int i = 0; i < parameterTypes.length; i++) {
     			if (i > 0) {
-    				stringBuilder.append(SeparatorChar.COMMA);
+    				stringBuilder.append(CharConstant.COMMA);
     			}
     			stringBuilder.append(parameterTypes[i].getSimpleName());
     		}

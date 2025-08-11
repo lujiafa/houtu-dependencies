@@ -3,7 +3,7 @@ package com.houtu.springcloud.feign.provider;
 import com.houtu.springcloud.feign.anotation.AutoFeign;
 import com.houtu.springcloud.feign.constant.FeignConstant;
 import com.houtu.util.common.AnnotationUtils;
-import com.houtu.util.constant.CommonConstant;
+import com.houtu.util.constant.CharConstant;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.BeanFactory;
@@ -167,7 +167,7 @@ public class FeignRequestMappingHandlerMapping extends RequestMappingHandlerMapp
 				@Override
 				public String[] params() {return new String[0];}
 				@Override
-				public String name() {return CommonConstant.EMPTY;}
+				public String name() {return CharConstant.EMPTY;}
 				@Override
 				public RequestMethod[] method() {return new RequestMethod[0];}
 				@Override

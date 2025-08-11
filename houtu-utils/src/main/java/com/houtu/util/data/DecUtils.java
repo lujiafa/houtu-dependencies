@@ -10,34 +10,36 @@ public class DecUtils {
 
 	/**
 	 * @Title toDec
-	 * @Description 16进制字符串转十进制数
-	 * @param hexStr
-	 * @return long
-	 */
-	public static long toDec(String hexStr) {
-		if (hexStr == null || hexStr.length() == 0) {
-			hexStr = "00";
-		}
-		return toDec(HexUtils.toBinary(hexStr));
-	}
-
-	/**
-	 * @Title toDec
 	 * @Description 十六进制字符转10进制数值
-	 * @param hexChar 十六进制字符
+	 * @param hex 十六进制字符
 	 * @return int ascii数值
 	 */
-	public static int toDec(char hexChar) {
-		if ('0' <= hexChar && hexChar <= '9') {
-			return hexChar - '0';
+	public static long toDec(String hex) {
+		long value = 0L;
+		char[] charArray = hex.toCharArray();
+		for (int i = 0; i < charArray.length; i++) {
+			switch (charArray[i]) {
+				case '0': value = value << 4 | 0; break;
+				case '1': value = value << 4 | 1; break;
+				case '2': value = value << 4 | 2; break;
+				case '3': value = value << 4 | 3; break;
+				case '4': value = value << 4 | 4; break;
+				case '5': value = value << 4 | 5; break;
+				case '6': value = value << 4 | 6; break;
+				case '7': value = value << 4 | 7; break;
+				case '8': value = value << 4 | 8; break;
+				case '9': value = value << 4 | 9; break;
+				case 'a', 'A': value = value << 4 | 10; break;
+				case 'b', 'B': value = value << 4 | 11; break;
+				case 'c', 'C': value = value << 4 | 12; break;
+				case 'd', 'D': value = value << 4 | 13; break;
+				case 'e', 'E': value = value << 4 | 14; break;
+				case 'f', 'F': value = value << 4 | 15; break;
+				default:
+					throw new IllegalArgumentException("contains illegal character for hexBinary: " + hex);
+			}
 		}
-		if ('A' <= hexChar && hexChar <= 'F') {
-			return hexChar - 'A' + hexChar;
-		}
-		if ('a' <= hexChar && hexChar <= 'f') {
-			return hexChar - 'a' + 10;
-		}
-		return -1;
+		return value;
 	}
 
 
@@ -50,14 +52,7 @@ public class DecUtils {
 		if (data == null || data.length == 0) {
 			throw new IllegalArgumentException("byte array cannot be null or empty");
 		}
-		switch (data.length) {
-			case 1: return data[0];
-			case 2: return toDecShort(data);
-			case 4: return toDecInt(data);
-			case 8: return toDecLong(data);
-			default:
-				throw new IllegalArgumentException("byte array conversion length does not match");
-		}
+		return toDecLong(data);
 	}
 
 	/**
@@ -67,20 +62,10 @@ public class DecUtils {
 	 * @return short
 	 */
 	public static short toDecShort(byte[] data) {
-		if (data == null || data.length == 0) {
-			throw new IllegalArgumentException("byte array cannot be null or empty");
-		}
-		if (data.length != 2) {
+		if (data == null || data.length > 2) {
 			throw new IllegalArgumentException("byte array conversion length does not match");
 		}
-		short r = 0;
-		for (int i = 0; i < data.length; i++) {
-			if (i > 0) {
-				r = (short) (r << 8);
-			}
-			r |= (data[i] & 0xFF);
-		}
-		return r;
+		return (short) toDecInt(data);
 	}
 
 	/**
@@ -90,20 +75,16 @@ public class DecUtils {
 	 * @return int
 	 */
 	public static int toDecInt(byte[] data) {
-		if (data == null || data.length == 0) {
-			throw new IllegalArgumentException("byte array cannot be null or empty");
-		}
-		if (data.length > 4) {
+		if (data == null || data.length > 4) {
 			throw new IllegalArgumentException("byte array conversion length does not match");
 		}
-		int r = 0;
+		int value = 0;
 		for (int i = 0; i < data.length; i++) {
-			if (i > 0) {
-				r = r << 8;
-			}
-			r |= (data[i] & 0xFF);
+			if (i > 0)
+				value = value << 8;
+			value |= data[i] & 0xFF;
 		}
-		return r;
+		return value;
 	}
 
 	/**
@@ -113,20 +94,16 @@ public class DecUtils {
 	 * @return long
 	 */
 	public static long toDecLong(byte[] data) {
-		if (data == null || data.length == 0) {
-			throw new IllegalArgumentException("byte array cannot be null or empty");
-		}
-		if (data.length > 8) {
+		if (data == null || data.length > 8) {
 			throw new IllegalArgumentException("byte array conversion length does not match");
 		}
-		long r = 0;
+		long value = 0L;
 		for (int i = 0; i < data.length; i++) {
-			if (i > 0) {
-				r = r << 8;
-			}
-			r |= (data[i] & 0xFF);
+			if (i > 0)
+				value = value << 8;
+			value |= data[i] & 0xFF;
 		}
-		return r;
+		return value;
 	}
 
 }

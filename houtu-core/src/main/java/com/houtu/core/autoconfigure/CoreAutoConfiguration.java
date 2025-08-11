@@ -1,14 +1,13 @@
 package com.houtu.core.autoconfigure;
 
+import com.houtu.core.context.LocaleBeanPostProcessor;
 import com.houtu.core.context.SpringApplicationContext;
 import com.houtu.core.exception.ErrorI18nProvider;
 import com.houtu.core.exception.ErrorResourceBundleMessageSource;
 import com.houtu.core.exception.provier.DefaultErrorI18nProvider;
-import com.houtu.core.prop.CoreProperties;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.Ordered;
@@ -20,7 +19,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @AutoConfiguration
-@EnableConfigurationProperties(CoreProperties.class)
 @AutoConfigureOrder(Ordered.HIGHEST_PRECEDENCE + 1)
 public class CoreAutoConfiguration {
 
@@ -45,5 +43,10 @@ public class CoreAutoConfiguration {
         messageSource.setDefaultEncoding(StandardCharsets.UTF_8.name());
         messageSource.setCacheSeconds(-1);
         return messageSource;
+    }
+
+    @Bean
+    public LocaleBeanPostProcessor localeBeanPostProcessor() {
+        return new LocaleBeanPostProcessor();
     }
 }

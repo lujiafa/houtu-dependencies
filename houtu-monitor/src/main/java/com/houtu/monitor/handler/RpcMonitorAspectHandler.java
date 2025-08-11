@@ -2,7 +2,7 @@ package com.houtu.monitor.handler;
 
 import com.houtu.monitor.annotation.RpcMonitor;
 import com.houtu.util.common.AnnotationUtils;
-import com.houtu.util.constant.SeparatorChar;
+import com.houtu.util.constant.CharConstant;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.util.StringUtils;
@@ -41,7 +41,7 @@ public class RpcMonitorAspectHandler extends AbstractMonitorAspectHandler<RpcMon
 
 				@Override
 				public String cmd() {
-					return method.getDeclaringClass().getName() + SeparatorChar.POINT + method.getName();
+					return method.getDeclaringClass().getName() + CharConstant.POINT + method.getName();
 				}
 			};
 		}

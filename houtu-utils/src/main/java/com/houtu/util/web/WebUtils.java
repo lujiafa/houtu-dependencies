@@ -2,7 +2,7 @@ package com.houtu.util.web;
 
 import com.houtu.util.common.JsonUtils;
 import com.houtu.util.common.XmlUtils;
-import com.houtu.util.constant.SeparatorChar;
+import com.houtu.util.constant.CharConstant;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -399,12 +399,12 @@ public class WebUtils extends org.springframework.web.util.WebUtils {
      */
     public static String getRequestIpChain(HttpServletRequest request) {
         StringBuilder builder = new StringBuilder();
-        builder.append(request.getHeader("x-forwarded-for")).append(SeparatorChar.VERTICAL_BAR)
-                .append(request.getHeader("Proxy-Client-IP")).append(SeparatorChar.VERTICAL_BAR)
-                .append(request.getHeader("WL-Proxy-Client-IP")).append(SeparatorChar.VERTICAL_BAR)
-                .append(request.getHeader("HTTP_CLIENT_IP")).append(SeparatorChar.VERTICAL_BAR)
-                .append(request.getHeader("HTTP_X_FORWARDED_FOR")).append(SeparatorChar.VERTICAL_BAR)
-                .append(request.getHeader("X-Real-IP")).append(SeparatorChar.VERTICAL_BAR)
+        builder.append(request.getHeader("x-forwarded-for")).append(CharConstant.VERTICAL_BAR)
+                .append(request.getHeader("Proxy-Client-IP")).append(CharConstant.VERTICAL_BAR)
+                .append(request.getHeader("WL-Proxy-Client-IP")).append(CharConstant.VERTICAL_BAR)
+                .append(request.getHeader("HTTP_CLIENT_IP")).append(CharConstant.VERTICAL_BAR)
+                .append(request.getHeader("HTTP_X_FORWARDED_FOR")).append(CharConstant.VERTICAL_BAR)
+                .append(request.getHeader("X-Real-IP")).append(CharConstant.VERTICAL_BAR)
                 .append(request.getRemoteAddr());
         return builder.toString();
     }
@@ -421,7 +421,7 @@ public class WebUtils extends org.springframework.web.util.WebUtils {
                 || ipArrayStr.length() == 0) {
             return "";
         }
-        String[] ipArray = ipArrayStr.split(SeparatorChar.COMMA);
+        String[] ipArray = ipArrayStr.split(CharConstant.COMMA);
         for (String ip : ipArray) {
             if (!StringUtils.hasLength(ip)
                     || "unknown".equalsIgnoreCase(ip)) {

@@ -1,5 +1,9 @@
 package com.houtu.util.data;
 
+import com.houtu.util.constant.CharConstant;
+
+import java.util.stream.IntStream;
+
 /**
  * @author lujiafa
  * @email lujiafayx@163.com
@@ -8,7 +12,7 @@ package com.houtu.util.data;
  */
 public final class HexUtils {
 
-	private static final char[] hexCode = "0123456789abcdef".toCharArray();
+	private static final char[] HEX_CHARS = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
 
 	/**
 	 * @Title  toHex
@@ -17,44 +21,38 @@ public final class HexUtils {
 	 * @return String 十六进制字符串
 	 */
 	public static String toHex(byte[] data) {
-		if (data == null) {
+		if (data == null)
 			data = new byte[0];
-		}
-		StringBuilder sb = new StringBuilder(data.length * 2);
-		for (byte b : data) {
-			sb.append(hexCode[(b >> 4) & 0xF]);
-			sb.append(hexCode[(b & 0xF)]);
-		}
-		return sb.toString();
+		char[] chars = new char[data.length * 2];
+		byte[] finalData = data;
+		IntStream.range(0, data.length).parallel().forEach(i -> {
+			chars[2 * i]= HEX_CHARS[finalData[i] & 0xFF >> 4];
+			chars[2 * i + 1]= HEX_CHARS[finalData[i] & 0x0F];
+		});
+		return new String(chars);
 	}
-	
+
 	/**
 	 * @Title toBinary
 	 * @Description 将十六进制字符串转为byte数组
-	 * @param hexStr 十六进制字符串
+	 * @param hex 十六进制字符串
 	 * @return byte[]
 	 */
-	public static byte[] toBinary(String hexStr) {
-		if (hexStr == null) {
-			hexStr = "";
-		} else if (hexStr.length() % 2 != 0) {
-			hexStr = "0" + hexStr;
+	public static byte[] toBinary(String hex) {
+		if (hex == null) {
+			return new byte[0];
 		}
-		char[] charArray = hexStr.toCharArray();
-		int len = charArray.length;
-		byte[] out = new byte[len / 2];
-		for (int i = 0; i < len; i += 2) {
-			int h = DecUtils.toDec(charArray[i]);
-			int l = DecUtils.toDec(charArray[i + 1]);
-			if (h == -1 || l == -1) {
-				throw new IllegalArgumentException("contains illegal character for hexBinary: " + hexStr);
-			}
-			out[i / 2] = (byte) (h << 4 | l);
+		if (hex.length() == 0) {
+			return new byte[]{CharConstant.EMPTY_CHAR};
 		}
-		return out;
+		int len = (hex.length() + 1) / 2;
+		long dec = DecUtils.toDec(hex);
+		byte[] value = new byte[len];
+		IntStream.range(0, len).parallel().forEach(i -> {
+			value[i] = (byte) (dec >> ((len - i - 1) * 8) & 0xFF);
+		});
+		return value;
 	}
-
-
 
 	/**
 	 * @Title toHex
