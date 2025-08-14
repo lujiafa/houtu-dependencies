@@ -1,1 +1,1 @@
-com.houtu.springcloud.nacos.autoconfigure.DiscoveryAutoConfiguration
+com.houtu.springcloud.discovery.autoconfigure.DiscoveryAutoConfiguration

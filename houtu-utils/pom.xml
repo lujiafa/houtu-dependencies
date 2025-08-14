@@ -14,6 +14,7 @@
     <properties>
         <javax.mail.version>1.6.2</javax.mail.version>
         <bcpkix-jdk18on.version>1.73</bcpkix-jdk18on.version>
+        <bcprov-jdk15on.version>1.70</bcprov-jdk15on.version>
     </properties>
 
     <dependencies>
@@ -36,7 +37,7 @@
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcprov-jdk15on</artifactId>
-            <version>1.70</version>
+            <version>${bcprov-jdk15on.version}</version>
             <scope>compile</scope>
         </dependency>
 

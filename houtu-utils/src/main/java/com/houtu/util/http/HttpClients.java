@@ -143,7 +143,7 @@ public class HttpClients {
             httpEntity = new UrlEncodedFormEntity(paramList, charset);
             httpPost.setEntity(httpEntity);
         } else {
-            throw new RuntimeException("not actuate Content-Type - " + contentType);
+            throw new RuntimeException("not health Content-Type - " + contentType);
         }
         addHeader(httpPost, requestConfig);
         return execute(requestConfig.getHttpClient(), httpPost);

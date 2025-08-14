@@ -11,7 +11,7 @@ import java.net.NetworkInterface;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class SystemUtils {
+public class SystemUtils extends org.apache.commons.lang3.SystemUtils {
 
 	private static final int PROCESS_ID;
 

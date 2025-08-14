@@ -76,9 +76,8 @@ public class WebSecurityHandlerInterceptor implements HandlerInterceptor, Filter
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        if (handler instanceof HandlerMethod) {
+        if (handler instanceof HandlerMethod handlerMethod) {
             try {
-                HandlerMethod handlerMethod = (HandlerMethod) handler;
                 Method method = handlerMethod.getMethod();
                 MethodSecurityAnnotationInfo annotationInfo = getAnnotationInfo(method);
                 if (annotationInfo.getCheckSession() != null && annotationInfo.getCheckSession().value()) {

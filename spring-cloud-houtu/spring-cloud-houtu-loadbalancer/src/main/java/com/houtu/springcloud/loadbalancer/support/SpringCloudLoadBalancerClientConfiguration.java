@@ -31,14 +31,14 @@ public class SpringCloudLoadBalancerClientConfiguration {
 
 
     @ConditionalOnClass({com.alibaba.cloud.nacos.loadbalancer.LoadBalancerNacosAutoConfiguration.class})
-    @com.alibaba.cloud.nacos.loadbalancer.ConditionalOnLoadBalancerNacos
+    @ConditionalOnProperty(value = {"spring.cloud.loadbalancer.nacos.enabled"}, havingValue = "true", matchIfMissing = true)
     @com.alibaba.cloud.nacos.ConditionalOnNacosDiscoveryEnabled
     public static class NacosLoadBalancerConfiguration {
         @Bean
         @ConditionalOnMissingBean(name = "nacosLoadBalancer")
         public ReactorLoadBalancer<ServiceInstance> nacosLoadBalancer(Environment environment, LoadBalancerClientFactory loadBalancerClientFactory,
                                                                       com.alibaba.cloud.nacos.NacosDiscoveryProperties nacosDiscoveryProperties) {
-            String name = environment.getProperty("loadbalancer.consumer.name");
+            String name = environment.getProperty("loadbalancer.client.name");
             return new NacosLoadBalancer(loadBalancerClientFactory.getLazyProvider(name, ServiceInstanceListSupplier.class), name, nacosDiscoveryProperties);
         }
     }

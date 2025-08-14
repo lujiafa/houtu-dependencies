@@ -125,14 +125,13 @@ public final class MailSender {
 			String fileName = null;
 			if (att instanceof byte[]) {
 				dataSource = new ByteArrayDataSource((byte[]) att, "application/octet-stream");
-			} else if (att instanceof File) {
-				File file = (File) att;
+			} else if (att instanceof File file) {
 				dataSource = new FileDataSource(file);
 				fileName = file.getName();
-			} else if (att instanceof MimePart) {
-				dataSource = new MimePartDataSource((MimePart) att);
-			} else if (att instanceof CharSequence) {
-				File file = new File(att.toString());
+			} else if (att instanceof MimePart mimePart) {
+				dataSource = new MimePartDataSource(mimePart);
+			} else if (att instanceof CharSequence charSequence) {
+				File file = new File(charSequence.toString());
 				dataSource = new FileDataSource(file);
 				fileName = file.getName();
 			} else {

@@ -4,7 +4,9 @@ import com.houtu.springcloud.feign.provider.FeignBeanPostProcessor;
 import com.houtu.springcloud.feign.provider.FeignTransformerExceptionResolver;
 import com.houtu.springcloud.feign.provider.FeignRequestMappingHandlerMapping;
 import com.houtu.util.common.ReflectionUtils;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
@@ -24,8 +26,9 @@ public class FeignProviderConfiguration {
     }
 
     @Bean
+    @ConditionalOnBean(value = RequestMappingHandlerMapping.class, name = "requestMappingHandlerMapping")
     public FeignRequestMappingHandlerMapping feignRequestMappingHandlerMapping(
-            RequestMappingHandlerMapping requestMappingHandlerMapping) {
+            @Qualifier("requestMappingHandlerMapping") RequestMappingHandlerMapping requestMappingHandlerMapping) {
         FeignRequestMappingHandlerMapping mapping = new FeignRequestMappingHandlerMapping();
         mapping.setOrder(requestMappingHandlerMapping.getOrder() + 1);
         mapping.setInterceptors(ReflectionUtils.getField(requestMappingHandlerMapping, "interceptors", List.class, Collections.emptyList()).toArray());

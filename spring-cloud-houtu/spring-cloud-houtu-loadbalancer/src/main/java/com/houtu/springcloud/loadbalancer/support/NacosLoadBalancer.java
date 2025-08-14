@@ -48,7 +48,7 @@ public class NacosLoadBalancer extends com.alibaba.cloud.nacos.loadbalancer.Naco
                 List<ServiceInstance> instancesToChoose = serviceInstances;
                 if (StringUtils.isNotBlank(clusterName)) {
                     List<ServiceInstance> sameClusterInstances = (List)serviceInstances.stream().filter((serviceInstance) -> {
-                        String cluster = (String)serviceInstance.getMetadata().get("nacos.cluster");
+                        String cluster = (String)serviceInstance.getMetadata().get("discovery.cluster");
                         return StringUtils.equals(cluster, clusterName);
                     }).collect(Collectors.toList());
                     if (!CollectionUtils.isEmpty(sameClusterInstances)) {

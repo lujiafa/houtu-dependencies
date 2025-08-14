@@ -61,8 +61,8 @@ public class WebUtils extends org.springframework.web.util.WebUtils {
      */
     public static ServletRequestAttributes getServletRequestAttributes() {
         RequestAttributes reqAttr = RequestContextHolder.getRequestAttributes();
-        if (reqAttr != null && reqAttr instanceof ServletRequestAttributes) {
-            return (ServletRequestAttributes) reqAttr;
+        if (reqAttr instanceof ServletRequestAttributes servletRequestAttributes) {
+            return servletRequestAttributes;
         }
         throw new RuntimeException("ServletRequestAttributes fetch failed, please check the configuration is correct.");
     }

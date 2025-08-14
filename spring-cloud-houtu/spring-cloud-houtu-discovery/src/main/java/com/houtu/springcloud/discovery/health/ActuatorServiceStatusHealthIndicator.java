@@ -1,7 +1,7 @@
-package com.houtu.springcloud.nacos.actuate;
+package com.houtu.springcloud.discovery.health;
 
-import com.houtu.springcloud.nacos.context.ServiceContext;
-import com.houtu.springcloud.nacos.type.ServiceStatus;
+import com.houtu.springcloud.discovery.context.ServiceContext;
+import com.houtu.springcloud.discovery.type.ServiceStatus;
 import org.springframework.boot.actuate.health.AbstractHealthIndicator;
 import org.springframework.boot.actuate.health.Health;
 
@@ -10,11 +10,11 @@ import org.springframework.boot.actuate.health.Health;
  * @author Jon
  * @date 2020/09/18
  */
-public class ActuatorDiscoveryServiceStatusHealthIndicator extends AbstractHealthIndicator {
+public class ActuatorServiceStatusHealthIndicator extends AbstractHealthIndicator {
 
     protected final ServiceContext serviceContext;
 
-    public ActuatorDiscoveryServiceStatusHealthIndicator(ServiceContext serviceContext) {
+    public ActuatorServiceStatusHealthIndicator(ServiceContext serviceContext) {
         this.serviceContext = serviceContext;
     }
 
@@ -27,4 +27,5 @@ public class ActuatorDiscoveryServiceStatusHealthIndicator extends AbstractHealt
             builder.down();
         }
     }
+
 }

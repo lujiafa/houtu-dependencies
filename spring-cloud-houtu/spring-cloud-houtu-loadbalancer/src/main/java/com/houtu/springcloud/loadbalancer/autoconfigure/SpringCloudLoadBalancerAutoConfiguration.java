@@ -33,6 +33,12 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import jakarta.servlet.Servlet;
 import java.beans.Introspector;
 
+/**
+ * 参考：LoadBalancerClientConfiguration、NacosLoadBalancerClientConfiguration
+ * @author: jonlu
+ * @date: 2023/9/15
+ */
+
 @AutoConfiguration
 @EnableConfigurationProperties(SpringCloudLoadBalancerProperties.class)
 @AutoConfigureBefore({LoadBalancerAutoConfiguration.class, ReactorLoadBalancerClientAutoConfiguration.class, LoadBalancerBeanPostProcessorAutoConfiguration.class})
