@@ -29,7 +29,9 @@ import org.springframework.core.env.Environment;
 public class SpringCloudLoadBalancerClientConfiguration {
     private static final int REACTIVE_SERVICE_INSTANCE_SUPPLIER_ORDER = 173827465;
 
-
+    /**
+     * 参考：LoadBalancerNacosAutoConfiguration配置优化调整
+     */
     @ConditionalOnClass({com.alibaba.cloud.nacos.loadbalancer.LoadBalancerNacosAutoConfiguration.class})
     @ConditionalOnProperty(value = {"spring.cloud.loadbalancer.nacos.enabled"}, havingValue = "true", matchIfMissing = true)
     @com.alibaba.cloud.nacos.ConditionalOnNacosDiscoveryEnabled

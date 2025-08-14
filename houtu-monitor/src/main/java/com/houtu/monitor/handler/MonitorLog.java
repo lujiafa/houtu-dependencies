@@ -7,8 +7,7 @@ import com.houtu.util.common.SystemUtils;
 import jakarta.annotation.Nonnull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.SmartLifecycle;
 import org.springframework.core.env.Environment;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -25,7 +24,7 @@ import java.util.stream.Collectors;
  * @author jon
  * @date 2020年12月23日
  */
-public final class MonitorLog implements InitializingBean, DisposableBean {
+public final class MonitorLog implements SmartLifecycle {
 
     static final Logger LOGGER = LoggerFactory.getLogger(MonitorLog.class);
 
@@ -35,7 +34,6 @@ public final class MonitorLog implements InitializingBean, DisposableBean {
     static final int[] QUANTILE = new int[]{90, 95, 99};
 
     static final MonitorLog INSTANCE = new MonitorLog();
-
 
     private String bizName;
     private String applicationName;
@@ -112,7 +110,7 @@ public final class MonitorLog implements InitializingBean, DisposableBean {
     }
 
     @Override
-    public void afterPropertiesSet() throws Exception {
+    public void start() {
         MonitorProperties monitorProperties = SpringApplicationContext.getBean(MonitorProperties.class);
         collectQueue = new LinkedBlockingQueue<>(monitorProperties.getCollectQueueCapacity());
         outputQueue = new LinkedBlockingQueue<>(monitorProperties.getOutputQueueCapacity());
@@ -131,8 +129,13 @@ public final class MonitorLog implements InitializingBean, DisposableBean {
     }
 
     @Override
-    public void destroy() throws Exception {
+    public void stop() {
         running.set(false);
+    }
+
+    @Override
+    public boolean isRunning() {
+        return running.get();
     }
 
     static class CollectTask extends Thread {
