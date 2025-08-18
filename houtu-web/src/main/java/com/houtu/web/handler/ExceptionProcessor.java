@@ -7,7 +7,7 @@ import jakarta.servlet.http.HttpServletResponse;
 /**
  * 异常错误码解析器
  */
-public interface TransformerExceptionResolver {
+public interface ExceptionProcessor {
 
-    ErrorCode resolve(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex);
+    ErrorCode process(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex);
 }

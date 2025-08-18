@@ -39,11 +39,11 @@ public class MonitorProperties {
 	/**
 	 * 监控日志Collect队列容量
 	 */
-	private int collectQueueCapacity = 5000;
+	private int collectQueueCapacity = 2000;
 	/**
 	 * 监控日志输出队列容量
 	 */
-	private int outputQueueCapacity = 5000;
+	private int outputQueueCapacity = 100;
 
 
 

@@ -4,7 +4,7 @@ import com.houtu.core.context.SpringApplicationContext;
 import com.houtu.core.exception.ErrorCode;
 import com.houtu.springcloud.feign.constant.FeignConstant;
 import com.houtu.springcloud.feign.util.ExceptionHeader;
-import com.houtu.web.handler.TransformerExceptionResolver;
+import com.houtu.web.handler.ExceptionProcessor;
 import feign.codec.DecodeException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -20,14 +20,14 @@ import java.util.Objects;
  * @date 2018年6月4日
  * @Description Feign默认提供全局异常处理
  */
-public class FeignTransformerExceptionResolver implements TransformerExceptionResolver, InitializingBean, Ordered {
+public class FeignExceptionProcessor implements ExceptionProcessor, InitializingBean, Ordered {
 
-    Logger logger = LoggerFactory.getLogger(FeignTransformerExceptionResolver.class);
+    Logger logger = LoggerFactory.getLogger(FeignExceptionProcessor.class);
 
     private String exceptionHeader;
 
     @Override
-    public ErrorCode resolve(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
+    public ErrorCode process(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
         if (ex instanceof DecodeException && ex.getCause() instanceof FeignThroughBusinessException throughBusinessException) {
             if (logger.isDebugEnabled()) {
                 logger.debug("Feign透传异常|FeignThroughBusinessException|{}|code={},message={}", ExceptionHeader.decode(throughBusinessException.getServiceName()), throughBusinessException.getErrorCode().getCode(), throughBusinessException.getErrorCode().getMessage());

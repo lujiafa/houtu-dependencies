@@ -3,7 +3,7 @@ package com.houtu.web.validation.handler;
 import com.houtu.core.constant.ErrorCodeConstant;
 import com.houtu.core.exception.ErrorCode;
 import com.houtu.util.constant.CharConstant;
-import com.houtu.web.handler.TransformerExceptionResolver;
+import com.houtu.web.handler.ExceptionProcessor;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.ConstraintViolation;
@@ -16,10 +16,10 @@ import java.util.Set;
  * @date 2018年6月4日
  * @Description 全局异常处理
  */
-public class ValidationTransformerExceptionResolver implements TransformerExceptionResolver, Ordered {
+public class ValidationExceptionProcessor implements ExceptionProcessor, Ordered {
 
 	@Override
-	public ErrorCode resolve(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
+	public ErrorCode process(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
 		if (ex instanceof ConstraintViolationException actualException) {// 违反约束异常
 			Set<ConstraintViolation<?>> violations = actualException.getConstraintViolations();
 			StringBuilder tempStringBuilder = new StringBuilder();
@@ -39,6 +39,6 @@ public class ValidationTransformerExceptionResolver implements TransformerExcept
 
 	@Override
 	public int getOrder() {
-		return HIGHEST_PRECEDENCE;
+		return 0;
 	}
 }

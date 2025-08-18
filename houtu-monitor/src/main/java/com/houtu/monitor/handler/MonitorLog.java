@@ -1,24 +1,22 @@
 package com.houtu.monitor.handler;
 
-import com.houtu.core.context.SpringApplicationContext;
-import com.houtu.monitor.prop.MonitorProperties;
-import com.houtu.monitor.util.CalculatorUtils;
-import com.houtu.util.common.SystemUtils;
+import com.houtu.monitor.handler.metric.sample.MetricOutput;
+import com.houtu.monitor.handler.metric.sample.MetricSample;
 import jakarta.annotation.Nonnull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.SmartLifecycle;
-import org.springframework.core.env.Environment;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
 
 /**
  * @author jon
@@ -28,28 +26,48 @@ public final class MonitorLog implements SmartLifecycle {
 
     static final Logger LOGGER = LoggerFactory.getLogger(MonitorLog.class);
 
-    static final String METRIC_REQUEST_ATTRS = "bizName=\"%s\",appName=\"%s\",svrIp=\"%s\",cmd=\"%s\",code=\"%d\",%s";
-    static final String METRIC_RPC_ATTRS = "bizName=\"%s\",appName=\"%s\",svrIp=\"%s\",rmtsrv=\"%s\",cmd=\"%s\",code=\"%d\",%s";
+    static MonitorLog INSTANCE;
 
-    static final int[] QUANTILE = new int[]{90, 95, 99};
-
-    static final MonitorLog INSTANCE = new MonitorLog();
-
-    private String bizName;
+    // 业务名称
+    private String businessName;
     private String applicationName;
     private String svrIp;
     private AtomicBoolean running;
     private long period;
     private long delay;
-    private BlockingQueue<Sample> collectQueue;
-    private BlockingQueue<Output> outputQueue;
-    private Map<Long, List<Sample>> collectCacheMap = new ConcurrentHashMap<>();
+    private BlockingQueue<MetricSample> collectQueue;
+    private BlockingQueue<ProcTask.TimeWindowOutput> outputQueue;
+//    private Map<Long, List<MetricSample>> collectCacheMap = new ConcurrentHashMap<>();
+    private Map<Long, Map<String, Map<String, List<Long>>>> collectCacheMap = new ConcurrentHashMap<>();
 
-    MonitorLog() {}
+    private final Map<String, MetricProcessor> processorMap = new HashMap<>();
+    private MonitorWriter monitorWriter;
 
-    public static MonitorLog getInstance() {
-        return INSTANCE;
+    public MonitorLog(String businessName,
+                      String applicationName,
+                      long period,
+                      long delay,
+                      int collectQueueCapacity,
+                      int outputQueueCapacity,
+                      List<MetricProcessor> metricProcessors,
+                      MonitorWriter monitorWriter) {
+        Assert.isTrue(INSTANCE == null, "MonitorLog is already initialized");
+        Assert.hasText(businessName, "businessName is null");
+        Assert.hasText(applicationName, "applicationName is null");
+        Assert.notNull(monitorWriter, "MonitorWriter is null");
+        this.businessName = businessName;
+        this.applicationName = applicationName;
+        this.period = period < 1000 ? 1000 : period;
+        this.delay = delay < 100 ? 100 : delay;
+        this.collectQueue = new LinkedBlockingQueue<>(collectQueueCapacity);
+        this.outputQueue = new LinkedBlockingQueue<>(outputQueueCapacity);
+        if (metricProcessors != null) {
+            metricProcessors.stream().forEach(metricProcessor -> processorMap.put(metricProcessor.supportMetricName(), metricProcessor));
+        }
+        this.monitorWriter = monitorWriter;
+        INSTANCE = this;
     }
+
 
     /**
      * 请求日志
@@ -68,21 +86,16 @@ public final class MonitorLog implements SmartLifecycle {
      * @param cmd  请求地址/请求指令
      * @param code 请求响应业务错误码或服务错误码（如：0-成功 ...）
      * @param cost 请求耗时情况（ms）
-     * @param tags 请求附加标签
+     * @param labels 请求附加标签
      */
-    public static void req(String cmd, int code, long cost, String... tags) {
-        StringBuilder tagsBuilder = new StringBuilder();
-        if (tags != null && tags.length > 0) {
-            for (int i = 0; i < tags.length; i += 2) {
-                tagsBuilder.append(tags[i]).append("=").append("\"");
-                if (i < tags.length - 1)
-                    tagsBuilder.append(tags[i + 1]);
-                tagsBuilder.append("\",");
-            }
-        }
-        String tagsString = tagsBuilder.toString();
-        String attrs = String.format(METRIC_REQUEST_ATTRS, INSTANCE.bizName, INSTANCE.applicationName, INSTANCE.svrIp, cmd, code, tagsString);
-        INSTANCE.collectQueue.offer(new Sample(1, System.currentTimeMillis(), attrs, cost));
+    public static void req(String cmd, int code, long cost, String... labels) {
+        String[] newLabels = new String[labels.length + 4];
+        newLabels[0] = "cmd";
+        newLabels[1] = cmd;
+        newLabels[2] = "code";
+        newLabels[3] = String.valueOf(code);
+        System.arraycopy(labels, 0, newLabels, 6, labels.length);
+        metric("req", cost, System.currentTimeMillis(), newLabels);
     }
 
     /**
@@ -92,40 +105,50 @@ public final class MonitorLog implements SmartLifecycle {
      * @param cmd    远程请求地址/请求指令
      * @param code   请求响应业务错误码或服务错误码
      * @param cost   请求耗时情况（ms）
-     * @param tags   请求附加标签
+     * @param labels   请求附加标签
      */
-    public static void rpc(String rmtsrv, String cmd, int code, long cost, String... tags) {
-        StringBuilder tagsBuilder = new StringBuilder();
-        if (tags != null && tags.length > 0) {
-            for (int i = 0; i < tags.length; i += 2) {
-                tagsBuilder.append(tags[i]).append("=").append("\"");
-                if (i < tags.length - 1)
-                    tagsBuilder.append(tags[i + 1]);
-                tagsBuilder.append("\",");
-            }
+    public static void rpc(String rmtsrv, String cmd, int code, long cost, String... labels) {
+        String[] newLabels = new String[labels.length + 6];
+        newLabels[0] = "rmtsrv";
+        newLabels[1] = rmtsrv;
+        newLabels[2] = "cmd";
+        newLabels[3] = cmd;
+        newLabels[4] = "code";
+        newLabels[5] = String.valueOf(code);
+        System.arraycopy(labels, 0, newLabels, 6, labels.length);
+        metric("rpc", cost, System.currentTimeMillis(), newLabels);
+    }
+
+    /**
+     * 指标日志
+     * @param metricName 指标名称
+     * @param value 值
+     * @param timestamp 时间戳
+     * @param labels 标签
+     */
+    public static void metric(String metricName, long value, long timestamp, String... labels) {
+        Assert.hasText(metricName, "parameter metricName cannot be empty.");
+        Assert.isTrue(labels.length > 0, "parameter labels cannot be empty.");
+        String[] newLabels = new String[labels.length + 6];
+        newLabels[0] = "businessName";
+        newLabels[1] = INSTANCE.businessName;
+        newLabels[2] = "applicationName";
+        newLabels[3] = INSTANCE.applicationName;
+        newLabels[4] = "svrIp";
+        newLabels[5] = INSTANCE.svrIp;
+        System.arraycopy(labels, 0, newLabels, 6, labels.length);
+        boolean offer = INSTANCE.collectQueue.offer(new MetricSample(metricName, newLabels, value, timestamp, INSTANCE.period));
+        if (!offer && LOGGER.isDebugEnabled()) {
+            LOGGER.debug("collect queue is full, metric sample is dropped, metricName={}, value={}", metricName, value);
         }
-        String tagsString = tagsBuilder.toString();
-        String attrs = String.format(METRIC_RPC_ATTRS, INSTANCE.bizName, INSTANCE.applicationName, INSTANCE.svrIp, rmtsrv, cmd, code, tagsString);
-        INSTANCE.collectQueue.offer(new Sample(2, System.currentTimeMillis(), attrs, cost));
     }
 
     @Override
     public void start() {
-        MonitorProperties monitorProperties = SpringApplicationContext.getBean(MonitorProperties.class);
-        collectQueue = new LinkedBlockingQueue<>(monitorProperties.getCollectQueueCapacity());
-        outputQueue = new LinkedBlockingQueue<>(monitorProperties.getOutputQueueCapacity());
-        delay = monitorProperties.getDelay().toMillis();
-        period = monitorProperties.getPeriod().toMillis();
-        Environment environment = SpringApplicationContext.getBean(Environment.class);
-        applicationName = environment != null ? environment.getProperty("spring.application.name", "") : "";
-        bizName = StringUtils.isEmpty(monitorProperties.getBusinessName()) ? applicationName : monitorProperties.getBusinessName();
-        svrIp = StringUtils.isEmpty(monitorProperties.getSvrIp()) ? SystemUtils.getServerIp() : monitorProperties.getSvrIp();
         running = new AtomicBoolean(true);
-        MonitorWriter monitorWriter = SpringApplicationContext.getBean(MonitorWriter.class);
-        Assert.notNull(monitorWriter, "MonitorWriter is null");
         new CollectTask(running).start();
         new ProcTask(running).start();
-        new OutTask(running, monitorWriter).start();
+        new ProcTask.OutTask(running, monitorWriter).start();
     }
 
     @Override
@@ -149,22 +172,30 @@ public final class MonitorLog implements SmartLifecycle {
         public void run() {
             while (running.get()) {
                 try {
-                    Sample sample = INSTANCE.collectQueue.poll();
+                    MetricSample sample = INSTANCE.collectQueue.poll();
                     if (sample == null) {
-                        Thread.sleep(100);
+                        Thread.sleep(1);
                         continue;
                     }
-                    long periodTime = sample.getTimestamp() / INSTANCE.period;
-                    List<Sample> list = INSTANCE.collectCacheMap.get(periodTime);
-                    if (list == null)
-                        INSTANCE.collectCacheMap.put(periodTime, list = new LinkedList<>());
-                    list.add(sample);
+                    long timeWindow = sample.getTimeWindow();
+                    Map<String, Map<String, List<Long>>> metricCollectMap = INSTANCE.collectCacheMap.get(timeWindow);
+                    if (metricCollectMap == null) {
+                        INSTANCE.collectCacheMap.put(timeWindow, metricCollectMap = new ConcurrentHashMap<>());
+                    }
+                    Map<String, List<Long>> attrsCollectMap = metricCollectMap.get(sample.getMetricName());
+                    if (attrsCollectMap == null) {
+                        metricCollectMap.put(sample.getMetricName(), attrsCollectMap = new ConcurrentHashMap<>());
+                    }
+                    List<Long> values = attrsCollectMap.get(sample.getAttrs());
+                    if (values == null) {
+                        attrsCollectMap.put(sample.getAttrs(), values = new LinkedList<>());
+                    }
+                    values.add(sample.getValue());
                 } catch (Exception e) {
                     LOGGER.info("collect task error: {}", e.getMessage());
                 }
             }
         }
-
     }
 
     static class ProcTask extends Thread {
@@ -176,38 +207,45 @@ public final class MonitorLog implements SmartLifecycle {
 
         @Override
         public void run() {
-            long lastProcPeriod = 0;
+            long lastProcTimeWindow = 0;
             while (running.get() || (!running.get() && !INSTANCE.collectCacheMap.isEmpty())) {
                 try {
-                    Long[] periodArray = INSTANCE.collectCacheMap.keySet().stream().sorted().toArray(Long[]::new);
-                    for (int i = 0; i < periodArray.length; i++) {
-                        Long periodTime = periodArray[i];
+                    Long[] timeWindowArray = INSTANCE.collectCacheMap.keySet().stream().sorted().toArray(Long[]::new);
+                    for (int i = 0; i < timeWindowArray.length; i++) {
+                        Long timeWindow = timeWindowArray[i];
                         long current = System.currentTimeMillis();
                         // x * period + period +delay <= currentTime计算而得
-                        long allowMaxPeriodTime = (current - INSTANCE.delay - INSTANCE.period) / INSTANCE.period;
-                        if (periodTime > allowMaxPeriodTime) {
-                            Thread.sleep(10);
+                        long allowMaxTimeWindow = (current - INSTANCE.delay - INSTANCE.period) / INSTANCE.period;
+                        if (timeWindow > allowMaxTimeWindow) {
+                            Thread.sleep(2);
                             break;
                         }
-                        if (periodTime <= lastProcPeriod) {
+                        if (timeWindow <= lastProcTimeWindow) {
                             // 过期废弃删除
-                            INSTANCE.collectCacheMap.remove(periodTime);
+                            INSTANCE.collectCacheMap.remove(timeWindow);
                             continue;
                         }
-                        lastProcPeriod = periodTime;
-                        List<Sample> list = INSTANCE.collectCacheMap.get(periodTime);
-                        Map<Integer, List<Sample>> typeMap = list.parallelStream().collect(Collectors.groupingBy(Sample::getType));
-                        typeMap.entrySet().parallelStream().forEach(e -> {
-                            switch (e.getKey()) {
-                                case 1:
-                                    processRequest(periodTime, e.getValue());
-                                    INSTANCE.collectCacheMap.remove(periodTime);
-                                    break;
-                                case 2:
-                                    processRPC(periodTime, e.getValue());
-                                    INSTANCE.collectCacheMap.remove(periodTime);
-                                    break;
-                            }
+                        lastProcTimeWindow = timeWindow;
+                        Map<String, Map<String, List<Long>>> metricCollectMap = INSTANCE.collectCacheMap.get(timeWindow);
+                        INSTANCE.collectCacheMap.remove(timeWindow);
+                        List<MetricOutput> outputs = new CopyOnWriteArrayList<>();
+                        metricCollectMap.entrySet().parallelStream().forEach(m -> {
+                            String metricName = m.getKey();
+                            MetricProcessor metricProcessor = INSTANCE.processorMap.get(m.getKey());
+                            m.getValue().entrySet().parallelStream().forEach(a -> {
+                                String attrs = a.getKey();
+                                List<Long> values = a.getValue();
+                                long windowTimestamp = timeWindow * INSTANCE.period;
+                                if (metricProcessor == null) {
+                                    long sum = values.parallelStream().mapToLong(v -> v).sum();
+                                    outputs.add(new MetricOutput(windowTimestamp, m.getKey(), attrs, sum));
+                                } else {
+                                    List<MetricOutput> results = metricProcessor.process(windowTimestamp, metricName, attrs, values);
+                                    if (results != null) {
+                                        outputs.addAll(results);
+                                    }
+                                }
+                            });
                         });
                     }
                 } catch (Exception e) {
@@ -216,124 +254,48 @@ public final class MonitorLog implements SmartLifecycle {
             }
         }
 
-        void processRequest(long periodTime, List<Sample> list) {
-            Map<String, List<Sample>> attrsMap = list.stream().collect(Collectors.groupingBy(Sample::getAttrs));
-            attrsMap.entrySet().parallelStream().forEach(e -> {
-                String attrs = e.getKey();
-                Long[] costArray = attrsMap.get(attrs).stream().map(s -> s.getCost()).sorted().toArray(Long[]::new);
-                List<String> outList = new CopyOnWriteArrayList<>();
-                String count = String.format("req_count{%s} %d", attrs, costArray.length);
-                outList.add(count);
-                String sum = String.format("req_sum{%s} %d", attrs, Arrays.stream(costArray).parallel().mapToLong(Long::longValue).sum());
-                outList.add(sum);
-                String max = String.format("req_max{%s} %d", attrs, costArray[costArray.length - 1]);
-                outList.add(max);
-                Arrays.stream(QUANTILE).parallel().forEach(q -> {
-                    long qv = CalculatorUtils.calcQuantile(costArray, q);
-                    String value = String.format("req_metric{%squantile=\"%d\",} %d", attrs, q, qv);
-                    outList.add(value);
-                });
-                INSTANCE.outputQueue.offer(new Output(periodTime, outList));
-            });
-        }
+        static class OutTask extends Thread {
+            private final AtomicBoolean running;
+            private final MonitorWriter writer;
 
-        void processRPC(long periodTime, List<Sample> list) {
-            Map<String, List<Sample>> attrsMap = list.stream().collect(Collectors.groupingBy(Sample::getAttrs));
-            attrsMap.entrySet().parallelStream().forEach(e -> {
-                String attrs = e.getKey();
-                Long[] costArray = attrsMap.get(attrs).stream().map(s -> s.getCost()).sorted().toArray(Long[]::new);
-                List<String> outList = new ArrayList<>();
-                String count = String.format("rpc_count{%s} %d", attrs, costArray.length);
-                outList.add(count);
-                String sum = String.format("rpc_sum{%s} %d", attrs, Arrays.stream(costArray).parallel().mapToLong(Long::longValue).sum());
-                outList.add(sum);
-                String max = String.format("rpc_max{%s} %d", attrs, costArray[costArray.length - 1]);
-                outList.add(max);
-                Arrays.stream(QUANTILE).parallel().forEach(q -> {
-                    long qv = CalculatorUtils.calcQuantile(costArray, q);
-                    String value = String.format("rpc_metric{%squantile=\"%d\",} %d", attrs, q, qv);
-                    outList.add(value);
-                });
-                INSTANCE.outputQueue.offer(new Output(periodTime, outList));
-            });
-        }
+            public OutTask(@Nonnull AtomicBoolean running, @Nonnull MonitorWriter writer) {
+                this.running = running;
+                this.writer = writer;
+            }
 
-    }
-
-    static class OutTask extends Thread {
-        private final AtomicBoolean running;
-        private final MonitorWriter writer;
-
-        public OutTask(@Nonnull AtomicBoolean running, @Nonnull MonitorWriter writer) {
-            this.running = running;
-            this.writer = writer;
-        }
-
-        @Override
-        public void run() {
-            while (running.get() || (!running.get() && (!INSTANCE.collectCacheMap.isEmpty() || !INSTANCE.outputQueue.isEmpty()))) {
-                try {
-                    Output out = INSTANCE.outputQueue.poll();
-                    if (out == null) {
-                        Thread.sleep(10);
-                        continue;
+            @Override
+            public void run() {
+                while (running.get() || (!running.get() && (!INSTANCE.collectCacheMap.isEmpty() || !INSTANCE.outputQueue.isEmpty()))) {
+                    try {
+                        TimeWindowOutput timeWindowOutput = INSTANCE.outputQueue.poll();
+                        if (timeWindowOutput == null) {
+                            Thread.sleep(10);
+                            continue;
+                        }
+                        writer.write(timeWindowOutput.getWindowTimestamp(), timeWindowOutput.getOutputs());
+                    } catch (Exception e) {
+                        LOGGER.info("out task error: {}", e.getMessage());
                     }
-                    long timestamp = INSTANCE.period * out.getPeriodTime();
-                    writer.write(timestamp, out.getOut());
-                } catch (Exception e) {
-                    LOGGER.info("out task error: {}", e.getMessage());
                 }
             }
         }
-    }
 
-    static class Sample {
-        // 类型 1-Request 2-Rpc
-        private int type;
-        // 采样时间戳
-        private long timestamp;
-        private String attrs;
-        private long cost;
+        static class TimeWindowOutput {
+            private long windowTimestamp;
+            private List<MetricOutput> outputs;
 
-        Sample(int type, long timestamp, String attrs, long cost) {
-            this.type = type;
-            this.timestamp = timestamp;
-            this.attrs = attrs;
-            this.cost = cost;
-        }
+            public TimeWindowOutput(long windowTimestamp, List<MetricOutput> outputs) {
+                this.windowTimestamp = windowTimestamp;
+                this.outputs = outputs;
+            }
 
-        public int getType() {
-            return type;
-        }
+            public List<MetricOutput> getOutputs() {
+                return outputs;
+            }
 
-        public long getTimestamp() {
-            return timestamp;
-        }
-
-        public String getAttrs() {
-            return attrs;
-        }
-
-        public long getCost() {
-            return cost;
-        }
-    }
-
-    static class Output {
-        private long periodTime;
-        private List<String> out;
-
-        Output(long periodTime, List<String> out) {
-            this.periodTime = periodTime;
-            this.out = out;
-        }
-
-        public long getPeriodTime() {
-            return periodTime;
-        }
-
-        public List<String> getOut() {
-            return out;
+            public long getWindowTimestamp() {
+                return windowTimestamp;
+            }
         }
     }
 

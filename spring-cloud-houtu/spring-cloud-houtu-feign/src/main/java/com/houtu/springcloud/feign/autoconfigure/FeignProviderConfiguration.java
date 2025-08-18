@@ -1,7 +1,7 @@
 package com.houtu.springcloud.feign.autoconfigure;
 
 import com.houtu.springcloud.feign.provider.FeignBeanPostProcessor;
-import com.houtu.springcloud.feign.provider.FeignTransformerExceptionResolver;
+import com.houtu.springcloud.feign.provider.FeignExceptionProcessor;
 import com.houtu.springcloud.feign.provider.FeignRequestMappingHandlerMapping;
 import com.houtu.util.common.ReflectionUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -56,8 +56,8 @@ public class FeignProviderConfiguration {
     @Bean
     @ConditionalOnMissingBean
     @ConditionalOnClass(com.houtu.web.handler.UnifiedHandlerExceptionResolver.class)
-    public FeignTransformerExceptionResolver feignHandlerExceptionResolver() {
-        return new FeignTransformerExceptionResolver();
+    public FeignExceptionProcessor feignHandlerExceptionResolver() {
+        return new FeignExceptionProcessor();
     }
 
 }

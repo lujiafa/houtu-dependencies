@@ -30,11 +30,11 @@ public class UnifiedHandlerExceptionResolver implements HandlerExceptionResolver
 
     protected final Logger logger = LoggerFactory.getLogger(UnifiedHandlerExceptionResolver.class);
 
-    private List<TransformerExceptionResolver> errorCodeResolvers = new ArrayList<>();
+    private List<ExceptionProcessor> errorCodeResolvers = new ArrayList<>();
 
     public UnifiedHandlerExceptionResolver() {}
 
-    public UnifiedHandlerExceptionResolver(List<TransformerExceptionResolver> errorCodeResolvers) {
+    public UnifiedHandlerExceptionResolver(List<ExceptionProcessor> errorCodeResolvers) {
         Assert.notNull(errorCodeResolvers, "errorCodeResolvers must not be null");
         this.errorCodeResolvers = errorCodeResolvers;
     }
@@ -45,7 +45,7 @@ public class UnifiedHandlerExceptionResolver implements HandlerExceptionResolver
                                          Object handler,
                                          Exception ex) {
         ErrorCode errorCode;
-        if ((errorCode = customErrorCodeResolver(request, response, handler, ex)) != null
+        if ((errorCode = customErrorCodeProcess(request, response, handler, ex)) != null
             || (errorCode = resolveBusinessException(ex)) != null) {
             if (logger.isDebugEnabled()) {
                 logger.debug("业务异常|code={}, message={}|{}", errorCode.getCode(), errorCode.getMessage(), ex.getMessage());
@@ -92,14 +92,14 @@ public class UnifiedHandlerExceptionResolver implements HandlerExceptionResolver
      * @param ex 异常对象
      * @return 自定义异常码
      */
-    ErrorCode customErrorCodeResolver(HttpServletRequest request,
-                                      HttpServletResponse response,
-                                      Object handler,
-                                      Exception ex) {
+    ErrorCode customErrorCodeProcess(HttpServletRequest request,
+                                     HttpServletResponse response,
+                                     Object handler,
+                                     Exception ex) {
         if (errorCodeResolvers.isEmpty())
             return null;
-        for (TransformerExceptionResolver resolver : errorCodeResolvers) {
-            ErrorCode errorCode = resolver.resolve(request, response, handler, ex);
+        for (ExceptionProcessor resolver : errorCodeResolvers) {
+            ErrorCode errorCode = resolver.process(request, response, handler, ex);
             if (errorCode != null)
                 return errorCode;
         }
