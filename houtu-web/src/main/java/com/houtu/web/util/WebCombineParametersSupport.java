@@ -1,11 +1,9 @@
 package com.houtu.web.util;
 
 import com.houtu.core.web.annotation.CachingParam;
-import com.houtu.core.context.SpringApplicationContext;
 import com.houtu.web.handler.CombineHandlerMethodArgumentResolver;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.MethodParameter;
 import org.springframework.util.Assert;
 import org.springframework.web.context.request.ServletWebRequest;
@@ -20,7 +18,7 @@ import java.util.LinkedHashMap;
  * @author jonlu
  * @date 2022/9/5
  */
-public final class WebCombineParametersSupport implements InitializingBean {
+public final class WebCombineParametersSupport {
 
     private static final MethodParameter METHOD_PARAMETER;
 
@@ -35,11 +33,32 @@ public final class WebCombineParametersSupport implements InitializingBean {
         }
     }
 
+    public WebCombineParametersSupport(CombineHandlerMethodArgumentResolver combineHandlerMethodArgumentResolver) {
+        Assert.notNull(combineHandlerMethodArgumentResolver, "combineHandlerMethodArgumentResolver must not be null");
+        WebCombineParametersSupport.combineHandlerMethodArgumentResolver = combineHandlerMethodArgumentResolver;
+    }
+
     /**
-     * 获取复合参数的ModelMap
+     * 获取复合参数的Body部分Map集合
      * @param request 请求对象
      * @param response 响应对象
-     * @return ModelMap
+     * @return LinkedHashMap
+     */
+    public static LinkedHashMap getBodyParameterMap(HttpServletRequest request, HttpServletResponse response) {
+        Assert.notNull(combineHandlerMethodArgumentResolver, "CombineHandlerMethodArgumentResolver must not be null");
+        try {
+            ServletWebRequest servletWebRequest = new ServletWebRequest(request, response);
+            return (LinkedHashMap) combineHandlerMethodArgumentResolver.resolveBodyArgumentReturnMap(METHOD_PARAMETER, servletWebRequest);
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
+
+    /**
+     * 获取复合参数的Map集合
+     * @param request 请求对象
+     * @param response 响应对象
+     * @return LinkedHashMap
      */
     public static LinkedHashMap getCombineParameterMap(HttpServletRequest request, HttpServletResponse response) {
         Assert.notNull(combineHandlerMethodArgumentResolver, "CombineHandlerMethodArgumentResolver must not be null");
@@ -51,11 +70,6 @@ public final class WebCombineParametersSupport implements InitializingBean {
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
         }
-    }
-
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        combineHandlerMethodArgumentResolver = SpringApplicationContext.getBean(CombineHandlerMethodArgumentResolver.class);
     }
 
     class ParameterMapWrapper {

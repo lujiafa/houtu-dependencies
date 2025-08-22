@@ -6,7 +6,7 @@ import com.houtu.util.common.UUIDUtils;
 import com.houtu.util.web.WebUtils;
 import com.houtu.websecurity.constant.SecurityConstant;
 import com.houtu.websecurity.exception.SessionException;
-import com.houtu.websecurity.prop.SecurityProperties;
+import com.houtu.websecurity.prop.SessionProperties;
 import com.houtu.websecurity.session.simple.SimpleSession;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -28,18 +28,18 @@ public class SessionContext {
 
 	static SessionContext INSTANCE;
 
-	private SecurityProperties securityProperties;
+	private SessionProperties sessionProperties;
 	private SessionRepository sessionRepository;
 
 	SessionContext() {}
 
-	public static final SessionContext getInstance(SessionRepository sessionRepository, SecurityProperties securityProperties) {
+	public static final SessionContext getInstance(SessionRepository sessionRepository, SessionProperties sessionProperties) {
 		Assert.notNull(sessionRepository, "parameter sessionRepository cannot be null.");
-		Assert.notNull(securityProperties, "parameter securityProperties cannot be null.");
+		Assert.notNull(sessionProperties, "parameter sessionProperties cannot be null.");
 		if (INSTANCE == null) {
 			INSTANCE = new SessionContext();
 			INSTANCE.sessionRepository = sessionRepository;
-			INSTANCE.securityProperties = securityProperties;
+			INSTANCE.sessionProperties = sessionProperties;
 		}
 		return INSTANCE;
 	}
@@ -51,7 +51,7 @@ public class SessionContext {
 	 * 		sessionId在请求头中字段名默认为“sid”，可通过配置"web.security.session.sessionIdName=sid"自定义设置；
 	 */
 	public static String getSessionId() {
-		String sessionIdName = INSTANCE.securityProperties.getSession().getSessionIdName();
+		String sessionIdName = INSTANCE.sessionProperties.getSessionIdName();
 		if (!StringUtils.hasLength(sessionIdName)) {
 			logger.error("properties sessionIdName[{}] cannot be empty.", sessionIdName);
 			throw new SessionException(ErrorCode.build(ErrorCodeConstant.INTERNAL_ERROR, new Object[]{"web.security.session.sessionIdName"}));
@@ -108,8 +108,8 @@ public class SessionContext {
 		})) {
 			sessionContextHolder.set(session);
 			HttpServletResponse response = WebUtils.getResponse();
-			response.setHeader(INSTANCE.securityProperties.getSession().getSessionIdName(), session.getId());
-			WebUtils.writeCookie(response, INSTANCE.securityProperties.getSession().getSessionIdName(), session.getId(), INSTANCE.securityProperties.getSession().getSessionCookiePath(), INSTANCE.securityProperties.getSession().getSessionCookieDomain(), INSTANCE.securityProperties.getSession().getExpire());
+			response.setHeader(INSTANCE.sessionProperties.getSessionIdName(), session.getId());
+			WebUtils.writeCookie(response, INSTANCE.sessionProperties.getSessionIdName(), session.getId(), INSTANCE.sessionProperties.getSessionCookiePath(), INSTANCE.sessionProperties.getSessionCookieDomain(), INSTANCE.sessionProperties.getExpire());
 			return true;
 		}
 		return false;
@@ -188,7 +188,7 @@ public class SessionContext {
 	public static boolean remove() {
 		remove(getSessionId());
 		reset();
-		WebUtils.removeCookie(WebUtils.getRequest(), WebUtils.getResponse(), INSTANCE.securityProperties.getSession().getSessionIdName());
+		WebUtils.removeCookie(WebUtils.getRequest(), WebUtils.getResponse(), INSTANCE.sessionProperties.getSessionIdName());
 		return true;
 	}
 	

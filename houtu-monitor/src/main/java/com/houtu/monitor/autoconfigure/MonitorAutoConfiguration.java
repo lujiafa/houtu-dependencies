@@ -4,10 +4,7 @@ import com.houtu.monitor.handler.*;
 import com.houtu.monitor.handler.metric.RequestMetricProcessor;
 import com.houtu.monitor.handler.metric.RpcMetricProcessor;
 import com.houtu.monitor.prop.MonitorProperties;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
+import org.springframework.boot.autoconfigure.condition.*;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -48,37 +45,35 @@ public class MonitorAutoConfiguration {
                 metricProcessors, monitorWriter);
     }
 
-    @Configuration
-    @ConditionalOnProperty(name = {MonitorProperties.PREFIX + ".fullRequest",MonitorProperties.PREFIX + ".full-request"}, havingValue = "false", matchIfMissing = true)
-    static class AspectRequestMonitorConfiguration {
-        @Bean
-        @ConditionalOnMissingBean(ReqMonitorAspectHandler.class)
-        public ReqMonitorAspectHandler requestMonitorAspectHandler() {
-            return new ReqMonitorAspectHandler();
-        }
-    }
 
-    @Configuration
-    @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
-    @ConditionalOnProperty(name = {MonitorProperties.PREFIX + ".fullRequest",MonitorProperties.PREFIX + ".full-request"}, havingValue = "true")
-    static class FullRequestMonitorConfiguration {
-        @Bean
-        @ConditionalOnMissingBean(RequestFeignMonitorHandler.class)
-        public RequestFeignMonitorHandler requestFeignMonitorHandler() {
-            return new RequestFeignMonitorHandler();
-        }
-
-        @Bean
-        @ConditionalOnMissingBean(RequestMonitorHandler.class)
-        public RequestMonitorHandler requestMonitorHandler() {
-            return new RequestMonitorHandler();
-        }
+    @Bean
+    @ConditionalOnMissingBean(ReqMonitorAspectHandler.class)
+    public ReqMonitorAspectHandler requestMonitorAspectHandler() {
+        return new ReqMonitorAspectHandler();
     }
 
     @Bean
     @ConditionalOnMissingBean(RpcMonitorAspectHandler.class)
     public RpcMonitorAspectHandler rpcMonitorAspectHandler() {
         return new RpcMonitorAspectHandler();
+    }
+
+    @Configuration
+    @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
+    @ConditionalOnProperty(name = MonitorProperties.PREFIX + ".full-request", havingValue = "true")
+    static class FullRequestMonitorConfiguration {
+        @Bean
+        @ConditionalOnMissingBean
+        @ConditionalOnClass(name = {RequestFeignMonitorHandler.FEIGN_ANNOTATION_CLASS_NAME, RequestFeignMonitorHandler.AUTO_FEIGN_ANNOTATION_CLASS_NAME})
+        public RequestFeignMonitorHandler requestFeignMonitorHandler() {
+            return new RequestFeignMonitorHandler();
+        }
+
+        @Bean
+        @ConditionalOnMissingBean
+        public RequestMonitorHandler requestMonitorHandler() {
+            return new RequestMonitorHandler();
+        }
     }
 
 }

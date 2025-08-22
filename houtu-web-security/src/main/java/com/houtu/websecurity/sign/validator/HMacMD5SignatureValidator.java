@@ -5,13 +5,12 @@ import com.houtu.core.exception.ErrorCode;
 import com.houtu.util.crypto.SignUtils;
 import com.houtu.websecurity.annotation.CheckSign;
 import com.houtu.websecurity.exception.SignatureException;
-import com.houtu.websecurity.prop.SecurityProperties;
+import com.houtu.websecurity.prop.SignProperties;
 import com.houtu.websecurity.sign.AbstractSignatureValidator;
 import com.houtu.websecurity.sign.SignContext;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.lang.reflect.Method;
 import java.util.Map;
@@ -23,13 +22,13 @@ public class HMacMD5SignatureValidator extends AbstractSignatureValidator {
 	
 	private final static Logger logger = LoggerFactory.getLogger(HMacMD5SignatureValidator.class);
 
-	protected SecurityProperties securityProperties;
+	protected SignProperties signProperties;
 
 	@Override
 	protected void doVerify(HttpServletRequest request, Method method, CheckSign checkSign, Map<String, String> signParamMap, String sign) throws SignatureException {
 		try {
 			String signKey = SignContext.getSignKey();
-			if (signKey == null && (securityProperties == null || (signKey = securityProperties.getSign().getSignKey()) == null))
+			if (signKey == null && (signProperties == null || (signKey = signProperties.getSignKey()) == null))
 				throw new SignatureException(ErrorCode.build(ErrorCodeConstant.INVALID_SIGNATURE_INFO));
 			if (!SignUtils.verifyHMacMD5(signParamMap, signKey, sign)) {
 				throw new SignatureException(ErrorCode.build(ErrorCodeConstant.INVALID_SIGNATURE_INFO, request.getLocale()));
@@ -42,7 +41,7 @@ public class HMacMD5SignatureValidator extends AbstractSignatureValidator {
 		}
 	}
 
-	public void setSecurityProperties(SecurityProperties securityProperties) {
-		this.securityProperties = securityProperties;
+	public void setSignProperties(SignProperties signProperties) {
+		this.signProperties = signProperties;
 	}
 }

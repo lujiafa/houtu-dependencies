@@ -11,9 +11,9 @@ import java.util.Map;
  * @Author: jonlu
  * @Date: 2018/9/5
  */
-public class AccessLogCombineModelMapProcessor {
+public class WebCombineParametersWrapper {
 
-    public Map getCombineModelMap(HttpServletRequest request, HttpServletResponse response) {
-        return WebCombineParametersSupport.getCombineParameterMap(request, response);
+    public Map getBodyParameterMap(HttpServletRequest request, HttpServletResponse response) {
+        return WebCombineParametersSupport.getBodyParameterMap(request, response);
     }
 }

@@ -73,35 +73,67 @@ public class UrlUtils {
 	
 	/**
 	 * @Description 通过url和参数集合组成新的url
+	 * 		url格式：scheme://[user:password@]host[:port]/path[?query][#fragment]
+	 * 		afterHashQuery默认为false
 	 * @param sourceUrl 源url
 	 * @param paramMap 增量参数集合
 	 * @param encode 是否进行增量参数URLEncode编码 true-进行编码 false-不进行编码
 	 * @return String
 	 */
 	public static String concat(String sourceUrl, Map<String, String> paramMap, boolean encode) {
+		return concat(sourceUrl, paramMap, encode, false);
+	}
+
+	/**
+	 * @Description 通过url和参数集合组成新的url
+	 * 		url格式：scheme://[user:password@]host[:port]/path[?query][#fragment]
+	 * @param sourceUrl 源url
+	 * @param paramMap 增量参数集合
+	 * @param encode 是否进行增量参数URLEncode编码 true-进行编码 false-不进行编码
+	 * @param afterHashQuery 是否在#号后添加参数 true-添加参数 false-在#号前添加参数
+	 * @return String
+	 */
+	public static String concat(String sourceUrl, Map<String, String> paramMap, boolean encode, boolean afterHashQuery) {
 		String slimUrl = sourceUrl.trim();
 		if (!StringUtils.hasText(slimUrl) || slimUrl.startsWith(CharConstant.HASH) || slimUrl.startsWith(CharConstant.QUESTION))
 			throw new IllegalArgumentException("sourceUrl is empty or starts with # or ?");
 		if (paramMap == null || paramMap.isEmpty())
 			return sourceUrl;
-		String fragment = null;
-		String query = null;
+		String fragment = CharConstant.EMPTY;
+		String query = CharConstant.EMPTY;
 		int fragmentSplitIndex = slimUrl.indexOf(CharConstant.HASH_CHAR);
 		if (fragmentSplitIndex > -1) {
-			if (fragmentSplitIndex == slimUrl.length() - 1)
-				fragment = CharConstant.EMPTY;
-			else
-				fragment = slimUrl.substring(fragmentSplitIndex + 1);
+			if (afterHashQuery) {
+				if (fragmentSplitIndex < slimUrl.length() - 1) {
+					fragment = slimUrl.substring(fragmentSplitIndex + 1);
+					int querySplitIndex = fragment.indexOf(CharConstant.QUESTION_CHAR);
+					if (querySplitIndex > -1) {
+						if (querySplitIndex == fragment.length() - 1) {
+							query = CharConstant.EMPTY;
+						} else {
+							query = fragment.substring(querySplitIndex + 1);
+						}
+						fragment = fragment.substring(0, querySplitIndex);
+					}
+				}
+			} else {
+				if (fragmentSplitIndex < slimUrl.length() - 1) {
+					fragment = slimUrl.substring(fragmentSplitIndex + 1);
+				}
+			}
 			slimUrl = slimUrl.substring(0, fragmentSplitIndex);
 		}
-		int querySplitIndex = slimUrl.indexOf(CharConstant.QUESTION_CHAR);
-		if (querySplitIndex > -1) {
-			if (querySplitIndex == slimUrl.length() - 1)
-				query = CharConstant.EMPTY;
-			else
-				query = slimUrl.substring(querySplitIndex + 1);
-			slimUrl = slimUrl.substring(0, querySplitIndex);
+		if (!afterHashQuery) {
+			int querySplitIndex = slimUrl.indexOf(CharConstant.QUESTION_CHAR);
+			if (querySplitIndex > -1) {
+				if (querySplitIndex == slimUrl.length() - 1)
+					query = CharConstant.EMPTY;
+				else
+					query = slimUrl.substring(querySplitIndex + 1);
+				slimUrl = slimUrl.substring(0, querySplitIndex);
+			}
 		}
+		// 拼接参数
 		StringBuilder queryBuilder = new StringBuilder(query);
 		paramMap.entrySet().forEach(p -> {
 			try {
@@ -115,12 +147,18 @@ public class UrlUtils {
 				throw new RuntimeException(e.getMessage(), e);
 			}
 		});
-		StringBuilder urlBuilder = new StringBuilder(slimUrl)
-				.append(CharConstant.QUESTION)
-				.append(queryBuilder);
-		if (fragment == null)
-			return urlBuilder.toString();
-		return urlBuilder.append(CharConstant.HASH).append(fragment).toString();
+		// 组成新url
+		StringBuilder urlBuilder = new StringBuilder(slimUrl);
+		if (afterHashQuery) {
+			urlBuilder.append(CharConstant.HASH).append(fragment).append(CharConstant.QUESTION).append(queryBuilder);
+		} else {
+			urlBuilder.append(CharConstant.QUESTION)
+					.append(queryBuilder);
+			if (fragmentSplitIndex > -1) {
+				urlBuilder.append(CharConstant.HASH).append(fragment);
+			}
+		}
+		return urlBuilder.toString();
 	}
 	
 }

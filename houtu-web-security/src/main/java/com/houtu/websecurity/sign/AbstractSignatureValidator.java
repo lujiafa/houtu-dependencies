@@ -5,7 +5,6 @@ import com.houtu.core.exception.ErrorCode;
 import com.houtu.websecurity.annotation.CheckSign;
 import com.houtu.websecurity.constant.SecurityConstant;
 import com.houtu.websecurity.exception.SignatureException;
-import com.houtu.websecurity.prop.SecurityProperties;
 import jakarta.servlet.http.HttpServletRequest;
 
 import java.lang.reflect.Method;
@@ -15,8 +14,6 @@ import java.util.Map;
  * 抽象签名验证器
  */
 public abstract class AbstractSignatureValidator implements SignatureValidator {
-
-    protected SecurityProperties securityProperties;
 
     @Override
     public void verify(HttpServletRequest request, Method method, CheckSign checkSign, Map<String, String> parameterMap) throws SignatureException {

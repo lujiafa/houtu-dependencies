@@ -1,17 +1,16 @@
 package com.houtu.websecurity.autoconfigure;
 
-import com.houtu.core.autoconfigure.CoreAutoConfiguration;
 import com.houtu.websecurity.config.WebSecurityWebMvcConfigurer;
 import com.houtu.websecurity.handler.WebSecurityHandlerInterceptor;
 import com.houtu.websecurity.permission.PermissionValidator;
-import com.houtu.websecurity.prop.SecurityProperties;
+import com.houtu.websecurity.prop.SessionProperties;
 import com.houtu.websecurity.session.SessionValidator;
 import com.houtu.websecurity.sign.SignatureValidator;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.boot.autoconfigure.AutoConfigureAfter;
+import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
@@ -24,20 +23,19 @@ import java.beans.Introspector;
 
 @AutoConfiguration
 @ConditionalOnWebApplication
-@AutoConfigureAfter(CoreAutoConfiguration.class)
-@EnableConfigurationProperties({SecurityProperties.class})
+@AutoConfigureOrder(Ordered.LOWEST_PRECEDENCE)
 @Import({SessionConfiguration.class, PermissionConfiguration.class, SignatureConfiguration.class})
 public class WebSecurityAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(WebSecurityHandlerInterceptor.class)
-    public WebSecurityHandlerInterceptor webSecurityHandlerInterceptor(Environment env,
-                                                                       SecurityProperties securityProperties,
+    public WebSecurityHandlerInterceptor webSecurityHandlerInterceptor(Environment environment,
+                                                                       SessionProperties sessionProperties,
                                                                        SessionValidator sessionValidator,
                                                                        SignatureValidator signatureValidator,
                                                                        PermissionValidator permissionValidator,
-                                                                       RedisTemplate redisTemplate) {
-        return new WebSecurityHandlerInterceptor(env, securityProperties, sessionValidator, signatureValidator, permissionValidator, redisTemplate);
+                                                                       @Qualifier("redisTemplate") RedisTemplate<Object, Object> redisTemplate) {
+        return new WebSecurityHandlerInterceptor(environment, sessionProperties, sessionValidator, signatureValidator, permissionValidator, redisTemplate);
     }
 
     @Bean

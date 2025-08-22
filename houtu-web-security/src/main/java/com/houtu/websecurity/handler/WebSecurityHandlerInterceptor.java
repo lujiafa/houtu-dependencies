@@ -6,7 +6,6 @@ import com.houtu.core.exception.ErrorCode;
 import com.houtu.util.common.AnnotationUtils;
 import com.houtu.util.common.MapUtils;
 import com.houtu.util.constant.CharConstant;
-import com.houtu.util.constant.CharConstant;
 import com.houtu.util.web.WebUtils;
 import com.houtu.web.util.WebCombineParametersSupport;
 import com.houtu.web.view.SmartErrorView;
@@ -15,7 +14,7 @@ import com.houtu.websecurity.constant.SecurityConstant;
 import com.houtu.websecurity.exception.SessionException;
 import com.houtu.websecurity.exception.SignatureException;
 import com.houtu.websecurity.permission.PermissionValidator;
-import com.houtu.websecurity.prop.SecurityProperties;
+import com.houtu.websecurity.prop.SessionProperties;
 import com.houtu.websecurity.session.SessionContext;
 import com.houtu.websecurity.session.SessionValidator;
 import com.houtu.websecurity.sign.SignatureValidator;
@@ -44,9 +43,9 @@ public class WebSecurityHandlerInterceptor implements HandlerInterceptor, Filter
     private static final Map<Method, MethodSecurityAnnotationInfo> CACHE_MAP = new java.util.HashMap<>();
     private static final MethodSecurityAnnotationInfo EMPTY_ANNOTATION_INFO = new MethodSecurityAnnotationInfo(null);
     private static final ReentrantLock CACHE_LOCK = new ReentrantLock();
-    private static final int CACHE_MAX_SIZE = 1000;
+    private static final int CACHE_MAX_SIZE = 2048;
 
-    private SecurityProperties securityProperties;
+    private SessionProperties sessionProperties;
     private SessionValidator sessionValidator;
     private PermissionValidator permissionValidator;
     private SignatureValidator signatureValidator;
@@ -54,12 +53,12 @@ public class WebSecurityHandlerInterceptor implements HandlerInterceptor, Filter
     private String applicationName;
 
     public WebSecurityHandlerInterceptor(Environment env,
-                                         SecurityProperties securityProperties,
+                                         SessionProperties sessionProperties,
                                          SessionValidator sessionValidator,
                                          SignatureValidator signatureValidator,
                                          PermissionValidator permissionValidator,
                                          RedisTemplate redisTemplate) {
-        this.securityProperties = securityProperties;
+        this.sessionProperties = sessionProperties;
         this.sessionValidator = sessionValidator;
         this.permissionValidator = permissionValidator;
         this.signatureValidator = signatureValidator;
@@ -121,18 +120,20 @@ public class WebSecurityHandlerInterceptor implements HandlerInterceptor, Filter
             if (ErrorCodeConstant.SESSION_EXPIRED.equals(e.getErrorCode().getCode())
                     || ErrorCodeConstant.SESSION_KICK_OUT_EXPIRED.equals(e.getErrorCode().getCode())) {
                 MediaType mediaType = WebUtils.getResponseMediaType(request);
-                if (StringUtils.hasLength(securityProperties.getSession().getLoginUrl())
+                if (StringUtils.hasLength(sessionProperties.getLoginUrl())
                         && (MediaType.TEXT_HTML.includes(mediaType)
                         || MediaType.APPLICATION_XHTML_XML.includes(mediaType))) {
                     try {
                         PrintWriter pw = response.getWriter();
-                        pw.write("<html><script type=\"text/javascript\">top.location.href=" + securityProperties.getSession().getLoginUrl().trim() + "</script></html>");
+                        pw.write("<html><script type=\"text/javascript\">top.location.href=" + sessionProperties.getLoginUrl().trim() + "</script></html>");
                         pw.flush();
                         pw.close();
                     } catch (IOException ie) {
                     }
+                    return;
                 }
             }
+            throw e;
         }
     }
 
@@ -141,6 +142,7 @@ public class WebSecurityHandlerInterceptor implements HandlerInterceptor, Filter
     }
 
     protected void checkRepeatRequest(HttpServletRequest request, Map<String, String> parameterMap) {
+        if (redisTemplate == null) return;
         String requestId = parameterMap.get(SecurityConstant.PARAM_REQUEST_ID_NAME);
         if (requestId == null) {
             requestId = request.getHeader(SecurityConstant.PARAM_REQUEST_ID_NAME);
@@ -168,7 +170,7 @@ public class WebSecurityHandlerInterceptor implements HandlerInterceptor, Filter
     private MethodSecurityAnnotationInfo getAnnotationInfo(Method method) {
         MethodSecurityAnnotationInfo annotationInfo = CACHE_MAP.get(method);
         if (annotationInfo != null) {
-            if (EMPTY_ANNOTATION_INFO.isEmpty())
+            if (annotationInfo.isEmpty())
                 return new MethodSecurityAnnotationInfo(method);
             return annotationInfo;
         }

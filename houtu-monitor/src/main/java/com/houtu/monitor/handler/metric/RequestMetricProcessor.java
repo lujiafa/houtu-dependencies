@@ -17,13 +17,13 @@ public class RequestMetricProcessor extends AbstractMetricProcessor {
 
     @Override
     protected void onProcess(long windowTimestamp, String metricName, String attrs, Long[] sampleSortedValues, List<MetricOutput> outputs) {
-        outputs.add(new MetricOutput(windowTimestamp, "req_count", attrs, sampleSortedValues.length));
-        outputs.add(new MetricOutput(windowTimestamp, "req_sum", attrs, Arrays.stream(sampleSortedValues).parallel().mapToLong(Long::longValue).sum()));
-        outputs.add(new MetricOutput(windowTimestamp, "req_max", attrs, sampleSortedValues[sampleSortedValues.length - 1]));
+        outputs.add(new MetricOutput(windowTimestamp, "req_count", attrs, sampleSortedValues.length, sampleSortedValues.length));
+        outputs.add(new MetricOutput(windowTimestamp, "req_sum", attrs, sampleSortedValues.length, Arrays.stream(sampleSortedValues).parallel().mapToLong(Long::longValue).sum()));
+        outputs.add(new MetricOutput(windowTimestamp, "req_max", attrs, sampleSortedValues.length, sampleSortedValues[sampleSortedValues.length - 1]));
         Arrays.stream(QUANTILE).parallel().forEach(q -> {
             long qv = CalculatorUtils.calcQuantile(sampleSortedValues, q);
             String newAttrs = String.format("%squantile=\"%d\",", attrs, q, qv);
-            outputs.add(new MetricOutput(windowTimestamp, "req_metric", newAttrs, qv));
+            outputs.add(new MetricOutput(windowTimestamp, "req_metric", newAttrs, sampleSortedValues.length, qv));
         });
     }
 }

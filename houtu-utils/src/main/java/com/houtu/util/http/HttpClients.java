@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.houtu.util.common.IntrospectorUtils;
 import com.houtu.util.common.JsonUtils;
 import com.houtu.util.prop.HttpClientProperties;
+import jakarta.annotation.Nonnull;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
@@ -386,7 +387,7 @@ public class HttpClients {
             return charset;
         }
 
-        public <T> T convert(Class<T> clazz) {
+        public @Nonnull <T> T convert(Class<T> clazz) {
             if (statusCode == HttpStatus.SC_OK) {
                 if (CharSequence.class.isAssignableFrom(clazz)) {
                     return (T) content;

@@ -17,7 +17,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.Ordered;
 import org.springframework.core.ResolvableType;
-import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.FormHttpMessageConverter;
@@ -37,10 +36,7 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.mvc.method.annotation.AbstractMessageConverterMethodArgumentResolver;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @date 2016年6月4日
@@ -71,6 +67,18 @@ public class CombineHandlerMethodArgumentResolver extends AbstractMessageConvert
             return true;
         }
         return false;
+    }
+
+    public Map resolveBodyArgumentReturnMap(MethodParameter parameter, NativeWebRequest webRequest) throws Exception {
+        HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
+        if (HashMap.class.isAssignableFrom(parameter.getParameterType()) && supportResolverRequestBody(request, parameter)) {
+            request.setAttribute(WebSupportConstant.CACHING_STREAM_ENABLE_ATTR_NAME, AnnotationUtils.getAnnotationByPriorityMethod(parameter.getMethod(), CachingParam.class) != null);
+            Object bodyArg = readWithMessageConverters(webRequest, parameter, parameter.getNestedGenericParameterType());
+            if (bodyArg instanceof HashMap hashMap) {
+                return hashMap;
+            }
+        }
+        return Collections.emptyMap();
     }
 
 
@@ -142,10 +150,7 @@ public class CombineHandlerMethodArgumentResolver extends AbstractMessageConvert
                 mavContainer.addAttribute(BindingResult.MODEL_KEY_PREFIX + name, binder.getBindingResult());
             }
         }
-
-        return
-
-                adaptArgumentIfNecessary(arg, parameter);
+        return adaptArgumentIfNecessary(arg, parameter);
     }
 
     @Override
@@ -158,8 +163,7 @@ public class CombineHandlerMethodArgumentResolver extends AbstractMessageConvert
         }
         HttpServletRequest request = (HttpServletRequest) servletRequest.getAttribute(WebSupportConstant.REPEAT_STREAM_HTTP_SERVLET_REQUEST_ATTR_NAME);
         if (request == null) {
-            request = new CachingStreamHttpServletRequest(servletRequest);
-            servletRequest.setAttribute(WebSupportConstant.REPEAT_STREAM_HTTP_SERVLET_REQUEST_ATTR_NAME, request);
+            servletRequest.setAttribute(WebSupportConstant.REPEAT_STREAM_HTTP_SERVLET_REQUEST_ATTR_NAME, request = new CachingStreamHttpServletRequest(servletRequest));
         }
         return new ServletServerHttpRequest(request);
     }
@@ -180,11 +184,12 @@ public class CombineHandlerMethodArgumentResolver extends AbstractMessageConvert
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         filterChain.doFilter(servletRequest, servletResponse);
-
         // 若启用缓存，则移除缓存的HttpServletRequest
         Boolean cachingEnable = (Boolean) servletRequest.getAttribute(WebSupportConstant.CACHING_STREAM_ENABLE_ATTR_NAME);
-        if (Boolean.TRUE.equals(cachingEnable)) {
-            servletRequest.removeAttribute(WebSupportConstant.REPEAT_STREAM_HTTP_SERVLET_REQUEST_ATTR_NAME);
+        if (cachingEnable != null) {
+            servletRequest.removeAttribute(WebSupportConstant.CACHING_STREAM_ENABLE_ATTR_NAME);
+            if (cachingEnable)
+                servletRequest.removeAttribute(WebSupportConstant.REPEAT_STREAM_HTTP_SERVLET_REQUEST_ATTR_NAME);
         }
     }
 

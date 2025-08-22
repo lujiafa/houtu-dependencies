@@ -1,6 +1,6 @@
 package com.houtu.websecurity.session.repository;
 
-import com.houtu.websecurity.prop.SecurityProperties;
+import com.houtu.websecurity.prop.SessionProperties;
 import com.houtu.websecurity.session.Session;
 import jakarta.annotation.Nonnull;
 import org.slf4j.Logger;
@@ -27,13 +27,13 @@ public class EfficientSessionRepository extends RedisSessionRepository {
 
     private Cache cache;
 
-    public EfficientSessionRepository(CacheManager cacheManager, RedisTemplate redisTemplate, SecurityProperties securityProperties) {
-        super(redisTemplate, securityProperties);
+    public EfficientSessionRepository(CacheManager cacheManager, RedisTemplate redisTemplate, SessionProperties sessionProperties) {
+        super(sessionProperties, redisTemplate);
         Assert.notNull(cacheManager, "parameter cacheManager cannot be null.");
-        if (cacheManager.getCacheNames().parallelStream().anyMatch(name -> Objects.equals(name, securityProperties.getSession().getCache().getName()))) {
-            cache = cacheManager.getCache(securityProperties.getSession().getCache().getName());
+        if (cacheManager.getCacheNames().parallelStream().anyMatch(name -> Objects.equals(name, sessionProperties.getEfficientCacheName()))) {
+            cache = cacheManager.getCache(sessionProperties.getEfficientCacheName());
         } else {
-            logger.warn("EfficientSessionRepository cache is not configured, please configure cache: {}", securityProperties.getSession().getCache().getName());
+            logger.warn("EfficientSessionRepository cache is not configured, please configure cache: {}", sessionProperties.getEfficientCacheName());
         }
     }
 
@@ -48,7 +48,7 @@ public class EfficientSessionRepository extends RedisSessionRepository {
         }
         if (super.save(session, uniqueCompositeMutexFunction)) {
             // 同步所有节点缓存会话信息已更新
-            redisTemplate.convertAndSend(securityProperties.getSession().getCache().getSyncChannel(), session.getId());
+            redisTemplate.convertAndSend(sessionProperties.getEfficientCacheSyncChannel(), session.getId());
             return true;
         }
         return false;
@@ -61,7 +61,7 @@ public class EfficientSessionRepository extends RedisSessionRepository {
         }
         if (super.update(session, uniqueCompositeMutexFunction)) {
             // 同步所有节点缓存会话信息已更新
-            redisTemplate.convertAndSend(securityProperties.getSession().getCache().getSyncChannel(), session.getId());
+            redisTemplate.convertAndSend(sessionProperties.getEfficientCacheSyncChannel(), session.getId());
             return true;
         }
         return false;

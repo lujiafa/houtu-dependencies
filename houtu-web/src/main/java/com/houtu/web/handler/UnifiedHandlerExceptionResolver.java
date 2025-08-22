@@ -4,6 +4,7 @@ import com.houtu.core.constant.ErrorCodeConstant;
 import com.houtu.core.exception.BusinessException;
 import com.houtu.core.exception.ErrorCode;
 import com.houtu.util.constant.CharConstant;
+import com.houtu.web.util.ThrowableUtils;
 import com.houtu.web.view.SmartErrorView;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

@@ -1,0 +1,35 @@
+package com.houtu.websecurity.session.configuration;
+
+import com.houtu.websecurity.prop.SessionProperties;
+import com.houtu.websecurity.session.redis.SessionRedisTemplateLoader;
+import com.houtu.websecurity.session.repository.EfficientSessionRepository;
+import com.houtu.websecurity.session.repository.EfficientSessionRepositoryMessageListener;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.listener.RedisMessageListenerContainer;
+import org.springframework.data.redis.listener.Topic;
+
+public abstract class AbstractEfficientSessionRepositoryConfiguration<T> {
+
+    public abstract EfficientSessionRepository sessionRepository(T cacheManager,
+                                                                 SessionRedisTemplateLoader sessionRedisTemplateLoader,
+                                                                 SessionProperties sessionProperties);
+
+    @Bean
+    @ConditionalOnBean(EfficientSessionRepository.class)
+    @ConditionalOnMissingBean
+    public RedisMessageListenerContainer sessionMessageListenerContainer(
+            SessionRedisTemplateLoader sessionRedisTemplateLoader,
+            SessionProperties sessionProperties,
+            EfficientSessionRepository sessionRepository) {
+        RedisTemplate redisTemplate = sessionRedisTemplateLoader.getRedisTemplate();
+        String syncChannel = sessionProperties.getEfficientCacheSyncChannel();
+        EfficientSessionRepositoryMessageListener sessionMessageListener = new EfficientSessionRepositoryMessageListener(sessionRepository.getCache(), redisTemplate, syncChannel);
+        RedisMessageListenerContainer sessionMessageListenerContainer = new RedisMessageListenerContainer();
+        sessionMessageListenerContainer.setConnectionFactory(redisTemplate.getConnectionFactory());
+        sessionMessageListenerContainer.addMessageListener(sessionMessageListener, Topic.channel(syncChannel));
+        return sessionMessageListenerContainer;
+    }
+}

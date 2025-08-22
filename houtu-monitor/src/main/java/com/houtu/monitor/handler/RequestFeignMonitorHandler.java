@@ -27,8 +27,8 @@ import java.lang.reflect.Proxy;
  * @author jonlu
  */
 public class RequestFeignMonitorHandler extends AbstractMonitorAspectHandler<ReqMonitor> implements Pointcut, MethodInterceptor, PointcutAdvisor {
-	static final String FEIGN_ANNOTATION_CLASS_NAME = "org.springframework.cloud.openfeign.FeignClient";
-	static final String AUTO_FEIGN_ANNOTATION_CLASS_NAME = "com.houtu.springcloud.feign.anotation.AutoFeign";
+	public static final String FEIGN_ANNOTATION_CLASS_NAME = "org.springframework.cloud.openfeign.FeignClient";
+	public static final String AUTO_FEIGN_ANNOTATION_CLASS_NAME = "com.houtu.springcloud.feign.anotation.AutoFeign";
 
 	static Logger logger = LoggerFactory.getLogger(RequestFeignMonitorHandler.class);
 

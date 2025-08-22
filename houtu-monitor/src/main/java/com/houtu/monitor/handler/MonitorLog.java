@@ -37,7 +37,6 @@ public final class MonitorLog implements SmartLifecycle {
     private long delay;
     private BlockingQueue<MetricSample> collectQueue;
     private BlockingQueue<ProcTask.TimeWindowOutput> outputQueue;
-//    private Map<Long, List<MetricSample>> collectCacheMap = new ConcurrentHashMap<>();
     private Map<Long, Map<String, Map<String, List<Long>>>> collectCacheMap = new ConcurrentHashMap<>();
 
     private final Map<String, MetricProcessor> processorMap = new HashMap<>();
@@ -238,7 +237,7 @@ public final class MonitorLog implements SmartLifecycle {
                                 long windowTimestamp = timeWindow * INSTANCE.period;
                                 if (metricProcessor == null) {
                                     long sum = values.parallelStream().mapToLong(v -> v).sum();
-                                    outputs.add(new MetricOutput(windowTimestamp, m.getKey(), attrs, sum));
+                                    outputs.add(new MetricOutput(windowTimestamp, m.getKey(), attrs, values.size(), sum));
                                 } else {
                                     List<MetricOutput> results = metricProcessor.process(windowTimestamp, metricName, attrs, values);
                                     if (results != null) {

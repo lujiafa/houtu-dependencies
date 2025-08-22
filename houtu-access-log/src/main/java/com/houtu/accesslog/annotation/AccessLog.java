@@ -19,10 +19,10 @@ public @interface AccessLog {
 	boolean value() default true;
 
 	/**
-	 * 是否启用输出所有参数数据
+	 * 是否启用输出body参数数据
 	 * @return true-开启 false-关闭
 	 */
-	boolean params() default false;
+	boolean body() default false;
 	
 	/**
 	 * @Title logFilterHandler
