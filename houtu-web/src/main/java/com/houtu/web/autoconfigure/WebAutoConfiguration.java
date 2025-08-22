@@ -10,7 +10,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
@@ -26,7 +25,6 @@ import org.springframework.web.servlet.mvc.method.annotation.JsonViewResponseBod
 import org.springframework.web.servlet.mvc.method.annotation.RequestBodyAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
-import java.beans.Introspector;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,14 +41,14 @@ public class WebAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    @ConditionalOnProperty(prefix = WebProperties.PROPERTIES_PREFIX, value = {"exceptionResolver", "exception-resolver"}, havingValue = "true", matchIfMissing = true)
+    @ConditionalOnProperty(prefix = WebProperties.PROPERTIES_PREFIX, value = "exception-resolver", havingValue = "true", matchIfMissing = true)
     public UnifiedBasicHandlerExceptionResolver unifiedBasicHandlerExceptionResolver() {
         return new UnifiedBasicHandlerExceptionResolver();
     }
 
     @Bean
     @ConditionalOnMissingBean
-    @ConditionalOnProperty(prefix = WebProperties.PROPERTIES_PREFIX, value = {"exceptionResolver", "exception-resolver"}, havingValue = "true", matchIfMissing = true)
+    @ConditionalOnProperty(prefix = WebProperties.PROPERTIES_PREFIX, value = "exception-resolver", havingValue = "true", matchIfMissing = true)
     public UnifiedHandlerExceptionResolver unifiedHandlerExceptionResolver(ObjectProvider<List<ExceptionProcessor>> errorCodeResolversProvider) {
         List<ExceptionProcessor> errorCodeResolvers = errorCodeResolversProvider.getIfAvailable();
         if (errorCodeResolvers == null || errorCodeResolvers.isEmpty()) {
@@ -67,16 +65,6 @@ public class WebAutoConfiguration {
     }
 
     @Bean
-    public FilterRegistrationBean<CombineHandlerMethodArgumentResolver> combineHandlerMethodArgumentResolverRegistrationBean(CombineHandlerMethodArgumentResolver combineHandlerMethodArgumentResolver) {
-        FilterRegistrationBean<CombineHandlerMethodArgumentResolver> requestSerialRegistration = new FilterRegistrationBean<CombineHandlerMethodArgumentResolver>();
-        requestSerialRegistration.setFilter(combineHandlerMethodArgumentResolver);
-        requestSerialRegistration.addUrlPatterns("/*");
-        requestSerialRegistration.setName(Introspector.decapitalize(CombineHandlerMethodArgumentResolver.class.getSimpleName()));
-        requestSerialRegistration.setOrder(Ordered.LOWEST_PRECEDENCE);
-        return requestSerialRegistration;
-    }
-
-    @Bean
     @ConditionalOnMissingBean
     public ExtensionHandlerMethodReturnValueHandler defaultHandlerMethodReturnValueHandler(List<HttpMessageConverter<?>> messageConverters,
                                                                                            ApplicationContext applicationContext) {
@@ -89,6 +77,7 @@ public class WebAutoConfiguration {
         WebMvcConfigurer configurer = new WebMvcConfigurer();
         configurer.addHandlerMethodArgumentResolver(argumentResolver);
         configurer.addReturnValueHandler(returnValueHandler);
+        configurer.addHandlerInterceptor(argumentResolver);
         return configurer;
     }
 

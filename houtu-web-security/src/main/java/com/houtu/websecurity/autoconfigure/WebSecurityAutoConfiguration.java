@@ -11,15 +11,12 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
-import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.Ordered;
 import org.springframework.core.env.Environment;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-
-import java.beans.Introspector;
 
 @AutoConfiguration
 @ConditionalOnWebApplication
@@ -36,16 +33,6 @@ public class WebSecurityAutoConfiguration {
                                                                        PermissionValidator permissionValidator,
                                                                        @Qualifier("redisTemplate") RedisTemplate<Object, Object> redisTemplate) {
         return new WebSecurityHandlerInterceptor(environment, sessionProperties, sessionValidator, signatureValidator, permissionValidator, redisTemplate);
-    }
-
-    @Bean
-    public FilterRegistrationBean<WebSecurityHandlerInterceptor> webSecurityHandlerInterceptorRegistrationBean(WebSecurityHandlerInterceptor webSecurityHandlerInterceptor) {
-        FilterRegistrationBean<WebSecurityHandlerInterceptor> requestSerialRegistration = new FilterRegistrationBean();
-        requestSerialRegistration.setFilter(webSecurityHandlerInterceptor);
-        requestSerialRegistration.addUrlPatterns("/*");
-        requestSerialRegistration.setName(Introspector.decapitalize(WebSecurityHandlerInterceptor.class.getSimpleName()));
-        requestSerialRegistration.setOrder(Ordered.HIGHEST_PRECEDENCE);
-        return requestSerialRegistration;
     }
 
     @Bean

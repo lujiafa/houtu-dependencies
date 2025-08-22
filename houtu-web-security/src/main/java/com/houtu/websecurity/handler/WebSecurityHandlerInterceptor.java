@@ -18,7 +18,6 @@ import com.houtu.websecurity.prop.SessionProperties;
 import com.houtu.websecurity.session.SessionContext;
 import com.houtu.websecurity.session.SessionValidator;
 import com.houtu.websecurity.sign.SignatureValidator;
-import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.core.Ordered;
@@ -38,7 +37,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class WebSecurityHandlerInterceptor implements HandlerInterceptor, Filter, Ordered {
+public class WebSecurityHandlerInterceptor implements HandlerInterceptor, Ordered {
 
     private static final Map<Method, MethodSecurityAnnotationInfo> CACHE_MAP = new java.util.HashMap<>();
     private static final MethodSecurityAnnotationInfo EMPTY_ANNOTATION_INFO = new MethodSecurityAnnotationInfo(null);
@@ -64,13 +63,6 @@ public class WebSecurityHandlerInterceptor implements HandlerInterceptor, Filter
         this.signatureValidator = signatureValidator;
         this.redisTemplate = redisTemplate;
         applicationName = env.getProperty("spring.application.name", CharConstant.HYPHEN);
-    }
-
-    @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain) throws IOException, ServletException {
-        filterChain.doFilter(request, response);
-        if (Boolean.TRUE.equals(request.getAttribute(SecurityConstant.SESSION_VALIDATOR_HANDLED_ATTR_NAME)))
-            SessionContext.reset();
     }
 
     @Override
@@ -102,6 +94,16 @@ public class WebSecurityHandlerInterceptor implements HandlerInterceptor, Filter
         return true;
     }
 
+    @Override
+    public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
+        SessionContext.reset();
+    }
+
+    @Override
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
+        SessionContext.reset();
+    }
+
     /**
      * 处理检查会话信息
      *
@@ -115,7 +117,6 @@ public class WebSecurityHandlerInterceptor implements HandlerInterceptor, Filter
             if (annotationInfo.getRequiresRole() != null || annotationInfo.getRequiresPermission() != null) {
                 permissionValidator.verify(annotationInfo.getMethod(), annotationInfo.getRequiresRole(), annotationInfo.getRequiresPermission());
             }
-            request.setAttribute(SecurityConstant.SESSION_VALIDATOR_HANDLED_ATTR_NAME, true);
         } catch (SessionException e) {
             if (ErrorCodeConstant.SESSION_EXPIRED.equals(e.getErrorCode().getCode())
                     || ErrorCodeConstant.SESSION_KICK_OUT_EXPIRED.equals(e.getErrorCode().getCode())) {

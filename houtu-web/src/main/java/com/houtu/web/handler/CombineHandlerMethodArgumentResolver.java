@@ -12,6 +12,7 @@ import com.houtu.web.type.CombineFormResolverType;
 import com.houtu.web.util.CachingStreamHttpServletRequest;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.MethodParameter;
@@ -33,6 +34,8 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.annotation.ModelFactory;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
+import org.springframework.web.servlet.HandlerInterceptor;
+import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.method.annotation.AbstractMessageConverterMethodArgumentResolver;
 
 import java.io.IOException;
@@ -42,7 +45,7 @@ import java.util.*;
  * @date 2016年6月4日
  * @Description 参数解析处理器
  */
-public class CombineHandlerMethodArgumentResolver extends AbstractMessageConverterMethodArgumentResolver implements HandlerMethodArgumentResolver, Filter, Ordered {
+public class CombineHandlerMethodArgumentResolver extends AbstractMessageConverterMethodArgumentResolver implements HandlerMethodArgumentResolver, HandlerInterceptor, Ordered {
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -182,14 +185,21 @@ public class CombineHandlerMethodArgumentResolver extends AbstractMessageConvert
     }
 
     @Override
-    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
-        filterChain.doFilter(servletRequest, servletResponse);
-        // 若启用缓存，则移除缓存的HttpServletRequest
-        Boolean cachingEnable = (Boolean) servletRequest.getAttribute(WebSupportConstant.CACHING_STREAM_ENABLE_ATTR_NAME);
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
+        this.clearAttributesCache(request);
+    }
+
+    @Override
+    public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
+        this.clearAttributesCache(request);
+    }
+
+    void clearAttributesCache(HttpServletRequest request) {
+        Boolean cachingEnable = (Boolean) request.getAttribute(WebSupportConstant.CACHING_STREAM_ENABLE_ATTR_NAME);
         if (cachingEnable != null) {
-            servletRequest.removeAttribute(WebSupportConstant.CACHING_STREAM_ENABLE_ATTR_NAME);
+            request.removeAttribute(WebSupportConstant.CACHING_STREAM_ENABLE_ATTR_NAME);
             if (cachingEnable)
-                servletRequest.removeAttribute(WebSupportConstant.REPEAT_STREAM_HTTP_SERVLET_REQUEST_ATTR_NAME);
+                request.removeAttribute(WebSupportConstant.REPEAT_STREAM_HTTP_SERVLET_REQUEST_ATTR_NAME);
         }
     }
 
