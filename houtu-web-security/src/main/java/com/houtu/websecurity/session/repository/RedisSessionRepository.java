@@ -1,19 +1,10 @@
 package com.houtu.websecurity.session.repository;
 
-import com.houtu.core.context.SpringApplicationContext;
 import com.houtu.websecurity.constant.RedisScriptConstant;
 import com.houtu.websecurity.prop.SessionProperties;
-import com.houtu.websecurity.prop.SessionRedisProperties;
 import com.houtu.websecurity.session.Session;
 import com.houtu.websecurity.session.SessionRepository;
-import com.houtu.websecurity.util.JedisConnectionFactoryBeanUtils;
-import com.houtu.websecurity.util.LettuceConnectionFactoryBeanUtils;
 import jakarta.annotation.Nonnull;
-import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
-import org.springframework.context.SmartLifecycle;
-import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.util.Assert;
 
@@ -119,21 +110,6 @@ public class RedisSessionRepository implements SessionRepository {
                 .map(e -> this.sessionProperties.getRedisBaseKey() + String.format(":mutex:%s:%s", e.getKey(), e.getValue())).collect(Collectors.toList())
                 .parallelStream()
                 .forEach(k -> this.redisTemplate.execute(RedisScriptConstant.SESSION_DEL_MUTEX_DATA_SCRIPT, Collections.singletonList(k), sessionId));
-    }
-
-    protected @Nonnull RedisConnectionFactory getRedisConnectionFactory(RedisProperties redisProperties) {
-        RedisProperties.ClientType clientType = redisProperties.getClientType() == null ? RedisProperties.ClientType.LETTUCE : redisProperties.getClientType();
-        RedisConnectionFactory redisConnectionFactory = null;
-        switch (clientType) {
-            case LETTUCE:
-                redisConnectionFactory = LettuceConnectionFactoryBeanUtils.getRedisConnectionFactory(redisProperties, false);
-                break;
-            case JEDIS:
-                redisConnectionFactory = JedisConnectionFactoryBeanUtils.getRedisConnectionFactory(redisProperties, false);
-                break;
-        }
-        Assert.notNull(redisConnectionFactory, "redisConnectionFactory is null, session redisConnectionFactory init failure.");
-        return redisConnectionFactory;
     }
 
 }

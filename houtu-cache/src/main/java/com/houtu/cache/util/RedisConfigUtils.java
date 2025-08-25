@@ -1,4 +1,4 @@
-package com.houtu.websecurity.util;
+package com.houtu.cache.util;
 
 import com.houtu.core.context.SpringApplicationContext;
 import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
@@ -48,11 +48,14 @@ public final class RedisConfigUtils {
                 config.setPassword(RedisPassword.of(password));
             }
             config.setSentinelUsername(redisProperties.getSentinel().getUsername());
-            String sentinelPassword = redisProperties.getSentinel().getPassword();
-            if (sentinelPassword != null) {
-                config.setSentinelPassword(RedisPassword.of(sentinelPassword));
+            String pwd = redisProperties.getSentinel().getPassword();
+            if (pwd != null) {
+                config.setSentinelPassword(RedisPassword.of(pwd));
             }
             config.setDatabase(redisProperties.getDatabase());
+            if (redisProperties.getSentinel().getMaster() != null) {
+                config.setMaster(redisProperties.getSentinel().getMaster());
+            }
             return config;
         }
         return null;

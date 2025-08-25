@@ -1,9 +1,9 @@
 package com.houtu.websecurity.session.redis;
 
+import com.houtu.cache.util.JedisConnectionFactoryBeanUtils;
+import com.houtu.cache.util.LettuceConnectionFactoryBeanUtils;
 import com.houtu.websecurity.prop.SessionProperties;
 import com.houtu.websecurity.prop.SessionRedisProperties;
-import com.houtu.websecurity.util.JedisConnectionFactoryBeanUtils;
-import com.houtu.websecurity.util.LettuceConnectionFactoryBeanUtils;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
@@ -12,10 +12,11 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.util.Assert;
 
+
 public class DefaultSessionRedisTemplateLoader implements SessionRedisTemplateLoader, InitializingBean, DisposableBean, Lifecycle {
 
-    private boolean systemDefault = true;
-    private RedisTemplate redisTemplate;
+    protected boolean systemDefault = true;
+    protected RedisTemplate redisTemplate;
 
     public DefaultSessionRedisTemplateLoader(SessionProperties sessionProperties, RedisTemplate redisTemplate) {
         Assert.notNull(sessionProperties, "sessionProperties is null");
@@ -31,6 +32,9 @@ public class DefaultSessionRedisTemplateLoader implements SessionRedisTemplateLo
                 case JEDIS:
                     redisConnectionFactory = JedisConnectionFactoryBeanUtils.getRedisConnectionFactory(redisProperties, false);
                     break;
+//                case REDISSON:
+//                    redisConnectionFactory = RedissonConnectionFactoryBeanUtils.getRedisConnectionFactory(RedissonConnectionFactoryBeanUtils.redisson(redisProperties));
+//                    break;
             }
             Assert.notNull(redisConnectionFactory, "redisConnectionFactory is null, sessionRedisConnectionFactory init fail.");
             this.redisTemplate = new RedisTemplate();

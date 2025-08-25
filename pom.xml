@@ -16,12 +16,15 @@
         <skipTests>true</skipTests>
         <spring-boot-starter-parent.version>3.5.3</spring-boot-starter-parent.version>
         <jakarta.xml.bind-api.version>4.0.2</jakarta.xml.bind-api.version>
+        <cache2k.version>2.6.1.Final</cache2k.version>
+        <redisson.version>3.51.0</redisson.version>
         <com.houtu.version>3.5.1-SNAPSHOT</com.houtu.version>
     </properties>
 
     <modules>
         <module>houtu-core</module>
         <module>houtu-utils</module>
+        <module>houtu-cache</module>
         <module>houtu-access-log</module>
         <module>houtu-web</module>
         <module>houtu-web-security</module>
@@ -54,6 +57,11 @@
             </dependency>
             <dependency>
                 <groupId>com.houtu</groupId>
+                <artifactId>houtu-cache</artifactId>
+                <version>${com.houtu.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.houtu</groupId>
                 <artifactId>houtu-monitor</artifactId>
                 <version>${com.houtu.version}</version>
             </dependency>
@@ -81,6 +89,31 @@
                 <groupId>com.houtu</groupId>
                 <artifactId>houtu-web-swagger</artifactId>
                 <version>${com.houtu.version}</version>
+            </dependency>
+
+
+            <!-- Redisson -->
+            <dependency>
+                <groupId>org.redisson</groupId>
+                <artifactId>redisson</artifactId>
+                <version>${redisson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.redisson</groupId>
+                <artifactId>redisson-spring-data-35</artifactId>
+                <version>${redisson.version}</version>
+            </dependency>
+
+            <!-- Cache2k -->
+            <dependency>
+                <groupId>org.cache2k</groupId>
+                <artifactId>cache2k-api</artifactId>
+                <version>${cache2k.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.cache2k</groupId>
+                <artifactId>cache2k-spring</artifactId>
+                <version>${cache2k.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

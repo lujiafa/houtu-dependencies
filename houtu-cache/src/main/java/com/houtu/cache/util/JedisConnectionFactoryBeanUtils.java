@@ -1,4 +1,4 @@
-package com.houtu.websecurity.util;
+package com.houtu.cache.util;
 
 import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
 import org.springframework.boot.context.properties.PropertyMapper;
