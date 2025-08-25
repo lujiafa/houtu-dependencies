@@ -36,4 +36,5 @@ public class SessionRedisProperties extends RedisProperties {
     public void setLettuce(Lettuce lettuce) {
         this.lettuce = lettuce;
     }
+
 }
