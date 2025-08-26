@@ -21,6 +21,7 @@
         <module>spring-cloud-houtu-loadbalancer</module>
         <module>spring-cloud-houtu-feign</module>
         <module>spring-cloud-houtu-discovery</module>
+        <module>spring-cloud-houtu-alibaba-sentinel</module>
     </modules>
 
     <dependencyManagement>
@@ -62,6 +63,11 @@
             <dependency>
                 <groupId>com.houtu</groupId>
                 <artifactId>spring-cloud-houtu-discovery</artifactId>
+                <version>${com.houtu.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.houtu</groupId>
+                <artifactId>spring-cloud-houtu-alibaba-sentinel</artifactId>
                 <version>${com.houtu.version}</version>
             </dependency>
         </dependencies>

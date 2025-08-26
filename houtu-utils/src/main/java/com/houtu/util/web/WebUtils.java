@@ -444,7 +444,7 @@ public class WebUtils extends org.springframework.web.util.WebUtils {
         } else {
             json = JsonUtils.toStringIgnoreNull(value);
         }
-        write(response, json);
+        write(response, MediaType.APPLICATION_JSON, json);
     }
 
     /**
@@ -453,13 +453,13 @@ public class WebUtils extends org.springframework.web.util.WebUtils {
      * @param value 待输出对象
      */
     public static void writeXml(HttpServletResponse response, Object value) {
-        String json;
+        String xml;
         if (value instanceof CharSequence) {
-            json = value.toString();
+            xml = value.toString();
         } else {
-            json = XmlUtils.toXml(value, StandardCharsets.UTF_8);
+            xml = XmlUtils.toXml(value, StandardCharsets.UTF_8);
         }
-        write(response, json);
+        write(response, MediaType.APPLICATION_XML, xml);
     }
 
     /**
@@ -467,10 +467,12 @@ public class WebUtils extends org.springframework.web.util.WebUtils {
      * @param response 响应对象
      * @param value 待输出对象
      */
-    public static void write(HttpServletResponse response, String value) {
+    public static void write(HttpServletResponse response, MediaType mediaType, String value) {
         Assert.notNull(response, "response cannot be null");
         Assert.notNull(value, "value cannot be null");
-        response.setContentType(MediaType.APPLICATION_JSON_UTF8.toString());
+        Assert.notNull(mediaType, "value cannot be null");
+        response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+        response.setContentType(mediaType.toString());
         PrintWriter writer = null;
         try {
             writer = response.getWriter();

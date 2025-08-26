@@ -1,6 +1,8 @@
 package com.houtu.websecurity.config;
 
+import org.springframework.core.Ordered;
 import org.springframework.web.servlet.HandlerInterceptor;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -14,7 +16,10 @@ public class WebSecurityWebMvcConfigurer implements WebMvcConfigurer {
 	@Override
 	public void addInterceptors(InterceptorRegistry registry) {
 		for (HandlerInterceptor handlerInterceptor : interceptors) {
-			registry.addInterceptor(handlerInterceptor);
+			InterceptorRegistration interceptorRegistration = registry.addInterceptor(handlerInterceptor);
+			if (handlerInterceptor instanceof Ordered ordered) {
+				interceptorRegistration.order(ordered.getOrder());
+			}
 		}
 	}
 	
