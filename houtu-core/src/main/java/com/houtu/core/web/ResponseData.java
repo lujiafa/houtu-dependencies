@@ -19,8 +19,6 @@ public class ResponseData<T> implements Serializable {
 	private String message = ErrorCodeConstant.SUCCESS_MESSAGE;
 	private T data;
 
-	ResponseData() {}
-	
 	public int getCode() {
 		return code;
 	}

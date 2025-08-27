@@ -22,8 +22,6 @@ public class EmbedResponseData extends LinkedHashMap<String, Object> {
 	public final static String CODE_NAME = "code";
 	public final static String MESSAGE_NAME = "message";
 
-	EmbedResponseData() {}
-
 	public int getCode() {
 		return (Integer) get(CODE_NAME);
 	}

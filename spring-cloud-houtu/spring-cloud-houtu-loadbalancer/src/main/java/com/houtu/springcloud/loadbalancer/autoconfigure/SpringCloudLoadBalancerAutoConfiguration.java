@@ -3,8 +3,12 @@ package com.houtu.springcloud.loadbalancer.autoconfigure;
 
 import com.houtu.springcloud.loadbalancer.prop.SpringCloudLoadBalancerProperties;
 import com.houtu.springcloud.loadbalancer.support.SpringCloudLoadBalancerClientConfiguration;
-import com.houtu.springcloud.loadbalancer.support.hint.*;
+import com.houtu.springcloud.loadbalancer.support.hint.HintFeignInterceptor;
+import com.houtu.springcloud.loadbalancer.support.hint.HintGatewayWebFilter;
+import com.houtu.springcloud.loadbalancer.support.hint.HintRequestHandlerInterceptor;
+import com.houtu.springcloud.loadbalancer.support.hint.HintWebFilter;
 import feign.Feign;
+import jakarta.servlet.Servlet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -14,7 +18,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerBeanPostProcessorAutoConfiguration;
 import org.springframework.cloud.client.loadbalancer.reactive.ReactorLoadBalancerClientAutoConfiguration;
 import org.springframework.cloud.gateway.handler.RoutePredicateHandlerMapping;
@@ -27,11 +30,9 @@ import org.springframework.web.reactive.config.WebFluxConfigurationSupport;
 import org.springframework.web.reactive.config.WebFluxConfigurer;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.servlet.DispatcherServlet;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-
-import jakarta.servlet.Servlet;
-import java.beans.Introspector;
 
 /**
  * 参考：LoadBalancerClientConfiguration、NacosLoadBalancerClientConfiguration
@@ -54,15 +55,16 @@ public class SpringCloudLoadBalancerAutoConfiguration {
     @ConditionalOnMissingBean({WebMvcConfigurationSupport.class})
     @ConditionalOnProperty(name = "spring.cloud.loadbalancer.hint.enable", havingValue = "true", matchIfMissing = true)
     public static class SpringMVCConfiguration {
+
         @Bean
-        public FilterRegistrationBean<HintRequestFilter> hintRequestFilterRegistrationBean() {
-            logger.info("Enable SpringMVC full-link hint function request filter.");
-            FilterRegistrationBean<HintRequestFilter> requestSerialRegistration = new FilterRegistrationBean<HintRequestFilter>();
-            requestSerialRegistration.setFilter(new HintRequestFilter());
-            requestSerialRegistration.addUrlPatterns("/*");
-            requestSerialRegistration.setName(Introspector.decapitalize(HintRequestAcrossThreadProcessor.class.getSimpleName()));
-            requestSerialRegistration.setOrder(Ordered.LOWEST_PRECEDENCE);
-            return requestSerialRegistration;
+        public WebMvcConfigurer loadbalanceWebMvcConfigurer() {
+            logger.info("Enable SpringMVC full-link hint function request intercept.");
+            return new WebMvcConfigurer() {
+                @Override
+                public void addInterceptors(InterceptorRegistry registry) {
+                    registry.addInterceptor(new HintRequestHandlerInterceptor()).order(Ordered.LOWEST_PRECEDENCE);
+                }
+            };
         }
     }
 

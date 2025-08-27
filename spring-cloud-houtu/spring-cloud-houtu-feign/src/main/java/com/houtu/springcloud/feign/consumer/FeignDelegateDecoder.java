@@ -1,6 +1,8 @@
 package com.houtu.springcloud.feign.consumer;
 
 import com.houtu.core.exception.ErrorCode;
+import com.houtu.core.web.EmbedResponseData;
+import com.houtu.core.web.ResponseData;
 import com.houtu.springcloud.feign.provider.FeignThroughBusinessException;
 import com.houtu.springcloud.feign.util.ExceptionHeader;
 import feign.FeignException;
@@ -14,11 +16,13 @@ import java.io.IOException;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Collection;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
 /**
  * 解码器，使用详见BaseBuilder
+ *
  * @author: jonlu
  * @date: 2018/7/27
  */
@@ -33,7 +37,7 @@ public class FeignDelegateDecoder implements Decoder {
 
     @Override
     public Object decode(Response response, Type type) throws IOException, DecodeException, FeignException {
-        checkResponseException(response);
+        checkResponseException(response, type);
         if (!isOptional(type)) {
             return this.delegate.decode(response, type);
         } else if (response.status() != 404 && response.status() != 204) {
@@ -46,14 +50,20 @@ public class FeignDelegateDecoder implements Decoder {
 
     /**
      * Decoder处理场景为HTTP状态码2xx时，无需考虑404和204，404和204场景下，通过Header传递异常信息，由FeignDelegateDecoder处理
+     *
      * @param response
      * @throws IOException
      */
-    void checkResponseException(Response response) throws IOException {
+    void checkResponseException(Response response, Type type) throws IOException {
         Collection<String> exceptionValues = response.headers().get(ExceptionHeader.RESPONSE_EXCEPTION_HEADER_NAME);
         if (exceptionValues != null
                 && response.status() == HttpStatus.OK.value()
                 && !exceptionValues.isEmpty()) {
+            if (ResponseData.class.isAssignableFrom(type.getClass())
+                    || EmbedResponseData.class.isAssignableFrom(type.getClass())
+                    || Map.class.isAssignableFrom(type.getClass())) {
+                return;
+            }
             String exServiceHeader = exceptionValues.iterator().next();
             ThroughErrorCode throughErrorCode = (ThroughErrorCode) delegate.decode(response, ThroughErrorCode.class);
             throw new FeignThroughBusinessException(exServiceHeader, throughErrorCode.toErrorCode());
@@ -64,7 +74,7 @@ public class FeignDelegateDecoder implements Decoder {
         if (!(type instanceof ParameterizedType)) {
             return false;
         } else {
-            ParameterizedType parameterizedType = (ParameterizedType)type;
+            ParameterizedType parameterizedType = (ParameterizedType) type;
             return parameterizedType.getRawType().equals(Optional.class);
         }
     }

@@ -23,7 +23,7 @@ public class SimpleBlockExceptionHandler implements BlockExceptionHandler {
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response, String s, BlockException e) throws Exception {
         MediaType mediaType = WebUtils.getResponseMediaType(request);
-        ErrorCode errorCode = ErrorCode.build(ErrorCodeConstant.REQUEST_INVALID, new Object[]{e.getMessage() == null ? "block" : e.getMessage()});
+        ErrorCode errorCode = ErrorCode.build(ErrorCodeConstant.SERVER_BUSY, new Object[]{e.getMessage() == null ? "block" : e.getMessage()});
         if (MediaType.APPLICATION_XML.includes(mediaType)
                 || MediaType.TEXT_XML.includes(mediaType)
                 || MediaType.APPLICATION_XHTML_XML.includes(mediaType)) {

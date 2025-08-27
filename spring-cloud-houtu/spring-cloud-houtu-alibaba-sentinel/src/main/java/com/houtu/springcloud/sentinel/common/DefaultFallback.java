@@ -7,6 +7,6 @@ import com.houtu.core.exception.ErrorCode;
 public class DefaultFallback {
 
     public static void fallback(Throwable e) {
-        throw new BusinessException(ErrorCode.build(ErrorCodeConstant.REQUEST_INVALID, new Object[]{e.getMessage()}));
+        throw new BusinessException(ErrorCode.build(ErrorCodeConstant.SERVER_BUSY, new Object[]{new Object[]{e.getMessage() == null ? "block" : e.getMessage()}}));
     }
 }
