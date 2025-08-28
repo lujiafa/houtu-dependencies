@@ -28,7 +28,8 @@ public class FeignExceptionProcessor implements ExceptionProcessor, Initializing
 
     @Override
     public ErrorCode process(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
-        if (ex instanceof DecodeException && ex.getCause() instanceof FeignThroughBusinessException throughBusinessException) {
+        Throwable e = ex;
+        if ((e instanceof DecodeException || (e = e.getCause()) instanceof DecodeException) && e.getCause() instanceof FeignThroughBusinessException throughBusinessException) {
             if (logger.isDebugEnabled()) {
                 logger.debug("Feign透传异常|FeignThroughBusinessException|{}|code={},message={}", ExceptionHeader.decode(throughBusinessException.getServiceName()), throughBusinessException.getErrorCode().getCode(), throughBusinessException.getErrorCode().getMessage());
             }
