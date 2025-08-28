@@ -108,11 +108,16 @@ public class SpringCloudLoadBalancerAutoConfiguration {
         }
     }
 
+    /**
+     * 参考：
+     * org.springframework.cloud.loadbalancer.config.LoadBalancerAutoConfiguration/org.springframework.cloud.loadbalancer.config.BlockingLoadBalancerClientAutoConfiguration（@LoadBalancerClients空配置默认LoadBalancerClientConfiguration）
+     * com.alibaba.cloud.nacos.loadbalancer.LoadBalancerNacosAutoConfiguration
+     */
     @Configuration
     @LoadBalancerClients(
             defaultConfiguration = {SpringCloudLoadBalancerClientConfiguration.class}
     )
-    public static class LoadBalancerConfiguration {
+    static class LoadBalancerConfiguration {
     }
 
 }

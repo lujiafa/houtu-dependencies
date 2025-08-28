@@ -21,17 +21,20 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.env.Environment;
 
-@Configuration(
-        proxyBeanMethods = false
-)
+
+/**
+ * 参考：
+ * org.springframework.cloud.loadbalancer.annotation.LoadBalancerClientConfiguration
+ * com.alibaba.cloud.nacos.loadbalancer.NacosLoadBalancerClientConfiguration
+ * @author: jonlu
+ * @date: 2021/7/27
+ */
+@Configuration(proxyBeanMethods = false)
 @ConditionalOnDiscoveryEnabled
 @Order(-1)
 public class SpringCloudLoadBalancerClientConfiguration {
     private static final int REACTIVE_SERVICE_INSTANCE_SUPPLIER_ORDER = 173827465;
 
-    /**
-     * 参考：LoadBalancerNacosAutoConfiguration配置优化调整
-     */
     @ConditionalOnClass({com.alibaba.cloud.nacos.loadbalancer.LoadBalancerNacosAutoConfiguration.class})
     @ConditionalOnProperty(value = {"spring.cloud.loadbalancer.nacos.enabled"}, havingValue = "true", matchIfMissing = true)
     @com.alibaba.cloud.nacos.ConditionalOnNacosDiscoveryEnabled

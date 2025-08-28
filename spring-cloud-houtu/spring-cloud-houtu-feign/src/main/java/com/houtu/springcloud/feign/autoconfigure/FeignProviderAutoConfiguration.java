@@ -4,8 +4,10 @@ import com.houtu.springcloud.feign.provider.FeignBeanPostProcessor;
 import com.houtu.springcloud.feign.provider.FeignExceptionProcessor;
 import com.houtu.springcloud.feign.provider.FeignRequestMappingHandlerMapping;
 import com.houtu.util.common.ReflectionUtils;
+import feign.Feign;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -16,8 +18,9 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 import java.util.Collections;
 import java.util.List;
 
-
-public class FeignProviderConfiguration {
+@AutoConfiguration
+@ConditionalOnClass({Feign.class})
+public class FeignProviderAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(FeignBeanPostProcessor.class)
