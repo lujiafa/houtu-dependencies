@@ -82,7 +82,7 @@ public class SpringCloudLoadBalancerClientConfiguration {
                 matchIfMissing = true
         )
         public ServiceInstanceListSupplier discoveryClientServiceInstanceListSupplier(ConfigurableApplicationContext context) {
-            return ServiceInstanceListSupplier.builder().withBlockingDiscoveryClient().with(SpringCloudDelegateCreator.build()).withWeighted(SpringCloudWeightFunction.build()).build(context);
+            return ServiceInstanceListSupplier.builder().withBlockingDiscoveryClient().with(SpringCloudHintDelegateCreator.build()).withWeighted(SpringCloudWeightFunction.build()).build(context);
         }
 
         @Bean
@@ -93,7 +93,7 @@ public class SpringCloudLoadBalancerClientConfiguration {
                 havingValue = "zone-preference"
         )
         public ServiceInstanceListSupplier zonePreferenceDiscoveryClientServiceInstanceListSupplier(ConfigurableApplicationContext context) {
-            return ServiceInstanceListSupplier.builder().withBlockingDiscoveryClient().withZonePreference().with(SpringCloudDelegateCreator.build()).withWeighted(SpringCloudWeightFunction.build()).build(context);
+            return ServiceInstanceListSupplier.builder().withBlockingDiscoveryClient().withZonePreference().with(SpringCloudHintDelegateCreator.build()).withWeighted(SpringCloudWeightFunction.build()).build(context);
         }
     }
 
@@ -111,7 +111,7 @@ public class SpringCloudLoadBalancerClientConfiguration {
                 matchIfMissing = true
         )
         public ServiceInstanceListSupplier discoveryClientServiceInstanceListSupplier(ConfigurableApplicationContext context) {
-            return ServiceInstanceListSupplier.builder().withDiscoveryClient().with(SpringCloudDelegateCreator.build()).withWeighted(SpringCloudWeightFunction.build()).build(context);
+            return ServiceInstanceListSupplier.builder().withDiscoveryClient().with(SpringCloudHintDelegateCreator.build()).withWeighted(SpringCloudWeightFunction.build()).build(context);
         }
 
         @Bean
@@ -122,7 +122,7 @@ public class SpringCloudLoadBalancerClientConfiguration {
                 havingValue = "zone-preference"
         )
         public ServiceInstanceListSupplier zonePreferenceDiscoveryClientServiceInstanceListSupplier(ConfigurableApplicationContext context) {
-            return ServiceInstanceListSupplier.builder().withDiscoveryClient().withZonePreference().with(SpringCloudDelegateCreator.build()).withWeighted(SpringCloudWeightFunction.build()).build(context);
+            return ServiceInstanceListSupplier.builder().withDiscoveryClient().withZonePreference().with(SpringCloudHintDelegateCreator.build()).withWeighted(SpringCloudWeightFunction.build()).build(context);
         }
     }
 

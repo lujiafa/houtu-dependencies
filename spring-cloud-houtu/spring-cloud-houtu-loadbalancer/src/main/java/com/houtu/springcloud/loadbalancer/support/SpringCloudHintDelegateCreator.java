@@ -9,11 +9,11 @@ import org.springframework.context.ConfigurableApplicationContext;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-public class SpringCloudDelegateCreator implements ServiceInstanceListSupplierBuilder.DelegateCreator {
+public class SpringCloudHintDelegateCreator implements ServiceInstanceListSupplierBuilder.DelegateCreator {
 
-    static final SpringCloudDelegateCreator INSTANCE = new SpringCloudDelegateCreator();
+    static final SpringCloudHintDelegateCreator INSTANCE = new SpringCloudHintDelegateCreator();
 
-    public static SpringCloudDelegateCreator build() {
+    public static SpringCloudHintDelegateCreator build() {
         return INSTANCE;
     }
 
