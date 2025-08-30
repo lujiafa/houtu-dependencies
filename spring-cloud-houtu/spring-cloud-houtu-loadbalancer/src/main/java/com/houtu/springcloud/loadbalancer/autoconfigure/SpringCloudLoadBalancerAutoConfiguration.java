@@ -36,6 +36,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
  * 参考：LoadBalancerClientConfiguration、NacosLoadBalancerClientConfiguration
+ *
  * @author: jonlu
  * @date: 2023/9/15
  */
@@ -48,9 +49,7 @@ public class SpringCloudLoadBalancerAutoConfiguration {
     private final static Logger logger = LoggerFactory.getLogger(SpringCloudLoadBalancerAutoConfiguration.class);
 
     @Configuration
-    @ConditionalOnWebApplication(
-            type = ConditionalOnWebApplication.Type.SERVLET
-    )
+    @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
     @ConditionalOnClass({Servlet.class, DispatcherServlet.class, WebMvcConfigurer.class})
     @ConditionalOnMissingBean({WebMvcConfigurationSupport.class})
     @ConditionalOnProperty(name = "spring.cloud.loadbalancer.hint.enable", havingValue = "true", matchIfMissing = true)
@@ -69,27 +68,21 @@ public class SpringCloudLoadBalancerAutoConfiguration {
     }
 
     @Configuration
-    @ConditionalOnWebApplication(
-            type = ConditionalOnWebApplication.Type.REACTIVE
-    )
+    @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.REACTIVE)
     @ConditionalOnClass({WebFluxConfigurer.class})
     @ConditionalOnMissingBean({WebFluxConfigurationSupport.class})
     @ConditionalOnProperty(name = "spring.cloud.loadbalancer.hint.enable", havingValue = "true", matchIfMissing = true)
     public static class SpringWebFluxConfiguration {
         @Bean
         @ConditionalOnClass(RoutePredicateHandlerMapping.class)
-        @ConditionalOnProperty(
-                name = {"spring.cloud.gateway.enabled"},
-                matchIfMissing = true
-        )
+        @ConditionalOnProperty(name = {"spring.cloud.gateway.enabled"}, matchIfMissing = true)
         public WebFilter hintGatewayWebFilter(SpringCloudLoadBalancerProperties springCloudLoadBalancerProperties) {
             logger.info("Enable SpringCloudGateway hint request filter.");
             return new HintGatewayWebFilter(springCloudLoadBalancerProperties);
         }
 
         @Bean
-        @ConditionalOnMissingBean(name = "hintGatewayWebFilter",
-                type = "com.houtu.springcloud.loadbalancer.support.hint.HintGatewayWebFilter")
+        @ConditionalOnMissingBean(name = "hintGatewayWebFilter", type = "com.houtu.springcloud.loadbalancer.support.hint.HintGatewayWebFilter")
         public WebFilter hintWebFilter() {
             logger.info("Enable SpringWebFlux full-link hint function request filter.");
             return new HintWebFilter();
@@ -114,9 +107,7 @@ public class SpringCloudLoadBalancerAutoConfiguration {
      * com.alibaba.cloud.nacos.loadbalancer.LoadBalancerNacosAutoConfiguration
      */
     @Configuration
-    @LoadBalancerClients(
-            defaultConfiguration = {SpringCloudLoadBalancerClientConfiguration.class}
-    )
+    @LoadBalancerClients(defaultConfiguration = {SpringCloudLoadBalancerClientConfiguration.class})
     static class LoadBalancerConfiguration {
     }
 
