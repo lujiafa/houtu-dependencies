@@ -4,39 +4,36 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties(prefix = SpringCloudLoadBalancerProperties.PREFIX)
 public class SpringCloudLoadBalancerProperties {
-    final static String PREFIX = "spring.cloud.loadbalancer";
+    public final static String PREFIX = "spring.cloud.loadbalancer";
 
-    private SpringCloudLoadBalancerHintProperties hint = new SpringCloudLoadBalancerHintProperties();
+    // 是否启用权重（默认启用）
+    private boolean weight = true;
+    // 是否启用hint（默认启用）
+    private boolean hint = true;
+    // SpringCloudGateway场景中，中是否去除请求头中"X-Hint"，防止干扰链路hint
+    private boolean disableGatewayRequestHint = false;
 
-    public SpringCloudLoadBalancerHintProperties getHint() {
+    public boolean isWeight() {
+        return weight;
+    }
+
+    public void setWeight(boolean weight) {
+        this.weight = weight;
+    }
+
+    public boolean isHint() {
         return hint;
     }
 
-    public void setHint(SpringCloudLoadBalancerHintProperties hint) {
+    public void setHint(boolean hint) {
         this.hint = hint;
     }
 
-    public static class SpringCloudLoadBalancerHintProperties {
-        // 默认开启
-        private boolean enable = true;
-        // SpringCloudGateway场景中，中是否去除请求头中"X-SC-LB-Hint"，防止干扰链路hint
-        private boolean enableGatewayRequestHeader = false;
-
-        public void setEnable(boolean enable) {
-            this.enable = enable;
-        }
-
-        public boolean isEnable() {
-            return enable;
-        }
-
-        public boolean isEnableGatewayRequestHeader() {
-            return enableGatewayRequestHeader;
-        }
-
-        public void setEnableGatewayRequestHeader(boolean enableGatewayRequestHeader) {
-            this.enableGatewayRequestHeader = enableGatewayRequestHeader;
-        }
+    public boolean isDisableGatewayRequestHint() {
+        return disableGatewayRequestHint;
     }
 
+    public void setDisableGatewayRequestHint(boolean disableGatewayRequestHint) {
+        this.disableGatewayRequestHint = disableGatewayRequestHint;
+    }
 }

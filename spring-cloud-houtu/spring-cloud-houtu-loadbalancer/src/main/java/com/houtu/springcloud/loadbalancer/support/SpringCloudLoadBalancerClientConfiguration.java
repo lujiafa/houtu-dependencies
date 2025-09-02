@@ -1,7 +1,10 @@
 package com.houtu.springcloud.loadbalancer.support;
 
+import com.houtu.springcloud.loadbalancer.prop.SpringCloudLoadBalancerProperties;
 import com.houtu.springcloud.loadbalancer.support.condition.DefaultLoadBalancerCondition;
+import com.houtu.springcloud.loadbalancer.support.condition.EnabledWeightCondition;
 import com.houtu.springcloud.loadbalancer.support.condition.NacosLoadBalancerCondition;
+import com.houtu.util.constant.CharConstant;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -13,6 +16,7 @@ import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.cloud.client.discovery.ReactiveDiscoveryClient;
 import org.springframework.cloud.loadbalancer.core.ReactorLoadBalancer;
 import org.springframework.cloud.loadbalancer.core.ServiceInstanceListSupplier;
+import org.springframework.cloud.loadbalancer.core.ServiceInstanceListSupplierBuilder;
 import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -21,7 +25,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.env.Environment;
-import org.springframework.util.StringUtils;
 
 
 /**
@@ -38,6 +41,12 @@ import org.springframework.util.StringUtils;
 public class SpringCloudLoadBalancerClientConfiguration {
     private static final int REACTIVE_SERVICE_INSTANCE_SUPPLIER_ORDER = 173827465;
 
+    @Bean
+    @Conditional(EnabledWeightCondition.class)
+    public SpringCloudLoadBalancerWeightLifecycle springCloudLoadBalancerWeightLifecycle() {
+        return new SpringCloudLoadBalancerWeightLifecycle();
+    }
+
     @Configuration(proxyBeanMethods = false)
     @Conditional(NacosLoadBalancerCondition.class)
     public static class SpringCloudNacosLoadBalancerConfiguration {
@@ -47,7 +56,7 @@ public class SpringCloudLoadBalancerClientConfiguration {
                                                                             LoadBalancerClientFactory loadBalancerClientFactory,
                                                                             com.alibaba.cloud.nacos.NacosDiscoveryProperties nacosDiscoveryProperties) {
             String name = environment.getProperty("loadbalancer.client.name");
-            String clusterName = StringUtils.isEmpty(nacosDiscoveryProperties.getClusterName()) ? "default" : nacosDiscoveryProperties.getClusterName();
+            String clusterName = nacosDiscoveryProperties.getClusterName() == null ? CharConstant.EMPTY : nacosDiscoveryProperties.getClusterName();
             return new SpringCloudLoadBalancer(loadBalancerClientFactory.getLazyProvider(name, ServiceInstanceListSupplier.class), name, clusterName, (serviceInstance -> serviceInstance.getMetadata().get("nacos.cluster")));
         }
 
@@ -60,10 +69,7 @@ public class SpringCloudLoadBalancerClientConfiguration {
         @ConditionalOnMissingBean
         public ReactorLoadBalancer<ServiceInstance> springCloudLoadBalancer(Environment environment, LoadBalancerClientFactory loadBalancerClientFactory) {
             String name = environment.getProperty("loadbalancer.client.name");
-            String clusterName = environment.getProperty("spring.cloud.discovery.cluster-name");
-            if (StringUtils.isEmpty(clusterName)) {
-                clusterName = "default";
-            }
+            String clusterName = environment.getProperty("spring.cloud.discovery.cluster-name", CharConstant.EMPTY);
             return new SpringCloudLoadBalancer(loadBalancerClientFactory.getLazyProvider(name, ServiceInstanceListSupplier.class), name, clusterName);
         }
     }
@@ -81,8 +87,15 @@ public class SpringCloudLoadBalancerClientConfiguration {
                 havingValue = "default",
                 matchIfMissing = true
         )
-        public ServiceInstanceListSupplier discoveryClientServiceInstanceListSupplier(ConfigurableApplicationContext context) {
-            return ServiceInstanceListSupplier.builder().withBlockingDiscoveryClient().with(SpringCloudHintDelegateCreator.build()).withWeighted(SpringCloudWeightFunction.build()).build(context);
+        public ServiceInstanceListSupplier discoveryClientServiceInstanceListSupplier(ConfigurableApplicationContext context, SpringCloudLoadBalancerProperties springCloudLoadBalancerProperties) {
+            ServiceInstanceListSupplierBuilder serviceInstanceListSupplierBuilder = ServiceInstanceListSupplier.builder().withBlockingDiscoveryClient();
+            if (springCloudLoadBalancerProperties.isHint()) {
+                serviceInstanceListSupplierBuilder.with(SpringCloudHintDelegateCreator.build());
+            }
+            if (springCloudLoadBalancerProperties.isWeight()) {
+                serviceInstanceListSupplierBuilder.withWeighted(SpringCloudWeightFunction.build());
+            }
+            return serviceInstanceListSupplierBuilder.build(context);
         }
 
         @Bean
@@ -92,8 +105,15 @@ public class SpringCloudLoadBalancerClientConfiguration {
                 value = {"spring.cloud.loadbalancer.configurations"},
                 havingValue = "zone-preference"
         )
-        public ServiceInstanceListSupplier zonePreferenceDiscoveryClientServiceInstanceListSupplier(ConfigurableApplicationContext context) {
-            return ServiceInstanceListSupplier.builder().withBlockingDiscoveryClient().withZonePreference().with(SpringCloudHintDelegateCreator.build()).withWeighted(SpringCloudWeightFunction.build()).build(context);
+        public ServiceInstanceListSupplier zonePreferenceDiscoveryClientServiceInstanceListSupplier(ConfigurableApplicationContext context, SpringCloudLoadBalancerProperties springCloudLoadBalancerProperties) {
+            ServiceInstanceListSupplierBuilder serviceInstanceListSupplierBuilder = ServiceInstanceListSupplier.builder().withBlockingDiscoveryClient().withZonePreference();
+            if (springCloudLoadBalancerProperties.isHint()) {
+                serviceInstanceListSupplierBuilder.with(SpringCloudHintDelegateCreator.build());
+            }
+            if (springCloudLoadBalancerProperties.isWeight()) {
+                serviceInstanceListSupplierBuilder.withWeighted(SpringCloudWeightFunction.build());
+            }
+            return serviceInstanceListSupplierBuilder.build(context);
         }
     }
 
@@ -110,8 +130,15 @@ public class SpringCloudLoadBalancerClientConfiguration {
                 havingValue = "default",
                 matchIfMissing = true
         )
-        public ServiceInstanceListSupplier discoveryClientServiceInstanceListSupplier(ConfigurableApplicationContext context) {
-            return ServiceInstanceListSupplier.builder().withDiscoveryClient().with(SpringCloudHintDelegateCreator.build()).withWeighted(SpringCloudWeightFunction.build()).build(context);
+        public ServiceInstanceListSupplier discoveryClientServiceInstanceListSupplier(ConfigurableApplicationContext context, SpringCloudLoadBalancerProperties springCloudLoadBalancerProperties) {
+            ServiceInstanceListSupplierBuilder serviceInstanceListSupplierBuilder = ServiceInstanceListSupplier.builder().withDiscoveryClient();
+            if (springCloudLoadBalancerProperties.isHint()) {
+                serviceInstanceListSupplierBuilder.with(SpringCloudHintDelegateCreator.build());
+            }
+            if (springCloudLoadBalancerProperties.isWeight()) {
+                serviceInstanceListSupplierBuilder.withWeighted(SpringCloudWeightFunction.build());
+            }
+            return serviceInstanceListSupplierBuilder.build(context);
         }
 
         @Bean
@@ -121,8 +148,15 @@ public class SpringCloudLoadBalancerClientConfiguration {
                 value = {"spring.cloud.loadbalancer.configurations"},
                 havingValue = "zone-preference"
         )
-        public ServiceInstanceListSupplier zonePreferenceDiscoveryClientServiceInstanceListSupplier(ConfigurableApplicationContext context) {
-            return ServiceInstanceListSupplier.builder().withDiscoveryClient().withZonePreference().with(SpringCloudHintDelegateCreator.build()).withWeighted(SpringCloudWeightFunction.build()).build(context);
+        public ServiceInstanceListSupplier zonePreferenceDiscoveryClientServiceInstanceListSupplier(ConfigurableApplicationContext context, SpringCloudLoadBalancerProperties springCloudLoadBalancerProperties) {
+            ServiceInstanceListSupplierBuilder serviceInstanceListSupplierBuilder = ServiceInstanceListSupplier.builder().withDiscoveryClient().withZonePreference();
+            if (springCloudLoadBalancerProperties.isHint()) {
+                serviceInstanceListSupplierBuilder.with(SpringCloudHintDelegateCreator.build());
+            }
+            if (springCloudLoadBalancerProperties.isWeight()) {
+                serviceInstanceListSupplierBuilder.withWeighted(SpringCloudWeightFunction.build());
+            }
+            return serviceInstanceListSupplierBuilder.build(context);
         }
     }
 

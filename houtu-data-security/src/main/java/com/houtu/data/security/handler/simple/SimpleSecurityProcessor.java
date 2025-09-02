@@ -19,7 +19,7 @@ public class SimpleSecurityProcessor implements SecurityProcessor {
     @Override
     public String encrypt(Method method, String original) {
         try {
-            return HexUtils.toHex(SM4Utils.encrypt(original.getBytes(StandardCharsets.UTF_8), HexUtils.toBinary(properties.getSecretKey()), SM4Utils.SM4Transformation.ECB().NoPadding()));
+            return HexUtils.toHex(SM4Utils.encrypt(original.getBytes(StandardCharsets.UTF_8), HexUtils.toBinary(properties.getSecretKey()), SM4Utils.SM4Transformation.ECB().PKCS5Padding()));
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
         }
@@ -29,7 +29,7 @@ public class SimpleSecurityProcessor implements SecurityProcessor {
     @Override
     public String decrypt(Method method, String encrypted) {
         try {
-            return new String(SM4Utils.decrypt(HexUtils.toBinary(encrypted), HexUtils.toBinary(properties.getSecretKey()), SM4Utils.SM4Transformation.ECB().NoPadding()), StandardCharsets.UTF_8);
+            return new String(SM4Utils.decrypt(HexUtils.toBinary(encrypted), HexUtils.toBinary(properties.getSecretKey()), SM4Utils.SM4Transformation.ECB().PKCS5Padding()), StandardCharsets.UTF_8);
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
         }

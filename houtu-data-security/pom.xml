@@ -29,6 +29,10 @@
 
         <dependency>
             <groupId>com.houtu</groupId>
+            <artifactId>houtu-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.houtu</groupId>
             <artifactId>houtu-utils</artifactId>
         </dependency>
     </dependencies>

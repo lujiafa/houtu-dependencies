@@ -38,6 +38,7 @@ public class MonitorAutoConfiguration {
         metricProcessors.add(new RpcMetricProcessor());
         return new MonitorLog(monitorProperties.getBusinessName(),
                 applicationName,
+                monitorProperties.getSvrIp(),
                 monitorProperties.getPeriod().toMillis(),
                 monitorProperties.getDelay().toMillis(),
                 monitorProperties.getCollectQueueCapacity(),

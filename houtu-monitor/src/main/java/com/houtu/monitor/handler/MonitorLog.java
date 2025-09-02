@@ -2,6 +2,7 @@ package com.houtu.monitor.handler;
 
 import com.houtu.monitor.handler.metric.sample.MetricOutput;
 import com.houtu.monitor.handler.metric.sample.MetricSample;
+import com.houtu.util.common.SystemUtils;
 import jakarta.annotation.Nonnull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,6 +45,7 @@ public final class MonitorLog implements SmartLifecycle {
 
     public MonitorLog(String businessName,
                       String applicationName,
+                      String svrIp,
                       long period,
                       long delay,
                       int collectQueueCapacity,
@@ -55,6 +57,7 @@ public final class MonitorLog implements SmartLifecycle {
         Assert.hasText(applicationName, "applicationName is null");
         Assert.notNull(monitorWriter, "MonitorWriter is null");
         this.businessName = businessName;
+        this.svrIp = this.svrIp == null || this.svrIp.length() == 0 ? SystemUtils.getServerIp() : svrIp;
         this.applicationName = applicationName;
         this.period = period < 1000 ? 1000 : period;
         this.delay = delay < 100 ? 100 : delay;

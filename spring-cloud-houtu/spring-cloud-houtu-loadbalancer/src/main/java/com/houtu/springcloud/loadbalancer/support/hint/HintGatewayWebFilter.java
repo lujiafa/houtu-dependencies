@@ -17,7 +17,7 @@ public class HintGatewayWebFilter implements WebFilter {
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
-        if (springCloudLoadBalancerProperties.getHint().isEnableGatewayRequestHeader()) {
+        if (springCloudLoadBalancerProperties.isDisableGatewayRequestHint()) {
             ServerWebExchange removeRequestHintExchange = exchange.mutate()
                     .request(request -> request.headers(headers -> headers.remove(LoadBalancerConstant.REQUEST_CONTEXT_HINT_NAME)))
                     .build();

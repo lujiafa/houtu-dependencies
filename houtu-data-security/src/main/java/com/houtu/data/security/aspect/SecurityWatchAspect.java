@@ -1,20 +1,21 @@
 package com.houtu.data.security.aspect;
 
-import com.houtu.data.security.annotation.SecurityField;
-import com.houtu.data.security.annotation.SecurityMapKey;
+import com.houtu.core.context.SpringApplicationContext;
 import com.houtu.data.security.annotation.SecurityParam;
 import com.houtu.data.security.annotation.SecurityWatch;
+import com.houtu.data.security.handler.SecurityDecrypt;
+import com.houtu.data.security.handler.SecurityEncrypt;
 import com.houtu.data.security.handler.SecurityProcessor;
+import com.houtu.data.security.handler.SecurityRecovery;
 import com.houtu.data.security.support.Securityable;
-import com.houtu.data.security.support.SetterContextInfo;
 import com.houtu.util.common.AnnotationUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
-import org.springframework.context.ApplicationContext;
 import org.springframework.core.Ordered;
+import org.springframework.util.StringUtils;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
@@ -22,7 +23,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
@@ -32,12 +32,10 @@ import java.util.stream.Collectors;
 @Aspect
 public class SecurityWatchAspect implements Ordered {
 
-    private ApplicationContext applicationContext;
-    private SecurityProcessor defaultSecurityProcessor;
+    private SecurityProcessor securityProcessor;
 
-    public SecurityWatchAspect(ApplicationContext applicationContext, SecurityProcessor defaultSecurityProcessor) {
-        this.applicationContext = applicationContext;
-        this.defaultSecurityProcessor = defaultSecurityProcessor;
+    public SecurityWatchAspect(SecurityProcessor securityProcessor) {
+        this.securityProcessor = securityProcessor;
     }
 
     @Pointcut("@within(com.houtu.data.security.annotation.SecurityWatch) || @annotation(com.houtu.data.security.annotation.SecurityWatch)")
@@ -51,381 +49,452 @@ public class SecurityWatchAspect implements Ordered {
         Method method = ((MethodSignature) pjp.getSignature()).getMethod();
         SecurityWatch securityWatch = AnnotationUtils.getAnnotationByPriorityMethod(method, SecurityWatch.class);
         SecurityProcessor securityProcessor = getSecurityProcessor(securityWatch);
-        Object[] encryptParamResultArray = procParams(method, securityWatch, args, securityProcessor);
+        SecurityParamsContext securityContext = null;
+        if (args.length > 0 && securityWatch.encrypt()) {
+            buildSecurityParams(securityContext = new SecurityParamsContext(method, securityWatch, securityProcessor), args)
+                    .getEncrypts().parallelStream().forEach(s -> s.encrypt());
+        }
         try {
-            if (void.class.equals(method.getReturnType())) {
-                return pjp.proceed(args);
+            Object result = pjp.proceed(args);
+            if (result == null || void.class.equals(method.getReturnType()) || !securityWatch.decrypt()) {
+                return result;
             }
-            return procResult(method, securityWatch, pjp.proceed(args), securityProcessor);
+            return decryptResult(new SecurityResultContext(method, securityWatch, securityProcessor, securityContext), pjp.proceed(args));
         } finally {
-            if (securityWatch.encryptRecovery()
-                    && securityWatch.encryptRecovery()
-                    && encryptParamResultArray != null
-                    && encryptParamResultArray[0] != null
-                    && encryptParamResultArray[1] != null) {
-                List<SetterContextInfo> setterContexts = (List<SetterContextInfo>) encryptParamResultArray[0];
-                Map<String, String> encryptedMap = (Map<String, String>) encryptParamResultArray[1];
-                Map<String, String> recoveryMap = encryptedMap.entrySet().stream()
-                        .collect(Collectors.toMap(
-                                Map.Entry::getValue,
-                                Map.Entry::getKey,
-                                (oldValue, newValue) -> oldValue,
-                                HashMap::new));
-                setterContexts.stream().map(p -> p.getRecoverySetter()).filter(p -> p != null).forEach(p -> p.accept(recoveryMap));
+            if (securityContext != null
+                    && !securityContext.getRecoveries().isEmpty()) {
+                securityContext.getRecoveries().parallelStream().forEach(r -> r.recovery());
             }
         }
     }
 
     SecurityProcessor getSecurityProcessor(SecurityWatch securityWatch) {
+        SecurityProcessor securityProcessor = null;
         String processorBeanName = securityWatch.processorBeanName();
-        if (processorBeanName == null || processorBeanName.trim().length() == 0) {
-            return defaultSecurityProcessor;
+        if (StringUtils.hasLength(processorBeanName)) {
+            securityProcessor = SpringApplicationContext.getBean(processorBeanName, securityWatch.processorClass());
+        } else {
+            securityProcessor = this.securityProcessor;
         }
-        SecurityProcessor securityProcessor = applicationContext.getBean(processorBeanName, SecurityProcessor.class);
         if (securityProcessor == null) {
             throw new IllegalArgumentException("SecurityProcessor bean name is not found");
         }
         return securityProcessor;
     }
 
-    Object[] procParams(Method method, SecurityWatch securityWatch, Object[] args, SecurityProcessor securityProcessor) throws Exception {
-        if (args.length == 0 || !securityWatch.encrypt()) return null;
-        List<SetterContextInfo> setterContexts = new ArrayList<>();
-        Set<Object> processedObjects = new HashSet<>();
-        Annotation[][] parameterAnnotations = method.getParameterAnnotations();
+
+    SecurityParamsContext buildSecurityParams(SecurityParamsContext securityContext, Object[] args) {
+        Annotation[][] parameterAnnotations = securityContext.getMethod().getParameterAnnotations();
         for (int i = 0; i < args.length; i++) {
             Object arg = args[i];
-            if (arg == null || !Arrays.stream(parameterAnnotations[i]).parallel().anyMatch(annotation -> annotation instanceof SecurityParam)) continue;
-            if (arg instanceof String) {
-                String str = (String) arg;
+            if (arg == null
+                    || (!Arrays.stream(parameterAnnotations[i]).parallel().anyMatch(annotation -> annotation instanceof SecurityParam) && !(arg instanceof Securityable)))
+                continue;
+            if (arg instanceof String _arg) {
                 int finalI = i;
-                setterContexts.add(new SetterContextInfo(p -> {
-                    args[finalI] = p.get(str);
-                }, p -> {
-                    Object _value = args[finalI];
-                    if (_value instanceof String) {
-                        String value = p.get(_value);
-                        if (value != null) {
-                            args[finalI] = value;
-                        }
-                    }
-                }, str));
-            } else if (arg instanceof Securityable) {
-                prepareSecurityable(method, arg, setterContexts, processedObjects, true);
+                SecurityEncrypt setter = () -> Array.set(args, finalI, encrypt(securityContext, _arg));
+                SecurityRecovery recovery = () -> Array.set(args, finalI, _arg);
+                securityContext.add(setter, recovery);
+            } else if (arg instanceof Securityable _arg) {
+                buildSecurityableSecurityParams(securityContext, _arg);
             } else {
-                prepareArrayAndCollections(method, arg, parameterAnnotations[i], setterContexts, processedObjects, true);
+                buildArrayAndCollectionsSecurityParams(securityContext, arg);
             }
         }
-        if (setterContexts.size() > 0) {
-            Set<String> originalValueSet = setterContexts.stream().flatMap(p -> p.getOriginals().stream()).collect(Collectors.toSet());
-            Map<String, String> encryptedMap = securityProcessor.encrypt(method, originalValueSet);
-            final Map<String, String>  _encryptedMap = encryptedMap;
-            if (_encryptedMap != null) {
-                setterContexts.stream().map(p -> p.getFeatureSetter()).toList().forEach(p -> p.accept(_encryptedMap));
-                return new Object[]{setterContexts, new HashMap<>()};
-            }
-        }
-        return new Object[]{setterContexts, new HashMap<>()};
+        return securityContext;
     }
 
-    Object procResult(Method method, SecurityWatch securityWatch, Object result, SecurityProcessor securityProcessor) throws Exception {
-        if (result == null || !securityWatch.decrypt()) return result;
-        List<SetterContextInfo> resultSetterContexts = new ArrayList<>();
-        if (result instanceof String) {
-            return securityProcessor.decrypt(method, (String) result);
-        }
-        if (result instanceof Securityable) {
-            prepareSecurityable(method, result, resultSetterContexts, new HashSet<>(), false);
-        } else {
-            prepareArrayAndCollections(method, result, method.getAnnotations(), resultSetterContexts, new HashSet<>(), false);
-        }
-        if (!resultSetterContexts.isEmpty()) {
-            Set<String> _originalValueSet = resultSetterContexts.stream().flatMap(p -> p.getOriginals().stream()).collect(Collectors.toSet());
-            Map<String, String> _pmap = securityProcessor.decrypt(method, _originalValueSet);
-            resultSetterContexts.stream().map(p -> p.getFeatureSetter()).toList().forEach(p -> p.accept(_pmap));
-        }
-        return result;
-    }
-
-    /**
-     * 预处理Securityable对象特定字段
-     *
-     * @param method           代理方法
-     * @param object           待处理的对象
-     * @param setterContexts
-     * @param processedObjects 处理中或已处理过的对象
-     * @param enableRecovery   是否启用回滚模块
-     * @throws Exception
-     */
-    void prepareSecurityable(Method method, Object object, List<SetterContextInfo> setterContexts, Set<Object> processedObjects, boolean enableRecovery) throws Exception {
-        if (processedObjects.contains(object)) return;
-        processedObjects.add(object);
-        Class objectClass = object.getClass();
-        List<Field> fieldList = Arrays.stream(objectClass.getDeclaredFields()).filter(field ->
-                        field.isAnnotationPresent(SecurityField.class)
+    void buildSecurityableSecurityParams(SecurityParamsContext securityContext, Securityable securityable) {
+        if (securityContext.isProcessed(securityable)) return;
+        List<Field> fieldList = Arrays.stream(securityable.getClass().getDeclaredFields()).filter(field ->
+                        field.isAnnotationPresent(SecurityParam.class)
                                 && !Modifier.isStatic(field.getModifiers())
                                 && !Modifier.isFinal(field.getModifiers())
                                 || Securityable.class.isAssignableFrom(field.getType()))
                 .collect(Collectors.toList());
         if (fieldList.size() == 0) return;
-        for (int m = 0; m < fieldList.size(); m++) {
-            Field field = fieldList.get(m);
-            field.setAccessible(true);
-            Object value = field.get(object);
-            if (value == null) continue;
-            if (value instanceof String) {
-                Consumer<Map<String, String>> setter = p -> {
-                    try {
-                        field.set(object, p.get(value));
-                    } catch (IllegalAccessException e) {
-                        throw new RuntimeException(e.getMessage(), e);
-                    }
-                };
-                if (enableRecovery) {
-                    setterContexts.add(new SetterContextInfo(setter, p -> {
+        securityContext.addProcessed(securityable);
+        try {
+            for (int i = 0; i < fieldList.size(); i++) {
+                Field field = fieldList.get(i);
+                field.setAccessible(true);
+                Object value = field.get(securityable);
+                if (value == null) continue;
+                if (value instanceof String _value) {
+                    SecurityEncrypt setter = () -> {
                         try {
-                            String _value = p.get(value);
-                            if (_value != null) {
-                                field.set(object, _value);
-                            }
+                            field.set(securityable, encrypt(securityContext, _value));
                         } catch (IllegalAccessException e) {
                             throw new RuntimeException(e.getMessage(), e);
                         }
-                    }, (String) value));
+                    };
+                    SecurityRecovery recovery = () -> {
+                        try {
+                            field.set(securityable, _value);
+                        } catch (IllegalAccessException e) {
+                            throw new RuntimeException(e.getMessage(), e);
+                        }
+                    };
+                    securityContext.add(setter, recovery);
+                } else if (value instanceof Securityable _value) {
+                    buildSecurityableSecurityParams(securityContext, _value);
                 } else {
-                    setterContexts.add(new SetterContextInfo(setter, (String) value));
+                    buildArrayAndCollectionsSecurityParams(securityContext, value);
                 }
-            } else if (value instanceof Securityable) {
-                prepareSecurityable(method, value, setterContexts, processedObjects, enableRecovery);
-            } else {
-                prepareArrayAndCollections(method, value, field.getAnnotations(), setterContexts, processedObjects, enableRecovery);
             }
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
+
+    void buildArrayAndCollectionsSecurityParams(SecurityParamsContext securityContext, Object object) {
+        if (securityContext.isProcessed(object)) return;
+        if (object.getClass().isArray()) {
+            int length = Array.getLength(object);
+            if (length == 0) return;
+            securityContext.addProcessed(object);
+            Object[] origins = new Object[length];
+            System.arraycopy(object, 0, origins, 0, length);
+            for (int i = 0; i < length; i++) {
+                Object value = Array.get(object, i);
+                if (value == null) continue;
+                if (value instanceof String _value) {
+                    int finalI = i;
+                    SecurityEncrypt setter = () -> Array.set(object, finalI, encrypt(securityContext, _value));
+                    securityContext.addEncrypt(setter);
+                } else if (value instanceof Securityable _value) {
+                    buildSecurityableSecurityParams(securityContext, _value);
+                } else {
+                    buildArrayAndCollectionsSecurityParams(securityContext, value);
+                }
+            }
+            SecurityRecovery recovery = () -> System.arraycopy(origins, 0, object, 0, length);
+            securityContext.addRecovery(recovery);
+        } else if (object instanceof List || object instanceof Set) {
+            Collection collection = (Collection) object;
+            if (collection.isEmpty() || isImmutable(object.getClass())) return;
+            securityContext.addProcessed(object);
+            ArrayList<Object> origins = new ArrayList<Object>(collection);
+            SecurityEncrypt setter = () -> {
+                collection.clear();
+                for (int i = 0; i < origins.size(); i++) {
+                    Object value = origins.get(i);
+                    if (value instanceof String _value) {
+                        collection.add(encrypt(securityContext, _value));
+                    } else if (value instanceof Securityable _value) {
+                        collection.add(_value);
+                        buildSecurityableSecurityParams(securityContext, _value);
+                    } else {
+                        collection.add(value);
+                        buildArrayAndCollectionsSecurityParams(securityContext, value);
+                    }
+                }
+            };
+            SecurityRecovery recovery = () -> {
+                collection.clear();
+                collection.addAll(origins);
+            };
+            securityContext.add(setter, recovery);
+        } else if (object instanceof Map map) {
+            if (map.isEmpty() || isImmutable(object.getClass())) return;
+            String[] encryptMapKeys = securityContext.getSecurityWatch().encryptMapKeys();
+            securityContext.addProcessed(object);
+            Map<String, Object> origins = new LinkedHashMap<>(map);
+            Set<String> encryptMapKeysSet = encryptMapKeys == null || encryptMapKeys.length == 0 ? map.keySet() : new HashSet<>(Arrays.asList(encryptMapKeys));
+            SecurityEncrypt setter = () -> {
+                map.clear();
+                for (Map.Entry<String, Object> entry : origins.entrySet()) {
+                    String key = entry.getKey();
+                    Object value = entry.getValue();
+                    if (value instanceof String _value) {
+                        if (encryptMapKeysSet.contains(key)) {
+                            map.put(key, encrypt(securityContext, _value));
+                        } else {
+                            map.put(key, _value);
+                        }
+                    } else if (value instanceof Securityable _value) {
+                        map.put(key, _value);
+                        buildSecurityableSecurityParams(securityContext, _value);
+                    } else {
+                        map.put(key, value);
+                        if (encryptMapKeysSet.contains(key)) {
+                            buildArrayAndCollectionsSecurityParams(securityContext, value);
+                        }
+                    }
+                }
+            };
+            SecurityRecovery recovery = () -> {
+                map.clear();
+                map.putAll(origins);
+            };
+            securityContext.add(setter, recovery);
+        }
+    }
+
+    String encrypt(SecurityParamsContext securityContext, String original) {
+        String encrypted = securityContext.getSecurityProcessor().encrypt(securityContext.getMethod(), original);
+        if (encrypted != null) {
+            securityContext.getEncryptedMap().put(original, encrypted = new String(encrypted));
+        }
+        return encrypted;
+    }
+
+    Object decryptResult(SecurityResultContext securityContext, Object result) {
+        if (result instanceof String _result) {
+            Optional<String> optional = securityContext.getSecurityParamsContext().getEncryptedMap().entrySet().parallelStream().filter(entry -> entry.getValue() != null && entry.getValue() == _result).map(entry -> entry.getKey()).findFirst();
+            if (optional.isPresent()) {
+                return optional.get();
+            }
+            return securityContext.getSecurityProcessor().decrypt(securityContext.getMethod(), _result);
+        }
+        if (result instanceof Securityable _result) {
+            buildSecurityableResult(securityContext, _result);
+        } else {
+            buildArrayAndCollectionsResult(securityContext, result);
+        }
+        securityContext.getDecrypts().parallelStream().forEach(p -> p.decrypt());
+        return result;
+    }
+
+    void buildSecurityableResult(SecurityResultContext securityContext, Securityable securityable) {
+        if (securityContext.isProcessed(securityable)) return;
+        List<Field> fieldList = Arrays.stream(securityable.getClass().getDeclaredFields()).filter(field ->
+                        field.isAnnotationPresent(SecurityParam.class)
+                                && !Modifier.isStatic(field.getModifiers())
+                                && !Modifier.isFinal(field.getModifiers())
+                                || Securityable.class.isAssignableFrom(field.getType()))
+                .collect(Collectors.toList());
+        if (fieldList.size() == 0) return;
+        securityContext.addProcessed(securityable);
+        try {
+            for (int i = 0; i < fieldList.size(); i++) {
+                Field field = fieldList.get(i);
+                field.setAccessible(true);
+                Object value = field.get(securityable);
+                if (value == null) continue;
+                if (value instanceof String _value) {
+                    SecurityDecrypt decrypt = () -> {
+                        try {
+                            field.set(securityable, securityContext.getSecurityProcessor().decrypt(securityContext.getMethod(), _value));
+                        } catch (IllegalAccessException e) {
+                            throw new RuntimeException(e.getMessage(), e);
+                        }
+                    };
+                    securityContext.addDecrypt(decrypt);
+                } else if (value instanceof Securityable _value) {
+                    buildSecurityableResult(securityContext, _value);
+                } else {
+                    buildArrayAndCollectionsResult(securityContext, value);
+                }
+            }
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
+
+    void buildArrayAndCollectionsResult(SecurityResultContext securityContext, Object object) {
+        if (securityContext.isProcessed(object)) return;
+        if (object.getClass().isArray()) {
+            int length = Array.getLength(object);
+            if (length == 0) return;
+            securityContext.addProcessed(object);
+            for (int i = 0; i < length; i++) {
+                Object value = Array.get(object, i);
+                if (value == null) continue;
+                if (value instanceof String _value) {
+                    int finalI = i;
+                    SecurityDecrypt decrypt = () -> Array.set(object, finalI, securityContext.getSecurityProcessor().decrypt(securityContext.getMethod(), _value));
+                    securityContext.addDecrypt(decrypt);
+                } else if (value instanceof Securityable _value) {
+                    buildSecurityableResult(securityContext, _value);
+                } else {
+                    buildArrayAndCollectionsResult(securityContext, value);
+                }
+            }
+        } else if (object instanceof List || object instanceof Set) {
+            Collection collection = (Collection) object;
+            if (collection.isEmpty() || isImmutable(object.getClass())) return;
+            securityContext.addProcessed(object);
+            ArrayList<Object> origins = new ArrayList<Object>(collection);
+            SecurityDecrypt decrypt = () -> {
+                collection.clear();
+                for (int i = 0; i < origins.size(); i++) {
+                    Object value = origins.get(i);
+                    if (value instanceof String _value) {
+                        collection.add(securityContext.getSecurityProcessor().decrypt(securityContext.getMethod(), _value));
+                    } else if (value instanceof Securityable _value) {
+                        collection.add(_value);
+                        buildSecurityableResult(securityContext, _value);
+                    } else {
+                        collection.add(value);
+                        buildArrayAndCollectionsResult(securityContext, value);
+                    }
+                }
+            };
+            securityContext.addDecrypt(decrypt);
+        } else if (object instanceof Map map) {
+            if (map.isEmpty() || isImmutable(object.getClass())) return;
+            String[] encryptMapKeys = securityContext.getSecurityWatch().encryptMapKeys();
+            securityContext.addProcessed(object);
+            Map<String, Object> origins = new LinkedHashMap<>(map);
+            Set<String> encryptMapKeysSet = encryptMapKeys == null || encryptMapKeys.length == 0 ? map.keySet() : new HashSet<>(Arrays.asList(encryptMapKeys));
+            SecurityDecrypt decrypt = () -> {
+                map.clear();
+                for (Map.Entry<String, Object> entry : origins.entrySet()) {
+                    String key = entry.getKey();
+                    Object value = entry.getValue();
+                    if (value instanceof String _value) {
+                        if (encryptMapKeysSet.contains(key)) {
+                            map.put(key, securityContext.getSecurityProcessor().decrypt(securityContext.getMethod(), _value));
+                        } else {
+                            map.put(key, _value);
+                        }
+                    } else if (value instanceof Securityable _value) {
+                        map.put(key, _value);
+                        buildSecurityableResult(securityContext, _value);
+                    } else {
+                        map.put(key, value);
+                        if (encryptMapKeysSet.contains(key)) {
+                            buildArrayAndCollectionsResult(securityContext, value);
+                        }
+                    }
+                }
+            };
+            securityContext.addDecrypt(decrypt);
         }
     }
 
     /**
-     * 预处理数组或集合对象
+     * 判断集合是否为不可变类
      *
-     * @param method               代理方法
-     * @param object               待处理的对象
-     * @param parameterAnnotations 参数注解
-     * @param setterContexts       待处理的上下文信息
-     * @param processedObjects     处理中或已处理过的对象
-     * @param enableRecovery       是否启用回滚模块
-     * @throws Exception
+     * @param clazz 集合类
+     * @return 是否为不可变类 true-不可变 false-可变
      */
-    void prepareArrayAndCollections(Method method, Object object, Annotation[] parameterAnnotations, List<SetterContextInfo> setterContexts, Set<Object> processedObjects, boolean enableRecovery) throws Exception {
-        Class objectClass = object.getClass();
-        if (objectClass.isArray()) {
-            if (processedObjects.contains(object)) return;
-            processedObjects.add(object);
-            // 数组
-            int length = Array.getLength(object);
-            if (length == 0) return;
-            Set<String> originalSet = new HashSet<>();
-            for (int m = 0; m < length; m++) {
-                Object value = Array.get(object, m);
-                if (value == null) continue;
-                if (value instanceof String) {
-                    originalSet.add((String) value);
-                } else if (value instanceof Securityable) {
-                    prepareSecurityable(method, value, setterContexts, processedObjects, enableRecovery);
-                } else if (value instanceof List
-                        || value instanceof Set
-                        || value instanceof Map) {
-                    prepareArrayAndCollections(method, value, parameterAnnotations, setterContexts, processedObjects, enableRecovery);
-                }
-            }
-            Consumer<Map<String, String>> setter = p -> {
-                if (originalSet.size() == 0) return;
-                for (int n = 0; n < length; n++) {
-                    Object value = Array.get(object, n);
-                    if (value == null || !(value instanceof String)) continue;
-                    Array.set(object, n, p.get(value));
-                }
-            };
-            if (enableRecovery) {
-                setterContexts.add(new SetterContextInfo(setter, p -> {
-                    for (int n = 0; n < length; n++) {
-                        Object _value = Array.get(object, n);
-                        if (_value == null || !(_value instanceof String)) continue;
-                        String value = p.get(_value);
-                        if (value != null) {
-                            Array.set(object, n, value);
-                        }
-                    }
-                }, originalSet));
-            } else {
-                setterContexts.add(new SetterContextInfo(setter, originalSet));
-            }
-        } else if (object instanceof List) {
-            if (processedObjects.contains(object)) return;
-            processedObjects.add(object);
-            // 列表
-            List list = (List) object;
-            if (list.size() == 0) return;
-            List<Object> copyList = new ArrayList<>(list.size());
-            Set<String> originalSet = new HashSet<>();
-            for (int m = 0; m < list.size(); m++) {
-                Object value = list.get(m);
-                copyList.add(value);
-                if (value == null) continue;
-                if (value instanceof String) {
-                    originalSet.add((String) value);
-                } else if (value instanceof Securityable) {
-                    prepareSecurityable(method, value, setterContexts, processedObjects, enableRecovery);
-                } else if (value instanceof List
-                        || value instanceof Set
-                        || value instanceof Map) {
-                    prepareArrayAndCollections(method, value, parameterAnnotations, setterContexts, processedObjects, enableRecovery);
-                }
-            }
-            Consumer<Map<String, String>> setter = p -> {
-                if (originalSet.size() == 0) return;
-                list.clear();
-                for (int n = 0; n < copyList.size(); n++) {
-                    Object value = copyList.get(n);
-                    if (value instanceof String) {
-                        list.add(p.get(value));
-                        continue;
-                    }
-                    list.add(value);
-                }
-            };
-            if (enableRecovery) {
-                setterContexts.add(new SetterContextInfo(setter, p -> {
-                    List<Object> _copyList = new ArrayList<Object>(list);
-                    list.clear();
-                    for (int n = 0; n < _copyList.size(); n++) {
-                        Object _value = _copyList.get(n);
-                        if (_value instanceof String) {
-                            String value = p.get(_value);
-                            if (value != null) {
-                                list.add(value);
-                                continue;
-                            }
-                        }
-                        list.add(_value);
-                    }
-                }, originalSet));
-            } else {
-                setterContexts.add(new SetterContextInfo(setter, originalSet));
-            }
-        } else if (object instanceof Set) {
-            if (processedObjects.contains(object)) return;
-            processedObjects.add(object);
-            // 集合
-            Set set = (Set) object;
-            if (set.size() == 0) return;
-            Set<Object> copySet = new LinkedHashSet<>(set);
-            Set<String> originalSet = new HashSet<>();
-            Iterator iterator = set.iterator();
-            while (iterator.hasNext()) {
-                Object value = iterator.next();
-                copySet.add(value);
-                if (value == null) continue;
-                if (value instanceof String) {
-                    originalSet.add((String) value);
-                } else if (value instanceof Securityable) {
-                    prepareSecurityable(method, value, setterContexts, processedObjects, enableRecovery);
-                } else if (value instanceof List
-                        || value instanceof Set
-                        || value instanceof Map) {
-                    prepareArrayAndCollections(method, value, parameterAnnotations, setterContexts, processedObjects, enableRecovery);
-                }
-            }
-            Consumer<Map<String, String>> setter = p -> {
-                if (originalSet.size() == 0) return;
-                set.clear();
-                Iterator copyIterator = copySet.iterator();
-                while (copyIterator.hasNext()) {
-                    Object value = copyIterator.next();
-                    if (value instanceof String) {
-                        set.add(p.get(value));
-                        continue;
-                    }
-                    set.add(value);
-                }
-            };
-            if (enableRecovery) {
-                setterContexts.add(new SetterContextInfo(setter, p -> {
-                    Set<Object> _copySet = new LinkedHashSet<>(set);
-                    set.clear();
-                    Iterator _copyIterator = copySet.iterator();
-                    while (_copyIterator.hasNext()) {
-                        Object _value = _copyIterator.next();
-                        if (_value instanceof String) {
-                            String value = p.get(_value);
-                            if (value != null) {
-                                set.add(value);
-                                continue;
-                            }
-                        }
-                        set.add(_value);
-                    }
-                }, originalSet));
-            } else {
-                setterContexts.add(new SetterContextInfo(setter, originalSet));
-            }
-        } else if (object instanceof Map) {
-            if (processedObjects.contains(object)) return;
-            processedObjects.add(object);
-            // Map
-            Map map = (Map) object;
-            if (map.size() == 0) return;
-            SecurityMapKey securityMapKey = Arrays.stream(parameterAnnotations)
-                    .filter(annotation -> annotation instanceof SecurityMapKey)
-                    .map(annotation -> (SecurityMapKey) annotation)
-                    .findFirst().orElse(null);
-            if (securityMapKey == null || securityMapKey.value().length == 0) {
-                return;
-            }
-            String[] encryptKeys = securityMapKey.value();
-            Set<String> originalSet = new HashSet<>();
-            for (int m = 0; m < encryptKeys.length; m++) {
-                Object value = map.get(encryptKeys[m]);
-                if (value == null) continue;
-                if (value instanceof String) {
-                    originalSet.add((String) value);
-                } else if (value instanceof Securityable) {
-                    prepareSecurityable(method, value, setterContexts, processedObjects, enableRecovery);
-                } else if (value instanceof List
-                        || value instanceof Set
-                        || value instanceof Map) {
-                    prepareArrayAndCollections(method, value, parameterAnnotations, setterContexts, processedObjects, enableRecovery);
-                }
-            }
-            Consumer<Map<String, String>> setter = p -> {
-                if (originalSet.size() == 0) return;
-                for (int n = 0; n < encryptKeys.length; n++) {
-                    String key = encryptKeys[n];
-                    Object value = map.get(key);
-                    if (value instanceof String) {
-                        map.put(key, p.get(value));
-                    }
-                }
-            };
-            if (enableRecovery) {
-                setterContexts.add(new SetterContextInfo(setter, p -> {
-                    for (int n = 0; n < encryptKeys.length; n++) {
-                        String key = encryptKeys[n];
-                        Object _value = map.get(key);
-                        if (_value instanceof String) {
-                            String value = p.get(_value);
-                            if (value != null) {
-                                map.put(key, value);
-                            }
-                        }
-                    }
-                }, originalSet));
-            } else {
-                setterContexts.add(new SetterContextInfo(setter, originalSet));
-            }
-        }
+    boolean isImmutable(Class clazz) {
+        String clazzName = clazz.getName();
+        return clazzName.contains("Immutable") || clazzName.contains("Unmodifiable");
     }
 
     @Override
     public int getOrder() {
         return LOWEST_PRECEDENCE;
+    }
+
+    static class SecurityParamsContext {
+        private Method method;
+        private SecurityWatch securityWatch;
+        private SecurityProcessor securityProcessor;
+        // 已build预处理的引用对象
+        private Set<Object> processedSet = new HashSet<>();
+        private List<SecurityEncrypt> encrypts = new ArrayList<>();
+        private List<SecurityRecovery> recoveries = new ArrayList<>();
+        // 已加密的数据Map（key=original, value=encrypted）
+        private Map<String, String> encryptedMap = new HashMap<>();
+
+        public SecurityParamsContext(Method method, SecurityWatch securityWatch, SecurityProcessor securityProcessor) {
+            this.method = method;
+            this.securityWatch = securityWatch;
+            this.securityProcessor = securityProcessor;
+        }
+
+        public Method getMethod() {
+            return method;
+        }
+
+        public SecurityWatch getSecurityWatch() {
+            return securityWatch;
+        }
+
+        public SecurityProcessor getSecurityProcessor() {
+            return securityProcessor;
+        }
+
+        public boolean isProcessed(Object object) {
+            return processedSet.contains(object);
+        }
+
+        public void addProcessed(Object object) {
+            processedSet.add(object);
+        }
+
+        public Set<Object> getProcessedSet() {
+            return processedSet;
+        }
+
+        public void addEncrypt(SecurityEncrypt encrypt) {
+            encrypts.add(encrypt);
+        }
+
+        public void add(SecurityEncrypt setter, SecurityRecovery recovery) {
+            addEncrypt(setter);
+            addRecovery(recovery);
+        }
+
+        public void addRecovery(SecurityRecovery recovery) {
+            recoveries.add(recovery);
+        }
+
+        public List<SecurityEncrypt> getEncrypts() {
+            return encrypts;
+        }
+
+        public List<SecurityRecovery> getRecoveries() {
+            return recoveries;
+        }
+
+        public Map<String, String> getEncryptedMap() {
+            return encryptedMap;
+        }
+    }
+
+    static class SecurityResultContext {
+        private Method method;
+        private SecurityWatch securityWatch;
+        private SecurityProcessor securityProcessor;
+        private SecurityParamsContext securityParamsContext;
+        private Set<Object> processedSet = new HashSet<>();
+        private List<SecurityDecrypt> decrypts = new ArrayList<>();
+
+        public SecurityResultContext(Method method, SecurityWatch securityWatch, SecurityProcessor securityProcessor, SecurityParamsContext securityParamsContext) {
+            this.method = method;
+            this.securityWatch = securityWatch;
+            this.securityProcessor = securityProcessor;
+            this.securityParamsContext = securityParamsContext;
+            if (securityParamsContext != null) {
+                processedSet.addAll(securityParamsContext.getProcessedSet());
+            }
+        }
+
+        public Method getMethod() {
+            return method;
+        }
+
+        public SecurityWatch getSecurityWatch() {
+            return securityWatch;
+        }
+
+        public SecurityProcessor getSecurityProcessor() {
+            return securityProcessor;
+        }
+
+        public boolean isProcessed(Object object) {
+            return processedSet.contains(object);
+        }
+
+        public void addProcessed(Object object) {
+            processedSet.add(object);
+        }
+
+        public SecurityParamsContext getSecurityParamsContext() {
+            return securityParamsContext;
+        }
+
+        public void addDecrypt(SecurityDecrypt setter) {
+            decrypts.add(setter);
+        }
+
+        public List<SecurityDecrypt> getDecrypts() {
+            return decrypts;
+        }
     }
 }

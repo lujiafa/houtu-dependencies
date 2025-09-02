@@ -40,7 +40,7 @@ public class AccessLogAspect implements InitializingBean {
 
 
 	/**
-	 * 输出日志：httpMethod|path|requestIp|user-agent|queryString|body|methodName|arg1, arg2, ...|responseArg|exception|耗时
+	 * 输出日志：httpMethod|path|requestIp|user-agent|queryString|[body]|methodName|arg1, arg2, ...|responseArg|exception|耗时
 	 * @param pjp 切点
 	 * @return Object
 	 * @throws Throwable

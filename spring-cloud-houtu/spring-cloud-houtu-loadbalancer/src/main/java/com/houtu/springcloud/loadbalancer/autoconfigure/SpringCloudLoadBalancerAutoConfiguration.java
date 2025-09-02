@@ -3,6 +3,7 @@ package com.houtu.springcloud.loadbalancer.autoconfigure;
 
 import com.houtu.springcloud.loadbalancer.prop.SpringCloudLoadBalancerProperties;
 import com.houtu.springcloud.loadbalancer.support.SpringCloudLoadBalancerClientConfiguration;
+import com.houtu.springcloud.loadbalancer.support.condition.EnabledHintCondition;
 import com.houtu.springcloud.loadbalancer.support.hint.HintFeignInterceptor;
 import com.houtu.springcloud.loadbalancer.support.hint.HintGatewayWebFilter;
 import com.houtu.springcloud.loadbalancer.support.hint.HintRequestHandlerInterceptor;
@@ -24,6 +25,7 @@ import org.springframework.cloud.gateway.handler.RoutePredicateHandlerMapping;
 import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClients;
 import org.springframework.cloud.loadbalancer.config.LoadBalancerAutoConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.web.reactive.config.WebFluxConfigurationSupport;
@@ -35,7 +37,9 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupp
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
- * 参考：LoadBalancerClientConfiguration、NacosLoadBalancerClientConfiguration
+ * 参考：
+ * org.springframework.cloud.loadbalancer.config.LoadBalancerAutoConfiguration
+ * com.alibaba.cloud.nacos.loadbalancer.LoadBalancerNacosAutoConfiguration
  *
  * @author: jonlu
  * @date: 2023/9/15
@@ -52,7 +56,7 @@ public class SpringCloudLoadBalancerAutoConfiguration {
     @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
     @ConditionalOnClass({Servlet.class, DispatcherServlet.class, WebMvcConfigurer.class})
     @ConditionalOnMissingBean({WebMvcConfigurationSupport.class})
-    @ConditionalOnProperty(name = "spring.cloud.loadbalancer.hint.enable", havingValue = "true", matchIfMissing = true)
+    @Conditional(EnabledHintCondition.class)
     public static class SpringMVCConfiguration {
 
         @Bean
@@ -71,7 +75,7 @@ public class SpringCloudLoadBalancerAutoConfiguration {
     @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.REACTIVE)
     @ConditionalOnClass({WebFluxConfigurer.class})
     @ConditionalOnMissingBean({WebFluxConfigurationSupport.class})
-    @ConditionalOnProperty(name = "spring.cloud.loadbalancer.hint.enable", havingValue = "true", matchIfMissing = true)
+    @Conditional(EnabledHintCondition.class)
     public static class SpringWebFluxConfiguration {
         @Bean
         @ConditionalOnClass(RoutePredicateHandlerMapping.class)
@@ -92,7 +96,7 @@ public class SpringCloudLoadBalancerAutoConfiguration {
 
     @Configuration
     @ConditionalOnClass(Feign.class)
-    @ConditionalOnProperty(name = "spring.cloud.loadbalancer.hint.enable", havingValue = "true", matchIfMissing = true)
+    @Conditional(EnabledHintCondition.class)
     public static class HintFeignConfiguration {
         @Bean
         public HintFeignInterceptor hintFeignInterceptor() {

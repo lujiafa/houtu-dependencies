@@ -5,6 +5,7 @@ import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.loadbalancer.core.WeightFunction;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Map;
 
 public class SpringCloudWeightFunction implements WeightFunction {
@@ -28,7 +29,7 @@ public class SpringCloudWeightFunction implements WeightFunction {
             String weightValue = metadata.get(weightName);
             if (weightValue != null && !weightValue.isEmpty()) {
                 try {
-                    return new BigDecimal(weightValue).intValue();
+                    return new BigDecimal(weightValue).setScale(0, RoundingMode.CEILING).intValue();
                 } catch (Exception e) {
                    e.printStackTrace();
                 }

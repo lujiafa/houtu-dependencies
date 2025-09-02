@@ -31,11 +31,11 @@ public class MonitorProperties {
 	/**
 	 * 监控窗口周期。默认1秒
 	 */
-	private Duration period = Duration.ofSeconds(1);
+	private Duration period = Duration.ofSeconds(5);
 	/**
 	 * 监控数据延期多久处理，防止高并发时临界错位问题。默认100毫秒
 	 */
-	private Duration delay = Duration.ofMillis(100);
+	private Duration delay = Duration.ofMillis(500);
 	/**
 	 * 监控日志Collect队列容量
 	 */

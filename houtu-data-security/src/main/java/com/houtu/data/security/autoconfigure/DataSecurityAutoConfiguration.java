@@ -7,7 +7,6 @@ import com.houtu.data.security.prop.DataSecurityProperties;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 
 @AutoConfiguration
@@ -22,8 +21,8 @@ public class DataSecurityAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public SecurityWatchAspect dataSecurityAspect(ApplicationContext applicationContext, SecurityProcessor securityProcessor) {
-        return new SecurityWatchAspect(applicationContext, securityProcessor);
+    public SecurityWatchAspect dataSecurityAspect(SecurityProcessor securityProcessor) {
+        return new SecurityWatchAspect(securityProcessor);
     }
 
 

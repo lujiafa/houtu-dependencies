@@ -56,10 +56,6 @@ public class HttpClients {
                 .setConnectTimeout(Timeout.ofSeconds(httpClientProperties.getRequest().getConnectTimeout()))
                 .setResponseTimeout(Timeout.ofSeconds(httpClientProperties.getRequest().getResponseTimeout()))
                 .build();
-//        SSLContext sslContext = SSLContextBuilder
-//                .create()
-//                .loadTrustMaterial(TrustAllStrategy.INSTANCE)
-//                .build();
         defaultHttpClient = HttpClientBuilder.create()
                 .setConnectionManager(cm)
                 .setDefaultRequestConfig(requestConfig)
