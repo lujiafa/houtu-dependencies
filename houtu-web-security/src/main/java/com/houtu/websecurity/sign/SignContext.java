@@ -32,7 +32,15 @@ public final class SignContext {
      * @return 密钥数据
      */
     public static String getSignKey() {
-        Session session = SessionContext.get();
+        return getSignKey(SessionContext.get());
+    }
+
+    /**
+     * 获取签名密钥数据
+     * @param session session会话
+     * @return 密钥数据
+     */
+    public static String getSignKey(Session session) {
         if (session == null) {
             throw new SessionException(ErrorCode.build(ErrorCodeConstant.SESSION_EXPIRED));
         }

@@ -3,6 +3,7 @@ package com.houtu.data.security.handler.simple;
 import com.houtu.data.security.handler.SecurityProcessor;
 import com.houtu.data.security.prop.DataSecurityProperties;
 import com.houtu.util.crypto.SM4Utils;
+import com.houtu.util.data.ByteUtils;
 import com.houtu.util.data.HexUtils;
 
 import java.lang.reflect.Method;
@@ -19,7 +20,7 @@ public class SimpleSecurityProcessor implements SecurityProcessor {
     @Override
     public String encrypt(Method method, String original) {
         try {
-            return HexUtils.toHex(SM4Utils.encrypt(original.getBytes(StandardCharsets.UTF_8), HexUtils.toBinary(properties.getSecretKey()), SM4Utils.SM4Transformation.ECB().PKCS5Padding()));
+            return HexUtils.toHex(SM4Utils.encrypt(original.getBytes(StandardCharsets.UTF_8), ByteUtils.toBinary(properties.getSecretKey()), SM4Utils.SM4Transformation.ECB().PKCS5Padding()));
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
         }
@@ -29,7 +30,7 @@ public class SimpleSecurityProcessor implements SecurityProcessor {
     @Override
     public String decrypt(Method method, String encrypted) {
         try {
-            return new String(SM4Utils.decrypt(HexUtils.toBinary(encrypted), HexUtils.toBinary(properties.getSecretKey()), SM4Utils.SM4Transformation.ECB().PKCS5Padding()), StandardCharsets.UTF_8);
+            return new String(SM4Utils.decrypt(ByteUtils.toBinary(encrypted), ByteUtils.toBinary(properties.getSecretKey()), SM4Utils.SM4Transformation.ECB().PKCS5Padding()), StandardCharsets.UTF_8);
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
         }

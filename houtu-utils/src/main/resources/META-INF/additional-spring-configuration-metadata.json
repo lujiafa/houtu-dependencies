@@ -1,0 +1,39 @@
+{
+  "properties": [
+    {
+      "name": "houtu.util.httpclient.pool.max-total",
+      "type": "java.lang.Integer",
+      "description": "Maximum number of connections in the connection pool.",
+      "defaultValue": 80
+    },
+    {
+      "name": "houtu.util.httpclient.pool.max-per-route",
+      "type": "java.lang.Integer",
+      "description": "Default maximum connections per route.",
+      "defaultValue": 10
+    },
+    {
+      "name": "houtu.util.httpclient.request.connect-timeout",
+      "type": "java.lang.Integer",
+      "description": "Connection timeout (seconds).",
+      "defaultValue": 5
+    },
+    {
+      "name": "houtu.util.httpclient.request.response-timeout",
+      "type": "java.lang.Integer",
+      "description": "Response timeout (seconds).",
+      "defaultValue": 15
+    },
+    {
+      "name": "houtu.util.httpclient.proxy.hostname",
+      "type": "java.lang.String",
+      "description": "Request proxy hostname."
+    },
+    {
+      "name": "houtu.util.httpclient.proxy.port",
+      "type": "java.lang.Integer",
+      "description": "Request proxy port."
+    }
+  ]
+}
+

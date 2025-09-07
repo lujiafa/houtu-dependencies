@@ -1,0 +1,17 @@
+{
+	"properties": [
+		{
+			"name": "houtu.web.exception-resolver",
+			"type": "java.lang.Boolean",
+			"description": "Whether to enable a unified exception resolver.",
+			"defaultValue": true
+		},
+		{
+			"name": "houtu.web.combine-form-resolver-type",
+			"type": "com.houtu.web.type.CombineFormResolverType",
+			"description": "The processing method of composite parameter resolver for Form parameters.",
+			"defaultValue": "JSON"
+		}
+	]
+}
+

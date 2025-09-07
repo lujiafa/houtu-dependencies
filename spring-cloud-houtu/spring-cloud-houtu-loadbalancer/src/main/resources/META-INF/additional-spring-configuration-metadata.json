@@ -1,0 +1,23 @@
+{
+	"properties": [
+		{
+			"name": "spring.cloud.loadbalancer.weight",
+			"type": "java.lang.Boolean",
+			"description": "Whether to enable weight-based routing.",
+			"defaultValue": true
+		},
+		{
+			"name": "spring.cloud.loadbalancer.hint",
+			"type": "java.lang.Boolean",
+			"description": "Whether to enable hint-based gray strategy.",
+			"defaultValue": true
+		},
+		{
+			"name": "spring.cloud.loadbalancer.disable-gateway-request-hint",
+			"type": "java.lang.Boolean",
+			"description": "Whether to disable the hint parameter in the request header, only effective for Spring-Cloud-Gateway.",
+			"defaultValue": false
+		}
+	]
+}
+

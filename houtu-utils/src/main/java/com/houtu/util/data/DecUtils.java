@@ -15,44 +15,19 @@ public class DecUtils {
 	 * @return int ascii数值
 	 */
 	public static long toDec(String hex) {
+		if (hex == null || hex.isEmpty()) {
+			throw new IllegalArgumentException("Input hex string cannot be null or empty");
+		}
 		long value = 0L;
-		char[] charArray = hex.toCharArray();
-		for (int i = 0; i < charArray.length; i++) {
-			switch (charArray[i]) {
-				case '0': value = value << 4 | 0; break;
-				case '1': value = value << 4 | 1; break;
-				case '2': value = value << 4 | 2; break;
-				case '3': value = value << 4 | 3; break;
-				case '4': value = value << 4 | 4; break;
-				case '5': value = value << 4 | 5; break;
-				case '6': value = value << 4 | 6; break;
-				case '7': value = value << 4 | 7; break;
-				case '8': value = value << 4 | 8; break;
-				case '9': value = value << 4 | 9; break;
-				case 'a', 'A': value = value << 4 | 10; break;
-				case 'b', 'B': value = value << 4 | 11; break;
-				case 'c', 'C': value = value << 4 | 12; break;
-				case 'd', 'D': value = value << 4 | 13; break;
-				case 'e', 'E': value = value << 4 | 14; break;
-				case 'f', 'F': value = value << 4 | 15; break;
-				default:
-					throw new IllegalArgumentException("contains illegal character for hexBinary: " + hex);
+		for (int i = 0; i < hex.length(); i++) {
+			char ch = hex.charAt(i);
+			int digit = Character.digit(ch, 16);
+			if (digit == -1) {
+				throw new IllegalArgumentException("Illegal character '" + ch + "' at position " + i + " in input: " + hex);
 			}
+			value = (value << 4) | digit;
 		}
 		return value;
-	}
-
-
-	/**
-	 * @Title toDec
-	 * @Description byte数组转十进制数（二进制转10进制）
-	 * @param data
-	 */
-	public static long toDec(byte[] data) {
-		if (data == null || data.length == 0) {
-			throw new IllegalArgumentException("byte array cannot be null or empty");
-		}
-		return toDecLong(data);
 	}
 
 	/**
@@ -80,8 +55,9 @@ public class DecUtils {
 		}
 		int value = 0;
 		for (int i = 0; i < data.length; i++) {
-			if (i > 0)
+			if (i > 0) {
 				value = value << 8;
+			}
 			value |= data[i] & 0xFF;
 		}
 		return value;

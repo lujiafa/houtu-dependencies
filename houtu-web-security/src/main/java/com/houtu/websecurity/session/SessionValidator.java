@@ -1,10 +1,7 @@
 package com.houtu.websecurity.session;
 
-import com.houtu.websecurity.annotation.CheckSession;
 import com.houtu.websecurity.exception.SessionException;
-
-import jakarta.servlet.http.HttpServletRequest;
-import java.lang.reflect.Method;
+import com.houtu.websecurity.handler.SecurityContext;
 
 /**
  * 会话验证器
@@ -12,13 +9,19 @@ import java.lang.reflect.Method;
 @FunctionalInterface
 public interface SessionValidator {
 
-	/**
-	 * 验证session是否合法，并返回合法有效会话对象
-	 * @param request 请求对象【M】
-	 * @param method 请求映射方法/待验证会话方法【M】
-	 * @param checkSession 注解【M】
-	 * @throws SessionException
-	 */
-	void verify(HttpServletRequest request, Method method, CheckSession checkSession) throws SessionException;
-	
+    /**
+     * 验证session是否合法，并返回合法有效会话对象
+     *
+     * @param securityContext 安全上下文对象【M】
+     *                        <ul>
+     *                          <li>securityContext.request 请求对象【M】</li>
+     *                          <li>securityContext.response 响应对象【M】</li>
+     *                          <li>securityContext.method 校验方法【M】</li>
+     *                          <li>securityContext.checkSession 校验方法或类注解（value=true），为就近@CheckSession【M】</li>
+     *                        </ul>
+     * @return Session 会话对象
+     * @throws SessionException 会话异常
+     */
+    Session verify(SecurityContext securityContext) throws SessionException;
+
 }

@@ -6,6 +6,7 @@ import com.houtu.websecurity.annotation.RequiresPermission;
 import com.houtu.websecurity.annotation.RequiresRole;
 import com.houtu.websecurity.exception.PermissionException;
 import com.houtu.websecurity.exception.SessionException;
+import com.houtu.websecurity.handler.SecurityContext;
 import com.houtu.websecurity.permission.Logic;
 import com.houtu.websecurity.permission.PermissionValidator;
 import com.houtu.websecurity.session.Session;
@@ -22,21 +23,19 @@ public class SimplePermissionValidator implements PermissionValidator {
 	
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 
-	public void verify(Method method, RequiresRole requiresRole, RequiresPermission requiresPermission) throws PermissionException {
-		Session session = SessionContext.get();
-		if (session == null) {
-			logger.debug("权限验证失败，会话已过期");
-			throw new SessionException(ErrorCode.build(ErrorCodeConstant.SESSION_EXPIRED));
-		}
+	public void verify(SecurityContext securityContext) throws PermissionException {
+		RequiresRole requiresRole = securityContext.getRequiresRole();
+		RequiresPermission requiresPermission = securityContext.getRequiresPermission();
+		Session session = securityContext.getSession();
 		if (requiresRole != null && requiresRole.value().length > 0) {
 			if (!verify(session.getRoles(), requiresRole.value(), requiresRole.logic())) {
-				logger.debug("权限验证|角色权限验证失败[sessionId={}, method={}]", session.getId(), method.getName());
+				logger.debug("权限验证|角色权限验证失败[sessionId={}, method={}]", session.getId(), securityContext.getMethod().getName());
 				throw new PermissionException(ErrorCode.build(ErrorCodeConstant.ACCESS_PERMISSIONS_DENIED));
 			}
 		}
 		if (requiresPermission != null && requiresPermission.value().length > 0) {
 			if (!verify(session.getPermissions(), requiresPermission.value(), requiresPermission.logic())) {
-				logger.debug("权限验证|权限验证失败[sessionId={}, method={}]", session.getId(), method);
+				logger.debug("权限验证|权限验证失败[sessionId={}, method={}]", session.getId(), securityContext.getMethod().getName());
 				throw new PermissionException(ErrorCode.build(ErrorCodeConstant.ACCESS_PERMISSIONS_DENIED));
 			}
 		}

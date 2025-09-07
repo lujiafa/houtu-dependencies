@@ -1,0 +1,15 @@
+{
+	"properties": [
+		{
+			"name": "houtu.core.decrypt.encrypt-keys",
+			"type": "java.util.ArrayList<java.lang.String>",
+			"description": "The encrypted configuration items will be decrypted through the class corresponding to decrypt-processor-class."
+		},
+		{
+			"name": "houtu.core.decrypt.decrypt-processor-class",
+			"type": "java.lang.Class<? extends com.houtu.core.env.DecryptProcessor>",
+			"description": "Custom configuration decryption processor class (Class<? extends com.houtu.core.env.DecryptProcessor>).",
+		}
+	]
+}
+

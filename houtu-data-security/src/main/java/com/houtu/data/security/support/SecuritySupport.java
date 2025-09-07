@@ -1,4 +1,4 @@
 package com.houtu.data.security.support;
 
-public interface Securityable {
+public interface SecuritySupport {
 }

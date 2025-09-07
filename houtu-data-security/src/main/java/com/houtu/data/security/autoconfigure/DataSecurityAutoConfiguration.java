@@ -4,12 +4,15 @@ import com.houtu.data.security.aspect.SecurityWatchAspect;
 import com.houtu.data.security.handler.SecurityProcessor;
 import com.houtu.data.security.handler.simple.SimpleSecurityProcessor;
 import com.houtu.data.security.prop.DataSecurityProperties;
+import org.aspectj.lang.annotation.Aspect;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 
 @AutoConfiguration
+@ConditionalOnClass(Aspect.class)
 @EnableConfigurationProperties(DataSecurityProperties.class)
 public class DataSecurityAutoConfiguration {
 
@@ -24,7 +27,5 @@ public class DataSecurityAutoConfiguration {
     public SecurityWatchAspect dataSecurityAspect(SecurityProcessor securityProcessor) {
         return new SecurityWatchAspect(securityProcessor);
     }
-
-
 
 }

@@ -34,6 +34,12 @@ public @interface SecurityWatch {
    boolean decrypt() default true;
 
    /**
+    * 所有被注解@SecurityParam的待解密Map结果类型或Securityable中Map类型字段（包含嵌套），当配置此数组后，仅对和配置Key匹配的String解密（嵌套Value中Securityable子类也会自动匹配）
+    * @return
+    */
+   String[] decryptMapKeys() default {};
+
+   /**
     * 可自定义实现处理器 com.houtu.data.security.handler.SecurityProcessor
     * @return 处理器Bean名称
     */

@@ -1,5 +1,6 @@
 package com.houtu.util.common;
 
+import com.houtu.util.data.ByteUtils;
 import com.houtu.util.data.HexUtils;
 
 import java.lang.management.ManagementFactory;
@@ -41,7 +42,7 @@ public class SystemUtils extends org.apache.commons.lang3.SystemUtils {
 	 * @return List<byte[]>
 	 */
 	public static List<byte[]> getMacByteList() {
-		return getMacList(true, true).stream().map((p) -> HexUtils.toBinary(p)).collect(Collectors.toList());
+		return getMacList(true, true).stream().map((p) -> ByteUtils.toBinary(p)).collect(Collectors.toList());
 	}
 	
 	/**
@@ -52,7 +53,7 @@ public class SystemUtils extends org.apache.commons.lang3.SystemUtils {
 	 * @return List<String> mac地址16进制集合
 	 */
 	public static List<byte[]> getMacByteList(boolean onlyUp, boolean onlySiteLocalAddress) {
-		return getMacList(onlyUp, onlySiteLocalAddress).stream().map((p) -> HexUtils.toBinary(p)).collect(Collectors.toList());
+		return getMacList(onlyUp, onlySiteLocalAddress).stream().map((p) -> ByteUtils.toBinary(p)).collect(Collectors.toList());
 	}
 	
 	/**
