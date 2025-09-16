@@ -1,5 +1,7 @@
 package com.houtu.util.data;
 
+import com.houtu.util.constant.CharConstant;
+
 /**
  * @author lujiafa
  * @date 2014年7月24日
@@ -71,6 +73,23 @@ public final class ByteUtils {
 			value[i] = (byte) ((highNibble << 4) + lowNibble);
 		}
 		return value;
+	}
+
+	/**
+	 * @Description 将byte数组转为bit字符串
+	 * @Title toBitString
+	 * @param bytes
+	 * @return String
+	 */
+	public static String toBitString(byte[] bytes) {
+		if (bytes == null || bytes.length == 0) {
+			return CharConstant.EMPTY;
+		}
+		StringBuilder stringBuilder = new StringBuilder();
+		for (byte b : bytes) {
+			stringBuilder.append(String.format("%08s", Integer.toBinaryString(b & 0xFF)));
+		}
+		return stringBuilder.toString();
 	}
 	
 }

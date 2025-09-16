@@ -25,7 +25,7 @@ public final class HintContext {
      * @param value 请求链路级预期HINT
      */
     public static void setX(String value) {
-        get().setHint(value);
+        get().setXHint(value);
     }
 
     /**

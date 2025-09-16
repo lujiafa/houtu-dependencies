@@ -5,7 +5,7 @@ import com.houtu.data.security.annotation.SecurityParam;
 import com.houtu.data.security.annotation.SecurityWatch;
 import com.houtu.data.security.handler.SecurityProcessor;
 import com.houtu.data.security.handler.SecuritySetter;
-import com.houtu.data.security.support.SecuritySupport;
+import com.houtu.data.security.support.SecurityObject;
 import com.houtu.util.common.AnnotationUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -38,31 +38,32 @@ public class SecurityWatchAspect implements Ordered {
         this.securityProcessor = securityProcessor;
     }
 
+//    @Pointcut("@within(com.houtu.data.security.annotation.SecurityWatch) " +
+//            "|| @annotation(com.houtu.data.security.annotation.SecurityWatch) " +
+//            "|| execution(* (@com.houtu.data.security.annotation.SecurityWatch *).*(..)) " +
+//            "|| within(@com.houtu.data.security.annotation.SecurityWatch *)")
     @Pointcut("@within(com.houtu.data.security.annotation.SecurityWatch) || @annotation(com.houtu.data.security.annotation.SecurityWatch)")
-    public void dataSecurityWatchPointcut() {
-    }
+    public void dataSecurityWatchPointcut() {}
 
-    //    @Around("daoWatchPointcut() || execution(* com.baomidou.mybatisplus.core.mapper.BaseMapper.*(..))")
     @Around("dataSecurityWatchPointcut()")
     public Object doAround(ProceedingJoinPoint pjp) throws Throwable {
-        Object[] args = pjp.getArgs();
         Method method = ((MethodSignature) pjp.getSignature()).getMethod();
         SecurityWatch securityWatch = AnnotationUtils.getAnnotationByPriorityMethod(method, SecurityWatch.class);
+        Object[] args = pjp.getArgs();
         SecurityProcessor securityProcessor = getSecurityProcessor(securityWatch);
-        IdentityHashMap<String, String> recoveryMap = null;
-        Set<Object> recoveryAndDecryptSet = null;
+        SecurityContext securityContext = new SecurityContext(method, args, securityWatch, securityProcessor);
         if (args.length > 0 && securityWatch.encrypt()) {
-            recoveryMap = encryptParams(method, securityWatch, securityProcessor, args);
+            encryptParams(securityContext);
         }
         try {
             Object result = pjp.proceed(args);
             if (result == null || void.class.equals(method.getReturnType()) || !securityWatch.decrypt()) {
                 return result;
             }
-            return decryptResult(method, securityWatch, securityProcessor, recoveryMap, result, recoveryAndDecryptSet = new HashSet<>());
+            return decryptResult(securityContext, result);
         } finally {
-            if (recoveryMap != null && !recoveryMap.isEmpty()) {
-                recoveryParams(method, args, recoveryMap, recoveryAndDecryptSet);
+            if (securityContext.getRecoveryMap() != null && !securityContext.getRecoveryMap().isEmpty()) {
+                recoveryParams(securityContext);
             }
         }
     }
@@ -81,18 +82,18 @@ public class SecurityWatchAspect implements Ordered {
         return securityProcessor;
     }
 
-
-    IdentityHashMap<String, String> encryptParams(Method method, SecurityWatch securityWatch, SecurityProcessor securityProcessor, Object[] args) {
+    void encryptParams(SecurityContext securityContext) {
         List<Supplier<String>> getters = new ArrayList<>();
         List<SecuritySetter> setters = new ArrayList<>();
-        buildSecurityParams(args, method.getParameterAnnotations(), getters, setters, new HashSet<>(), securityWatch.encryptMapKeys());
+        SecurityWatch securityWatch = securityContext.getSecurityWatch();
+        buildSecurityParams(securityContext.getArgs(), securityContext.getParameterAnnotations(), getters, setters, new HashSet<>(), securityWatch.encryptMapKeys());
         IdentityHashMap<String, String> recoveryMap = new IdentityHashMap<>();
         if (!getters.isEmpty()) {
             Map<String, String> encryptedProcessMap = new ConcurrentHashMap<>(getters.size());
             List<String> origins = getters.stream().map(g -> g.get()).toList();
             origins.parallelStream().forEach(o -> {
                 if (encryptedProcessMap.get(o) == null) {
-                    encryptedProcessMap.put(o, securityProcessor.encrypt(method, o));
+                    encryptedProcessMap.put(o, securityProcessor.encrypt(securityContext.getMethod(), o));
                 }
             });
             IdentityHashMap<String, String> encryptedMap = new IdentityHashMap<>();
@@ -105,21 +106,20 @@ public class SecurityWatchAspect implements Ordered {
             setters.parallelStream().forEach(s -> s.set(encryptedMap));
             encryptedMap.entrySet().forEach(e -> recoveryMap.put(e.getValue(), e.getKey()));
         }
-        return recoveryMap;
+        securityContext.setRecoveryMap(recoveryMap);
     }
 
-    void recoveryParams(Method method, Object[] args, IdentityHashMap<String, String> recoveryMap, Set<Object> recoveryAndDecryptSet) {
+    void recoveryParams(SecurityContext securityContext) {
         List<SecuritySetter> setters = new ArrayList<>();
-        buildSecurityParams(args, method.getParameterAnnotations(), null, setters, recoveryAndDecryptSet == null ? new HashSet<>() : recoveryAndDecryptSet, null);
-        setters.parallelStream().forEach(s -> s.set(recoveryMap));
+        buildSecurityParams(securityContext.getArgs(), securityContext.getParameterAnnotations(), null, setters, securityContext.getRecoveryAndDecryptProcessedSet(), null);
+        setters.parallelStream().forEach(s -> s.set(securityContext.getRecoveryMap()));
     }
-
 
     void buildSecurityParams(Object[] args, Annotation[][] parameterAnnotations, List<Supplier<String>> getters, List<SecuritySetter> setters, Set<Object> processedSet, String[] mapKeys) {
         for (int i = 0; i < args.length; i++) {
             Object arg = args[i];
             if (arg == null
-                    || (!Arrays.stream(parameterAnnotations[i]).parallel().anyMatch(annotation -> annotation instanceof SecurityParam) && !(arg instanceof SecuritySupport)))
+                    || (!Arrays.stream(parameterAnnotations[i]).parallel().anyMatch(annotation -> annotation instanceof SecurityParam) && !(arg instanceof SecurityObject)))
                 continue;
             if (arg instanceof String _arg) {
                 if (getters != null) {
@@ -135,25 +135,27 @@ public class SecurityWatchAspect implements Ordered {
         }
     }
 
-    Object decryptResult(Method method, SecurityWatch securityWatch, SecurityProcessor securityProcessor, IdentityHashMap<String, String> recoveryMap, Object result, Set<Object> recoveryAndDecryptSet) {
+    Object decryptResult(SecurityContext securityContext, Object result) {
         if (result instanceof String _result) {
+            IdentityHashMap<String, String> recoveryMap = securityContext.getRecoveryMap();
             if (recoveryMap != null) {
-                String original = recoveryMap.get(_result);
+                String original = securityContext.getRecoveryMap().get(_result);
                 if (original != null) {
                     return original;
                 }
             }
-            return securityProcessor.decrypt(method, _result);
+            return securityProcessor.decrypt(securityContext.getMethod(), _result);
         }
         List<Supplier<String>> getters = new ArrayList<>();
         List<SecuritySetter> setters = new ArrayList<>();
-        build(result, getters, setters, recoveryAndDecryptSet, securityWatch.decryptMapKeys());
+        build(result, getters, setters, securityContext.getRecoveryAndDecryptProcessedSet(), securityContext.getSecurityWatch().decryptMapKeys());
         if (!getters.isEmpty()) {
+            IdentityHashMap<String, String> recoveryMap = securityContext.getRecoveryMap();
             Map<String, String> decryptProcessMap = recoveryMap == null ? new ConcurrentHashMap<>(getters.size()) : new ConcurrentHashMap<>(recoveryMap);
             List<String> encrypts = getters.stream().map(g -> g.get()).toList();
             encrypts.parallelStream().forEach(o -> {
                 if (decryptProcessMap.get(o) == null) {
-                    decryptProcessMap.put(o, securityProcessor.decrypt(method, o));
+                    decryptProcessMap.put(o, securityProcessor.decrypt(securityContext.getMethod(), o));
                 }
             });
             IdentityHashMap<String, String> decryptionMap = recoveryMap == null ? new IdentityHashMap<>() : new IdentityHashMap<>(recoveryMap);
@@ -169,12 +171,12 @@ public class SecurityWatchAspect implements Ordered {
 
     void build(Object object, List<Supplier<String>> getters, List<SecuritySetter> setters, Set<Object> processedSet, String[] mapKeys) {
         if (object == null || processedSet.contains(object)) return;
-        if (object instanceof SecuritySupport) {
+        if (object instanceof SecurityObject) {
             List<Field> fieldList = Arrays.stream(object.getClass().getDeclaredFields()).filter(field ->
                             field.isAnnotationPresent(SecurityParam.class)
                                     && !Modifier.isStatic(field.getModifiers())
                                     && !Modifier.isFinal(field.getModifiers())
-                                    || SecuritySupport.class.isAssignableFrom(field.getType()))
+                                    || SecurityObject.class.isAssignableFrom(field.getType()))
                     .collect(Collectors.toList());
             if (fieldList.size() == 0) return;
             processedSet.add(object);
@@ -229,7 +231,7 @@ public class SecurityWatchAspect implements Ordered {
                             }
                         });
                     }
-                }else {
+                } else {
                     build(value, getters, setters, processedSet, mapKeys);
                 }
             }
@@ -253,7 +255,7 @@ public class SecurityWatchAspect implements Ordered {
                             } else {
                                 collection.add(newValue);
                             }
-                        }else {
+                        } else {
                             collection.add(value);
                             build(value, getters, setters, processedSet, mapKeys);
                         }
@@ -288,7 +290,7 @@ public class SecurityWatchAspect implements Ordered {
                             }
                         } else {
                             map.put(key, value);
-                            if (encryptMapKeysSet.contains(key) || value instanceof SecuritySupport) {
+                            if (encryptMapKeysSet.contains(key) || value instanceof SecurityObject) {
                                 build(value, getters, setters, processedSet, mapKeys);
                             }
                         }
@@ -321,64 +323,63 @@ public class SecurityWatchAspect implements Ordered {
 
 
     static class SecurityContext {
-        protected OperateType operateType;
         protected Method method;
+        private Object[] args;
         protected SecurityWatch securityWatch;
         protected SecurityProcessor securityProcessor;
-        protected Set<Object> processedSet = new HashSet<>();
-        protected List<Supplier<String>> getters = new ArrayList<>();
-        protected List<SecuritySetter> setters = new ArrayList<>();
+        protected Annotation[][] parameterAnnotations;
 
-        public SecurityContext(OperateType operateType, Method method, SecurityWatch securityWatch, SecurityProcessor securityProcessor, Set<Object> processedSet) {
-            this.operateType = operateType;
+        private IdentityHashMap<String, String> recoveryMap;
+
+        private Set<Object> recoveryAndDecryptProcessedSet;
+
+        public SecurityContext(Method method, Object[] args, SecurityWatch securityWatch, SecurityProcessor securityProcessor) {
             this.method = method;
+            this.args = args;
             this.securityWatch = securityWatch;
             this.securityProcessor = securityProcessor;
-            this.processedSet = processedSet == null ? new HashSet<>() : processedSet;
-        }
-
-        public OperateType getOperateType() {
-            return operateType;
         }
 
         public Method getMethod() {
-            return method;
+            return this.method;
+        }
+
+        public Object[] getArgs() {
+            return args;
         }
 
         public SecurityWatch getSecurityWatch() {
-            return securityWatch;
+            return this.securityWatch;
         }
 
         public SecurityProcessor getSecurityProcessor() {
-            return securityProcessor;
+            return this.securityProcessor;
         }
 
-        public boolean isProcessed(Object object) {
-            return processedSet.contains(object);
+        public Annotation[][] getParameterAnnotations() {
+            if (this.parameterAnnotations == null) {
+                this.parameterAnnotations = method.getParameterAnnotations();
+            }
+            return this.parameterAnnotations;
         }
 
-        public void addProcessed(Object object) {
-            processedSet.add(object);
+        public IdentityHashMap<String, String> getRecoveryMap() {
+            return recoveryMap;
         }
 
-        public Set<Object> getProcessedSet() {
-            return processedSet;
+        public void setRecoveryMap(IdentityHashMap<String, String> recoveryMap) {
+            this.recoveryMap = recoveryMap;
         }
 
-        public void addGetter(Supplier<String> getter) {
-            getters.add(getter);
+        public Set<Object> getRecoveryAndDecryptProcessedSet() {
+            if (this.recoveryAndDecryptProcessedSet == null)  {
+                this.recoveryAndDecryptProcessedSet = new HashSet<>();
+            }
+            return this.recoveryAndDecryptProcessedSet;
         }
 
-        public void addSetter(SecuritySetter setter) {
-            setters.add(setter);
-        }
-
-        public List<Supplier<String>> getGetters() {
-            return getters;
-        }
-
-        public List<SecuritySetter> getSetter() {
-            return setters;
+        public void setRecoveryAndDecryptProcessedSet(Set<Object> recoveryAndDecryptProcessedSet) {
+            this.recoveryAndDecryptProcessedSet = recoveryAndDecryptProcessedSet;
         }
     }
 
