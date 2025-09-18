@@ -22,7 +22,7 @@ public class SimpleSessionValidator implements SessionValidator {
 			}
 			throw new SessionException(ErrorCode.build(ErrorCodeConstant.SESSION_EXPIRED));
 		}
-		SessionContext.delay(session.getId());
+		SessionContext.delay(session);
 		return session;
 	}
 }

@@ -20,7 +20,7 @@ public class EfficientSessionRepositoryMessageListener implements MessageListene
     private final RedisTemplate redisTemplate;
     private final String channelName;
 
-    public EfficientSessionRepositoryMessageListener(@Nonnull Cache cache, @Nonnull RedisTemplate redisTemplate, @Nonnull String channelName) {
+    public EfficientSessionRepositoryMessageListener(Cache cache, RedisTemplate redisTemplate, String channelName) {
         this.cache = cache;
         this.redisTemplate = redisTemplate;
         this.channelName = channelName;

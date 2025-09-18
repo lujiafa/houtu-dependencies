@@ -176,55 +176,55 @@ public class SM2Utils {
        return signVerify(originalData, publicKey, signData, GMObjectIdentifiers.sm2sign_with_sm3);
     }
 
-    public static void main(String[] args) {
-        SM2KeyPair keyPair = SM2Utils.getKeyPair();
-        String str = "6688";
-        try {
-            byte[] sm2EncryptBytes = SM2Utils.encrypt(str.getBytes(), keyPair.getPublicKey());
-            System.out.println("SM2加密数据：" + Base64Utils.encode(sm2EncryptBytes));
-
-            byte[] sm2DecryptBytes = SM2Utils.decrypt(sm2EncryptBytes, keyPair.getPrivateKey());
-            System.out.println("SM2解密数据：" + new String(sm2DecryptBytes));
-
-
-            byte[] signSM3WithSM2Bytes = SM2Utils.signSM3WithSM2(str.getBytes(), keyPair.getPrivateKeyBytes());
-            System.out.println("Sign-SM3WithSM2 签名数据：" + Base64Utils.encode(signSM3WithSM2Bytes));
-            System.out.println("Sign-SM3WithSM2 验签结果：" + SM2Utils.signVerifySM3WithSM2(str.getBytes(), keyPair.getPublicKeyBytes(), signSM3WithSM2Bytes));
-
-
-            byte[] sm4Key = SM4Utils.getKey();
-            byte[] sm4EncryptBytes = SM4Utils.encrypt(str.getBytes(), sm4Key, SM4Utils.SM4Transformation.ECB().PKCS5Padding());
-            System.out.println("SM4加密数据：" + Base64Utils.encode(sm4EncryptBytes));
-            byte[] sm4EncryptBytes2 = SM4Utils.encrypt(str.getBytes(), sm4Key, SM4Utils.SM4Transformation.ECB().PKCS5Padding());
-            System.out.println("SM4加密数据2：" + Base64Utils.encode(sm4EncryptBytes2));
-            byte[] sm4DecryptBytes = SM4Utils.decrypt(sm4EncryptBytes, sm4Key, SM4Utils.SM4Transformation.ECB().PKCS5Padding());
-            System.out.println("SM4解密数据：" + new String(sm4DecryptBytes));
-
-
-            RSAUtils.RSAKeyPair rsaKeyPair = RSAUtils.getKeyPair(RSAUtils.RSAKeySize._2048);
-            byte[] rsaPrivateKeyBytes = rsaKeyPair.getPrivateKeyBytes();
-            byte[] rsaPublicKeyBytes = rsaKeyPair.getPublicKeyBytes();
-
-            byte[] rsaEncryptBytes = RSAUtils.encryptByPublicKey(str.getBytes(), rsaPublicKeyBytes);
-            System.out.println("RSA - encryptByPublicKey 加密数据：" + Base64Utils.encode(rsaEncryptBytes));
-            byte[] rsaDecryptBytes = RSAUtils.decryptByPrivateKey(rsaEncryptBytes, rsaPrivateKeyBytes);
-            System.out.println("RSA - decryptByPrivateKey 解密数据：" + new String(rsaDecryptBytes, "UTF-8"));
-
-            byte[] rsaEncryptBytes2 = RSAUtils.encryptByPrivateKey(str.getBytes(), rsaPrivateKeyBytes);
-            System.out.println("RSA - encryptByPrivateKey 加密数据：" + Base64Utils.encode(rsaEncryptBytes2));
-            byte[] rsaDecryptBytes2 = RSAUtils.decryptByPublicKey(rsaEncryptBytes2, rsaPublicKeyBytes);
-            System.out.println("RSA - decryptByPublicKey 解密数据：" + new String(rsaDecryptBytes2));
-
-            byte[] signSHA256WithRSABytes = RSAUtils.signSHA256WithRSA(str.getBytes(), rsaPrivateKeyBytes);
-            System.out.println("RSA - signSHA256WithRSA 签名数据：" + Base64Utils.encode(signSHA256WithRSABytes));
-            System.out.println("RSA - signSHA256WithRSA 验签结果：" + RSAUtils.signVerifySHA256WithRSA(str.getBytes(), rsaPublicKeyBytes, signSHA256WithRSABytes));
-
-            byte[] bytes = SM3Utils.hmacSM3(str.getBytes(), "12".getBytes());
-            System.out.println("SM3 - hmacSM3 摘要数据：" + HexUtils.toHex(bytes));
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
+//    public static void main(String[] args) {
+//        SM2KeyPair keyPair = SM2Utils.getKeyPair();
+//        String str = "6688";
+//        try {
+//            byte[] sm2EncryptBytes = SM2Utils.encrypt(str.getBytes(), keyPair.getPublicKey());
+//            System.out.println("SM2加密数据：" + Base64Utils.encode(sm2EncryptBytes));
+//
+//            byte[] sm2DecryptBytes = SM2Utils.decrypt(sm2EncryptBytes, keyPair.getPrivateKey());
+//            System.out.println("SM2解密数据：" + new String(sm2DecryptBytes));
+//
+//
+//            byte[] signSM3WithSM2Bytes = SM2Utils.signSM3WithSM2(str.getBytes(), keyPair.getPrivateKeyBytes());
+//            System.out.println("Sign-SM3WithSM2 签名数据：" + Base64Utils.encode(signSM3WithSM2Bytes));
+//            System.out.println("Sign-SM3WithSM2 验签结果：" + SM2Utils.signVerifySM3WithSM2(str.getBytes(), keyPair.getPublicKeyBytes(), signSM3WithSM2Bytes));
+//
+//
+//            byte[] sm4Key = SM4Utils.getKey();
+//            byte[] sm4EncryptBytes = SM4Utils.encrypt(str.getBytes(), sm4Key, SM4Utils.SM4Transformation.ECB().PKCS5Padding());
+//            System.out.println("SM4加密数据：" + Base64Utils.encode(sm4EncryptBytes));
+//            byte[] sm4EncryptBytes2 = SM4Utils.encrypt(str.getBytes(), sm4Key, SM4Utils.SM4Transformation.ECB().PKCS5Padding());
+//            System.out.println("SM4加密数据2：" + Base64Utils.encode(sm4EncryptBytes2));
+//            byte[] sm4DecryptBytes = SM4Utils.decrypt(sm4EncryptBytes, sm4Key, SM4Utils.SM4Transformation.ECB().PKCS5Padding());
+//            System.out.println("SM4解密数据：" + new String(sm4DecryptBytes));
+//
+//
+//            RSAUtils.RSAKeyPair rsaKeyPair = RSAUtils.getKeyPair(RSAUtils.RSAKeySize._2048);
+//            byte[] rsaPrivateKeyBytes = rsaKeyPair.getPrivateKeyBytes();
+//            byte[] rsaPublicKeyBytes = rsaKeyPair.getPublicKeyBytes();
+//
+//            byte[] rsaEncryptBytes = RSAUtils.encryptByPublicKey(str.getBytes(), rsaPublicKeyBytes);
+//            System.out.println("RSA - encryptByPublicKey 加密数据：" + Base64Utils.encode(rsaEncryptBytes));
+//            byte[] rsaDecryptBytes = RSAUtils.decryptByPrivateKey(rsaEncryptBytes, rsaPrivateKeyBytes);
+//            System.out.println("RSA - decryptByPrivateKey 解密数据：" + new String(rsaDecryptBytes, "UTF-8"));
+//
+//            byte[] rsaEncryptBytes2 = RSAUtils.encryptByPrivateKey(str.getBytes(), rsaPrivateKeyBytes);
+//            System.out.println("RSA - encryptByPrivateKey 加密数据：" + Base64Utils.encode(rsaEncryptBytes2));
+//            byte[] rsaDecryptBytes2 = RSAUtils.decryptByPublicKey(rsaEncryptBytes2, rsaPublicKeyBytes);
+//            System.out.println("RSA - decryptByPublicKey 解密数据：" + new String(rsaDecryptBytes2));
+//
+//            byte[] signSHA256WithRSABytes = RSAUtils.signSHA256WithRSA(str.getBytes(), rsaPrivateKeyBytes);
+//            System.out.println("RSA - signSHA256WithRSA 签名数据：" + Base64Utils.encode(signSHA256WithRSABytes));
+//            System.out.println("RSA - signSHA256WithRSA 验签结果：" + RSAUtils.signVerifySHA256WithRSA(str.getBytes(), rsaPublicKeyBytes, signSHA256WithRSABytes));
+//
+//            byte[] bytes = SM3Utils.hmacSM3(str.getBytes(), "12".getBytes());
+//            System.out.println("SM3 - hmacSM3 摘要数据：" + HexUtils.toHex(bytes));
+//        } catch (Exception e) {
+//            throw new RuntimeException(e);
+//        }
+//    }
 
     public static SM2KeyPair getKeyPair() {
         try {

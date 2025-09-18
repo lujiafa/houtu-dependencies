@@ -28,6 +28,12 @@
             <artifactId>cache2k-spring</artifactId>
             <scope>provided</scope>
         </dependency>
+        <!-- jwt -->
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
 
         <dependency>
             <groupId>com.houtu</groupId>

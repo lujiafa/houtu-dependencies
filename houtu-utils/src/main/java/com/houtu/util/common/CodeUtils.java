@@ -216,7 +216,7 @@ public class CodeUtils {
         }
     }
 
-    static class RuleData {
+    public static class RuleData {
         RuleData() {}
 
         RuleData(boolean success, Long timestamp, Long incr, byte[] mac, Integer processId) {

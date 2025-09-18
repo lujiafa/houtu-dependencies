@@ -3,14 +3,13 @@ package com.houtu.websecurity.session.repository;
 import com.houtu.websecurity.constant.RedisScriptConstant;
 import com.houtu.websecurity.prop.SessionProperties;
 import com.houtu.websecurity.session.Session;
-import com.houtu.websecurity.session.SessionRepository;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.util.Assert;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -20,25 +19,21 @@ import java.util.stream.Collectors;
  * @author jonlu
  * @date 2019/9/5
  */
-public class RedisSessionRepository implements SessionRepository {
+public class RedisSessionRepository extends SessionPersistentRepository {
 
     protected RedisTemplate redisTemplate;
-    protected SessionProperties sessionProperties;
 
     public RedisSessionRepository(SessionProperties sessionProperties, RedisTemplate redisTemplate) {
-        Assert.notNull(sessionProperties, "sessionProperties must not be null");
-        
-        this.sessionProperties = sessionProperties;
+        super(sessionProperties);
         this.redisTemplate = redisTemplate;
     }
 
     @Override
-    public boolean save(Session session, Function<Session, Map<String, String>> uniqueCompositeMutexFunction) {
+    protected boolean save(Session session, Map<String, String> uniqueCompositeMutexMap) {
         String cachePrefix = this.sessionProperties.getRedisBaseKey();
-        int expire = this.sessionProperties.getExpire();
+        long expire = this.sessionProperties.getExpire().getSeconds();
         String sessionCacheKey = cachePrefix + session.getId();
         this.redisTemplate.opsForValue().set(sessionCacheKey, session, expire, TimeUnit.SECONDS);
-        Map<String, String> uniqueCompositeMutexMap = uniqueCompositeMutexFunction.apply(session);
         if (!uniqueCompositeMutexMap.isEmpty()) {
             uniqueCompositeMutexMap.entrySet().parallelStream().forEach(e -> {
                 String cacheKey = String.format("%s:mutex:%s:%s", cachePrefix, e.getKey(), e.getValue());
@@ -49,24 +44,7 @@ public class RedisSessionRepository implements SessionRepository {
     }
 
     @Override
-    public boolean update(Session session, Function<Session, Map<String, String>> uniqueCompositeMutexFunction) {
-        String cachePrefix = this.sessionProperties.getRedisBaseKey();
-        Map<String, String> uniqueCompositeMutexMap = uniqueCompositeMutexFunction.apply(session);
-        if (uniqueCompositeMutexMap.isEmpty()) {
-            return redisTemplate.opsForValue().setIfPresent(cachePrefix, session);
-        }
-        if (uniqueCompositeMutexMap.entrySet()
-                .parallelStream().map(e -> String.format("%s:mutex:%s:%s", cachePrefix, e.getKey(), e.getValue()))
-                .collect(Collectors.toList())
-                .parallelStream()
-                .allMatch(k -> Objects.equals(session.getId(), redisTemplate.opsForValue().get(k)))) {
-            return redisTemplate.opsForValue().setIfPresent(cachePrefix, session);
-        }
-        return false;
-    }
-
-    @Override
-    public Session get(String sessionId, Function<Session, Map<String, String>> uniqueCompositeMutexFunction) {
+    protected Session get(String sessionId, Function<Session, Map<String, String>> uniqueCompositeMutexFunction) {
         String cachePrefix = this.sessionProperties.getRedisBaseKey();
         String sessionCacheKey = cachePrefix + sessionId;
         Session session = (Session) this.redisTemplate.opsForValue().get(sessionCacheKey);
@@ -82,33 +60,36 @@ public class RedisSessionRepository implements SessionRepository {
     }
 
     @Override
-    public boolean delay(String sessionId, Function<Session, Map<String, String>> uniqueCompositeMutexFunction) {
+    protected boolean delay(Session session, Map<String, String> uniqueCompositeMutexMap) {
         String cachePrefix = this.sessionProperties.getRedisBaseKey();
-        int expire = this.sessionProperties.getExpire();
-        String sessionCacheKey = cachePrefix + sessionId;
-        Session session = (Session) this.redisTemplate.opsForValue().getAndExpire(sessionCacheKey, expire, TimeUnit.SECONDS);
-        if (session != null) {
-            Map<String, String> uniqueCompositeMutexMap = uniqueCompositeMutexFunction.apply(session);
+        long expire = this.sessionProperties.getExpire().getSeconds();
+        String sessionCacheKey = cachePrefix + session.getId();
+        if (redisTemplate.expire(sessionCacheKey, expire, TimeUnit.SECONDS)) {
             if (uniqueCompositeMutexMap.isEmpty())
                 return true;
             return uniqueCompositeMutexMap.entrySet()
                     .parallelStream().map(e -> String.format("%s:mutex:%s:%s", cachePrefix, e.getKey(), e.getValue())).collect(Collectors.toList())
                     .parallelStream()
-                    .allMatch(k -> sessionId.equals(this.redisTemplate.opsForValue().getAndExpire(k, this.sessionProperties.getExpire(), TimeUnit.SECONDS)));
+                    .allMatch(k -> session.getId().equals(this.redisTemplate.expire(k, this.sessionProperties.getExpire().getSeconds(), TimeUnit.SECONDS)));
         }
         return false;
     }
 
     @Override
-    public void remove(String sessionId, Function<Session, Map<String, String>> uniqueCompositeMutexFunction) {
-        String sessionCacheKey = this.sessionProperties.getRedisBaseKey() + sessionId;
-        Session session = (Session) this.redisTemplate.opsForValue().getAndDelete(sessionCacheKey);
-        if (session == null) return;
-        uniqueCompositeMutexFunction.apply(session).entrySet()
+    protected void remove(Session session, Map<String, String> uniqueCompositeMutexMap) {
+        String sessionCacheKey = this.sessionProperties.getRedisBaseKey() + session.getId();
+        redisTemplate.delete(sessionCacheKey);
+        uniqueCompositeMutexMap.entrySet()
                 .parallelStream()
                 .map(e -> this.sessionProperties.getRedisBaseKey() + String.format(":mutex:%s:%s", e.getKey(), e.getValue())).collect(Collectors.toList())
                 .parallelStream()
-                .forEach(k -> this.redisTemplate.execute(RedisScriptConstant.SESSION_DEL_MUTEX_DATA_SCRIPT, Collections.singletonList(k), sessionId));
+                .forEach(k -> this.redisTemplate.execute(RedisScriptConstant.SESSION_DEL_MUTEX_DATA_SCRIPT, Collections.singletonList(k), session.getId()));
     }
+
+    @Override
+    protected String getSessionId(HttpServletRequest request) {
+        return request.getHeader(sessionProperties.getSessionIdName());
+    }
+
 
 }

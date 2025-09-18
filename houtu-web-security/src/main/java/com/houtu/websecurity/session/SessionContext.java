@@ -10,13 +10,11 @@ import com.houtu.websecurity.prop.SessionProperties;
 import com.houtu.websecurity.session.simple.SimpleSession;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
-import java.util.Collections;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -100,51 +98,7 @@ public class SessionContext {
 	 * @return boolean
 	 */
 	public static boolean save(Session session) {
-		return save(session, true, true);
-	}
-
-	/**
-	 * @Title save
-	 * @Description: 保存Session并响应，默认响应到响应头中，可通过"web.security.session.enableHeader=false"来关闭头部传递，从而输出到cookie
-	 * @param session 会话对象
-	 * @param write2Header 是否响应session-id到响应头中
-	 * @param write2Cookie 是否响应session-id到cookie中
-	 * @return boolean
-	 */
-	public static boolean save(Session session, boolean write2Header, boolean write2Cookie) {
-		Assert.notNull(session, "parameter session must cannot be null");
-		if (INSTANCE.sessionRepository.save(session, s -> {
-			if (s == null) return Collections.emptyMap();
-			Map<String, String> uniqueCompositeMutexMap = (Map<String, String>) session.getAttribute(SecurityConstant.SECURITY_SESSION_MUTEX_KEYS_ATTR_NAME);
-			return uniqueCompositeMutexMap == null ? Collections.emptyMap() : uniqueCompositeMutexMap;
-		})) {
-			sessionContextHolder.set(session);
-			HttpServletResponse response = null;
-			if (write2Header) {
-				response = WebUtils.getResponse();
-				response.setHeader(INSTANCE.sessionProperties.getSessionIdName(), session.getId());
-			}
-			if (write2Cookie) {
-				WebUtils.writeCookie(response == null ? WebUtils.getResponse() : response, INSTANCE.sessionProperties.getSessionIdName(), session.getId(), INSTANCE.sessionProperties.getSessionCookiePath(), INSTANCE.sessionProperties.getSessionCookieDomain(), INSTANCE.sessionProperties.getExpire());
-			}
-			return true;
-		}
-		return false;
-	}
-
-	/**
-	 * @Title save
-	 * @Description: 更新Session
-	 * @param session
-	 * @return boolean
-	 */
-	public static boolean update(Session session) {
-		Assert.notNull(session, "parameter session must cannot be null");
-		if (INSTANCE.sessionRepository.update(session, s -> {
-			if (s == null) return Collections.emptyMap();
-			Map<String, String> uniqueCompositeMutexMap = (Map<String, String>) session.getAttribute(SecurityConstant.SECURITY_SESSION_MUTEX_KEYS_ATTR_NAME);
-			return uniqueCompositeMutexMap == null ? Collections.emptyMap() : uniqueCompositeMutexMap;
-		})) {
+		if (INSTANCE.sessionRepository.save(session, WebUtils.getResponse())) {
 			sessionContextHolder.set(session);
 			return true;
 		}
@@ -159,43 +113,18 @@ public class SessionContext {
 		Session session = sessionContextHolder.get();
 		if (session != null)
 			return session;
-		String sessionId = getSessionId();
-		if (sessionId == null) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("未知的会话信息，sessionId为空");
-			}
-			return null;
-		}
-		if ((session = get(sessionId)) != null)
+		if ((session = INSTANCE.sessionRepository.get(WebUtils.getRequest())) != null)
 			sessionContextHolder.set(session);
 		return session;
-	}
-
-	/**
-	 * 通过sessionId获取会话信息
-	 * @param sessionId 会话ID
-	 * @return 会话信息
-	 */
-	public static Session get(String sessionId) {
-		Assert.notNull(sessionId, "parameter sessionId must cannot be null");
-		return INSTANCE.sessionRepository.get(sessionId, s -> {
-			if (s == null) return Collections.emptyMap();
-			Map<String, String> uniqueCompositeMutexMap = (Map<String, String>) s.getAttribute(SecurityConstant.SECURITY_SESSION_MUTEX_KEYS_ATTR_NAME);
-			return uniqueCompositeMutexMap == null ? Collections.emptyMap() : uniqueCompositeMutexMap;
-		});
 	}
 	
 	/**
 	 * 延长过期时间，仅将cache的过期时间按配置中过期时间重置，cache中的内容不变，无重写操作
 	 * @return true-延期成功 false-延期失败
 	 */
-	public static boolean delay(String sessionId) {
-		Assert.notNull(sessionId, "parameter sessionId must cannot be null");
-		return INSTANCE.sessionRepository.delay(sessionId, s -> {
-			if (s == null) return Collections.emptyMap();
-			Map<String, String> uniqueCompositeMutexMap = (Map<String, String>) s.getAttribute(SecurityConstant.SECURITY_SESSION_MUTEX_KEYS_ATTR_NAME);
-			return uniqueCompositeMutexMap == null ? Collections.emptyMap() : uniqueCompositeMutexMap;
-		});
+	public static boolean delay(Session session) {
+		Assert.notNull(session, "parameter session must cannot be null");
+		return INSTANCE.sessionRepository.delay(session, WebUtils.getResponse());
 	}
 
 	/**
@@ -203,24 +132,9 @@ public class SessionContext {
 	 * @return 返回删除结果状态 true-删除成功 false-删除失败
 	 */
 	public static boolean remove() {
+		INSTANCE.sessionRepository.remove(get(), WebUtils.getResponse());
 		reset();
-		remove(getSessionId());
-		WebUtils.removeCookie(WebUtils.getRequest(), WebUtils.getResponse(), INSTANCE.sessionProperties.getSessionIdName());
 		return true;
-	}
-	
-	/**
-	 * @Title remove
-	 * @Description 通过索引sessionId删除会话（慎用，使用不当可能踢出其他用户）
-	 * @param sessionId 会话ID
-	 */
-	public static void remove(String sessionId) {
-		Assert.notNull(sessionId, "parameter sessionId must cannot be null");
-		INSTANCE.sessionRepository.remove(sessionId, s -> {
-			if (s == null) return Collections.emptyMap();
-			Map<String, String> uniqueCompositeMutexMap = (Map<String, String>) s.getAttribute(SecurityConstant.SECURITY_SESSION_MUTEX_KEYS_ATTR_NAME);
-			return uniqueCompositeMutexMap == null ? Collections.emptyMap() : uniqueCompositeMutexMap;
-		});
 	}
 	
 	/**

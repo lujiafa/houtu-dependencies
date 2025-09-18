@@ -2,7 +2,6 @@ package com.houtu.websecurity.session.repository;
 
 import com.houtu.websecurity.prop.SessionProperties;
 import com.houtu.websecurity.session.Session;
-import jakarta.annotation.Nonnull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.Cache;
@@ -42,11 +41,11 @@ public class EfficientSessionRepository extends RedisSessionRepository {
     }
 
     @Override
-    public boolean save(@Nonnull Session session, Function<Session, Map<String, String>> uniqueCompositeMutexFunction) {
+    protected boolean save(Session session, Map<String, String> uniqueCompositeMutexMap) {
         if (cache == null) {
-            return super.save(session, uniqueCompositeMutexFunction);
+            return super.save(session, uniqueCompositeMutexMap);
         }
-        if (super.save(session, uniqueCompositeMutexFunction)) {
+        if (super.save(session, uniqueCompositeMutexMap)) {
             // 同步所有节点缓存会话信息已更新
             redisTemplate.convertAndSend(sessionProperties.getEfficientCacheSyncChannel(), session.getId());
             return true;
@@ -55,20 +54,7 @@ public class EfficientSessionRepository extends RedisSessionRepository {
     }
 
     @Override
-    public boolean update(@Nonnull Session session, @Nonnull Function<Session, Map<String, String>> uniqueCompositeMutexFunction) {
-        if (cache == null) {
-            return super.update(session, uniqueCompositeMutexFunction);
-        }
-        if (super.update(session, uniqueCompositeMutexFunction)) {
-            // 同步所有节点缓存会话信息已更新
-            redisTemplate.convertAndSend(sessionProperties.getEfficientCacheSyncChannel(), session.getId());
-            return true;
-        }
-        return false;
-    }
-
-    @Override
-    public Session get(@Nonnull String sessionId, Function<Session, Map<String, String>> uniqueCompositeMutexFunction) {
+    protected Session get(String sessionId, Function<Session, Map<String, String>> uniqueCompositeMutexFunction) {
         if (cache == null) {
             return super.get(sessionId, uniqueCompositeMutexFunction);
         }
@@ -83,13 +69,13 @@ public class EfficientSessionRepository extends RedisSessionRepository {
     }
 
     @Override
-    public void remove(@Nonnull String sessionId, Function<Session, Map<String, String>> uniqueCompositeMutexFunction) {
+    protected void remove(Session session, Map<String, String> uniqueCompositeMutexMap) {
         if (cache == null) {
-            super.remove(sessionId, uniqueCompositeMutexFunction);
+            super.remove(session, uniqueCompositeMutexMap);
             return;
         }
-        cache.evict(sessionId);
-        super.remove(sessionId, uniqueCompositeMutexFunction);
+        super.remove(session, uniqueCompositeMutexMap);
+        redisTemplate.convertAndSend(sessionProperties.getEfficientCacheSyncChannel(), session.getId());
     }
 
 }

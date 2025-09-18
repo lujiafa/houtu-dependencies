@@ -40,17 +40,4 @@ public class SM3Utils {
         return mac.doFinal(data);
     }
 
-    public static void main(String[] args) {
-        String str = "ssdf";
-        String key = "1cb";
-        try {
-            byte[] hmacSM3Bytes = hmacSM3(str.getBytes(), key.getBytes());
-            System.out.println("SM3 - hmacSM3 摘要数据：" + HexUtils.toHex(hmacSM3Bytes));
-
-            byte[] sm3Bytes = sm3(str.getBytes());
-            System.out.println("SM3 - sm3 摘要数据：" + HexUtils.toHex(sm3Bytes));
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
 }
