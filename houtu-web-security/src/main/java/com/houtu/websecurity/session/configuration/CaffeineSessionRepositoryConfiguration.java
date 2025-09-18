@@ -1,6 +1,7 @@
 package com.houtu.websecurity.session.configuration;
 
 import com.houtu.websecurity.prop.SessionProperties;
+import com.houtu.websecurity.session.SessionRepository;
 import com.houtu.websecurity.session.redis.SessionRedisTemplateLoader;
 import com.houtu.websecurity.session.repository.EfficientSessionRepository;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -14,9 +15,9 @@ public class CaffeineSessionRepositoryConfiguration extends AbstractEfficientSes
     @Bean
     @ConditionalOnBean(CaffeineCacheManager.class)
     @ConditionalOnMissingBean
-    public EfficientSessionRepository sessionRepository(org.springframework.cache.caffeine.CaffeineCacheManager cacheManager,
-                                                        SessionRedisTemplateLoader sessionRedisTemplateLoader,
-                                                        SessionProperties sessionProperties) {
+    public SessionRepository sessionRepository(org.springframework.cache.caffeine.CaffeineCacheManager cacheManager,
+                                               SessionRedisTemplateLoader sessionRedisTemplateLoader,
+                                               SessionProperties sessionProperties) {
         return new EfficientSessionRepository(cacheManager, sessionRedisTemplateLoader.getRedisTemplate(), sessionProperties);
     }
 }

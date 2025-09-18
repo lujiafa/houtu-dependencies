@@ -2,6 +2,7 @@ package com.houtu.websecurity.session;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -36,11 +37,11 @@ public interface Session extends Serializable {
 	void setAttribute(String attributeName, Object attributeValue);
 
 	/**
-	 * @Title getAttributeNames
+	 * @Title getAttributes
 	 * @Description 获取属性名集合
 	 * @return 属性名称集合
 	 */
-	Set<String> getAttributeNames();
+	Map<String, Object> getAttributes();
 
 	/**
 	 * @Title getAttribute

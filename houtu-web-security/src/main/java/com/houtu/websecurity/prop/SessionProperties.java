@@ -10,6 +10,17 @@ public class SessionProperties {
     private final static String DEFAULT_SESSION_EFFICIENT_CACHE_NAME = "session";
     private final static String DEFAULT_SESSION_EFFICIENT_CACHE_SYNC_CHANNEL = "session-sync";
 
+
+    /**
+     * session有效期（秒）
+     **/
+    protected int expire = DEFAULT_SESSION_EXPIRE;
+
+    /**
+     * 登录URL地址(仅web中有用)
+     **/
+    protected String loginUrl;
+
     /**
      * 请求头数据中session id键名
      **/
@@ -22,10 +33,6 @@ public class SessionProperties {
      * session cookie domain
      **/
     protected String sessionCookieDomain = DEFAULT_SESSION_COOKIE_DOMAIN;
-    /**
-     * session有效期（秒）
-     **/
-    protected int expire = DEFAULT_SESSION_EXPIRE;
 
     /**
      * Session对象缓存前缀
@@ -41,11 +48,6 @@ public class SessionProperties {
      * 高效二级缓存同步发布订阅频道名称
      */
     private String efficientCacheSyncChannel = DEFAULT_SESSION_EFFICIENT_CACHE_SYNC_CHANNEL;
-
-    /**
-     * 登录URL地址(仅web中有用)
-     **/
-    protected String loginUrl;
 
     private SessionRedisProperties redis;
 

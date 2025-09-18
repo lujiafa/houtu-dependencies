@@ -18,7 +18,7 @@ public class SimpleSessionValidator implements SessionValidator {
 		Session session = SessionContext.get();
 		if (session == null) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("会话已过期，获取会话对象失败({})", SessionContext.getSessionId());
+				logger.debug("会话已过期，获取会话对象失败");
 			}
 			throw new SessionException(ErrorCode.build(ErrorCodeConstant.SESSION_EXPIRED));
 		}

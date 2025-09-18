@@ -19,8 +19,8 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @AutoConfiguration
-@ConditionalOnWebApplication
 @AutoConfigureOrder(Ordered.LOWEST_PRECEDENCE)
+@ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 @Import({SessionConfiguration.class, PermissionConfiguration.class, SignatureConfiguration.class})
 public class WebSecurityAutoConfiguration {
 

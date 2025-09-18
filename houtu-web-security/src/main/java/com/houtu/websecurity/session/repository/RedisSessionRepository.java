@@ -4,7 +4,6 @@ import com.houtu.websecurity.constant.RedisScriptConstant;
 import com.houtu.websecurity.prop.SessionProperties;
 import com.houtu.websecurity.session.Session;
 import com.houtu.websecurity.session.SessionRepository;
-import jakarta.annotation.Nonnull;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.util.Assert;
 
@@ -34,7 +33,7 @@ public class RedisSessionRepository implements SessionRepository {
     }
 
     @Override
-    public boolean save(@Nonnull Session session, Function<Session, Map<String, String>> uniqueCompositeMutexFunction) {
+    public boolean save(Session session, Function<Session, Map<String, String>> uniqueCompositeMutexFunction) {
         String cachePrefix = this.sessionProperties.getRedisBaseKey();
         int expire = this.sessionProperties.getExpire();
         String sessionCacheKey = cachePrefix + session.getId();
@@ -50,7 +49,7 @@ public class RedisSessionRepository implements SessionRepository {
     }
 
     @Override
-    public boolean update(@Nonnull Session session, @Nonnull Function<Session, Map<String, String>> uniqueCompositeMutexFunction) {
+    public boolean update(Session session, Function<Session, Map<String, String>> uniqueCompositeMutexFunction) {
         String cachePrefix = this.sessionProperties.getRedisBaseKey();
         Map<String, String> uniqueCompositeMutexMap = uniqueCompositeMutexFunction.apply(session);
         if (uniqueCompositeMutexMap.isEmpty()) {
@@ -67,7 +66,7 @@ public class RedisSessionRepository implements SessionRepository {
     }
 
     @Override
-    public Session get(@Nonnull String sessionId, Function<Session, Map<String, String>> uniqueCompositeMutexFunction) {
+    public Session get(String sessionId, Function<Session, Map<String, String>> uniqueCompositeMutexFunction) {
         String cachePrefix = this.sessionProperties.getRedisBaseKey();
         String sessionCacheKey = cachePrefix + sessionId;
         Session session = (Session) this.redisTemplate.opsForValue().get(sessionCacheKey);
@@ -83,7 +82,7 @@ public class RedisSessionRepository implements SessionRepository {
     }
 
     @Override
-    public boolean delay(@Nonnull String sessionId, Function<Session, Map<String, String>> uniqueCompositeMutexFunction) {
+    public boolean delay(String sessionId, Function<Session, Map<String, String>> uniqueCompositeMutexFunction) {
         String cachePrefix = this.sessionProperties.getRedisBaseKey();
         int expire = this.sessionProperties.getExpire();
         String sessionCacheKey = cachePrefix + sessionId;
@@ -101,7 +100,7 @@ public class RedisSessionRepository implements SessionRepository {
     }
 
     @Override
-    public void remove(@Nonnull String sessionId, Function<Session, Map<String, String>> uniqueCompositeMutexFunction) {
+    public void remove(String sessionId, Function<Session, Map<String, String>> uniqueCompositeMutexFunction) {
         String sessionCacheKey = this.sessionProperties.getRedisBaseKey() + sessionId;
         Session session = (Session) this.redisTemplate.opsForValue().getAndDelete(sessionCacheKey);
         if (session == null) return;

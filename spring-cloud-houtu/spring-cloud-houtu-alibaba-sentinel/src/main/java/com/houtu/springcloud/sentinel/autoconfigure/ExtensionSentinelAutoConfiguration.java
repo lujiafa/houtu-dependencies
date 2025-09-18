@@ -7,11 +7,13 @@ import com.alibaba.csp.sentinel.datasource.WritableDataSource;
 import com.houtu.springcloud.sentinel.handler.SimpleBlockExceptionHandler;
 import com.houtu.springcloud.sentinel.handler.WritableDataSourceBeanProcessor;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 
+@AutoConfiguration
 public class ExtensionSentinelAutoConfiguration {
 
     @Bean

@@ -96,10 +96,22 @@ public class SessionContext {
 	/**
 	 * @Title save
 	 * @Description: 保存Session并响应，默认响应到响应头中，可通过"web.security.session.enableHeader=false"来关闭头部传递，从而输出到cookie
-	 * @param session
+	 * @param session 会话对象
 	 * @return boolean
 	 */
 	public static boolean save(Session session) {
+		return save(session, true, true);
+	}
+
+	/**
+	 * @Title save
+	 * @Description: 保存Session并响应，默认响应到响应头中，可通过"web.security.session.enableHeader=false"来关闭头部传递，从而输出到cookie
+	 * @param session 会话对象
+	 * @param write2Header 是否响应session-id到响应头中
+	 * @param write2Cookie 是否响应session-id到cookie中
+	 * @return boolean
+	 */
+	public static boolean save(Session session, boolean write2Header, boolean write2Cookie) {
 		Assert.notNull(session, "parameter session must cannot be null");
 		if (INSTANCE.sessionRepository.save(session, s -> {
 			if (s == null) return Collections.emptyMap();
@@ -107,9 +119,14 @@ public class SessionContext {
 			return uniqueCompositeMutexMap == null ? Collections.emptyMap() : uniqueCompositeMutexMap;
 		})) {
 			sessionContextHolder.set(session);
-			HttpServletResponse response = WebUtils.getResponse();
-			response.setHeader(INSTANCE.sessionProperties.getSessionIdName(), session.getId());
-			WebUtils.writeCookie(response, INSTANCE.sessionProperties.getSessionIdName(), session.getId(), INSTANCE.sessionProperties.getSessionCookiePath(), INSTANCE.sessionProperties.getSessionCookieDomain(), INSTANCE.sessionProperties.getExpire());
+			HttpServletResponse response = null;
+			if (write2Header) {
+				response = WebUtils.getResponse();
+				response.setHeader(INSTANCE.sessionProperties.getSessionIdName(), session.getId());
+			}
+			if (write2Cookie) {
+				WebUtils.writeCookie(response == null ? WebUtils.getResponse() : response, INSTANCE.sessionProperties.getSessionIdName(), session.getId(), INSTANCE.sessionProperties.getSessionCookiePath(), INSTANCE.sessionProperties.getSessionCookieDomain(), INSTANCE.sessionProperties.getExpire());
+			}
 			return true;
 		}
 		return false;
@@ -186,8 +203,8 @@ public class SessionContext {
 	 * @return 返回删除结果状态 true-删除成功 false-删除失败
 	 */
 	public static boolean remove() {
-		remove(getSessionId());
 		reset();
+		remove(getSessionId());
 		WebUtils.removeCookie(WebUtils.getRequest(), WebUtils.getResponse(), INSTANCE.sessionProperties.getSessionIdName());
 		return true;
 	}

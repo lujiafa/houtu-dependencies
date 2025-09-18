@@ -1,6 +1,7 @@
 package com.houtu.websecurity.session.configuration;
 
 import com.houtu.websecurity.prop.SessionProperties;
+import com.houtu.websecurity.session.SessionRepository;
 import com.houtu.websecurity.session.redis.SessionRedisTemplateLoader;
 import com.houtu.websecurity.session.repository.EfficientSessionRepository;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -13,9 +14,9 @@ public class Cache2kSessionRepositoryConfiguration extends AbstractEfficientSess
     @Bean
     @ConditionalOnBean(org.cache2k.extra.spring.SpringCache2kCacheManager.class)
     @ConditionalOnMissingBean
-    public EfficientSessionRepository sessionRepository(org.cache2k.extra.spring.SpringCache2kCacheManager cacheManager,
-                                                        SessionRedisTemplateLoader sessionRedisTemplateLoader,
-                                                        SessionProperties sessionProperties) {
+    public SessionRepository sessionRepository(org.cache2k.extra.spring.SpringCache2kCacheManager cacheManager,
+                                               SessionRedisTemplateLoader sessionRedisTemplateLoader,
+                                               SessionProperties sessionProperties) {
         return new EfficientSessionRepository(cacheManager, sessionRedisTemplateLoader.getRedisTemplate(), sessionProperties);
     }
 }
