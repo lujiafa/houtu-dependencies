@@ -14,6 +14,7 @@ import org.springframework.core.Ordered;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
+import org.springframework.data.redis.core.RedisOperations;
 import org.springframework.util.StringUtils;
 
 /**
@@ -21,10 +22,10 @@ import org.springframework.util.StringUtils;
  * @date 2020年12月17日
  */
 @AutoConfigureAfter(RedisAutoConfiguration.class)
+@ConditionalOnClass(RedisOperations.class)
 @AutoConfigureOrder(Ordered.LOWEST_PRECEDENCE)
 @EnableConfigurationProperties({RedisProperties.class})
 public class CacheAutoConfiguration {
-
 
     @Configuration
     @ConditionalOnClass(org.redisson.api.RedissonClient.class)

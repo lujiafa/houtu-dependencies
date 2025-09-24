@@ -7,6 +7,12 @@
       "defaultValue": "1800s"
     },
     {
+      "name": "houtu.web.session.delay",
+      "type": "java.lang.Boolean",
+      "description": "Session delay expiration time.",
+      "defaultValue": true
+    },
+    {
       "name": "houtu.web.session.type",
       "type": "com.houtu.websecurity.session.type.SessionRepositoryType",
       "description": "Session Persistence and Persistence Type.",
@@ -47,15 +53,19 @@
       "description": "Session Redis configuration, consistent with the Redis configuration introduced by Spring Boot."
     },
     {
-      "name": "houtu.web.session.jwt-secret-key",
+      "name": "houtu.web.session.jwt-signature-key",
       "type": "java.lang.String",
       "description": "JWT signing key."
     },
     {
+      "name": "houtu.web.session.jwt-signature-verify-key",
+      "type": "java.lang.String",
+      "description": "JWT signature verify key (HS256/HS384/HS512 default ${houtu.web.session.jwt-signature-key}."
+    },
+    {
       "name": "houtu.web.session.jwt-signature-algorithm",
       "type": "com.houtu.websecurity.session.type.JWTSignatureAlgorithm",
-      "description": "JWT signature algorithm.",
-      "defaultValue": "HS256"
+      "description": "JWT signature algorithm."
     },
     {
       "name": "houtu.web.sign.sign-key",

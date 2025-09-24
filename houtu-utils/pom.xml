@@ -13,8 +13,7 @@
 
     <properties>
         <javax.mail.version>1.6.2</javax.mail.version>
-        <bcpkix-jdk18on.version>1.73</bcpkix-jdk18on.version>
-        <bcprov-jdk15on.version>1.70</bcprov-jdk15on.version>
+        <bouncycastle.version>1.82</bouncycastle.version>
     </properties>
 
     <dependencies>
@@ -32,12 +31,12 @@
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcpkix-jdk18on</artifactId>
-            <version>${bcpkix-jdk18on.version}</version>
+            <version>${bouncycastle.version}</version>
         </dependency>
         <dependency>
             <groupId>org.bouncycastle</groupId>
-            <artifactId>bcprov-jdk15on</artifactId>
-            <version>${bcprov-jdk15on.version}</version>
+            <artifactId>bcprov-jdk18on</artifactId>
+            <version>${bouncycastle.version}</version>
             <scope>compile</scope>
         </dependency>
 

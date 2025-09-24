@@ -28,7 +28,7 @@ public class HMacMD5SignatureValidator extends AbstractSignatureValidator {
 			String signKey = SignContext.getSignKey(securityContext.getSession());
 			if (signKey == null && (signProperties == null || (signKey = signProperties.getSignKey()) == null))
 				throw new SignatureException(ErrorCode.build(ErrorCodeConstant.INVALID_SIGNATURE_INFO));
-			if (!SignUtils.verifyHMacMD5(params, signKey, sign)) {
+			if (!SignUtils.verifyMD5WithRSA(params, signKey, sign)) {
 				throw new SignatureException(ErrorCode.build(ErrorCodeConstant.INVALID_SIGNATURE_INFO));
 			}
 		} catch (Exception e) {

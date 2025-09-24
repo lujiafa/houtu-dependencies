@@ -1,9 +1,12 @@
 package com.houtu.util.crypto;
 
+import com.houtu.util.common.CodecData;
+import com.houtu.util.constant.CryptoConstant;
+
+import javax.crypto.KeyGenerator;
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
-import java.nio.charset.StandardCharsets;
 
 /**
  * @author lujiafa
@@ -12,46 +15,52 @@ import java.nio.charset.StandardCharsets;
  */
 public final class HMacMD5Utils {
 
-    /**
-     * 密钥生成器算法
-     */
-    public static final String ALGORITHM = "HmacMD5";
-
-    /**
-     * @param data    需加密数据【M】
-     * @param key     加密key【M】
-     * @param charset 编码方式【O】，默认为UTF-8
-     * @return byte[] 已加密字节数组
-     * @Title: encryptHMAC
-     * @Description: 通过h-mac-md5方式进行数据加密
-     */
-    public static byte[] encryptHMAC(String data, String key, String charset) {
+    public static CodecData getKey() {
         try {
-            byte[] dataBytes = data.getBytes(charset == null ? StandardCharsets.UTF_8.name() : charset);
-            byte[] keyBytes = key.getBytes(charset == null ? StandardCharsets.UTF_8.name() : charset);
-            return encryptHMAC(dataBytes, keyBytes);
+            KeyGenerator keyGen = KeyGenerator.getInstance(CryptoConstant.ALGORITHM_HMAC_MD5);
+            SecretKey secretKey = keyGen.generateKey();
+            return CodecData.bytes(secretKey.getEncoded());
         } catch (Exception e) {
-            if (e instanceof RuntimeException) {
-                throw (RuntimeException) e;
-            }
             throw new RuntimeException(e.getMessage(), e);
         }
     }
 
     /**
-     * @param dataBytes 需加密数据
-     * @param keyBytes  加密key
+     * @param source 需加密数据【M】
+     * @param key  加密key【M】
      * @return byte[] 已加密字节数组
      * @Title: encryptHMAC
      * @Description: 通过h-mac-md5方式进行数据加密
      */
-    public static byte[] encryptHMAC(byte[] dataBytes, byte[] keyBytes) {
+    public static CodecData hash(CodecData source, CodecData key) {
+        return hash(source.bytes(), key.bytes());
+    }
+
+    /**
+     * @param source 需加密数据【M】
+     * @param key  加密key【M】
+     * @return byte[] 已加密字节数组
+     * @Title: encryptHMAC
+     * @Description: 通过h-mac-md5方式进行数据加密
+     */
+    public static CodecData hash(byte[] source, CodecData key) {
+        return hash(source, key.bytes());
+    }
+
+    /**
+     * @param source 需加密数据【M】
+     * @param key  加密key【M】
+     * @return byte[] 已加密字节数组
+     * @Title: encryptHMAC
+     * @Description: 通过h-mac-md5方式进行数据加密
+     */
+    public static CodecData hash(byte[] source, byte[] key) {
         try {
-            SecretKey secretKey = new SecretKeySpec(keyBytes, ALGORITHM);
+            SecretKey secretKey = new SecretKeySpec(key, CryptoConstant.ALGORITHM_HMAC_MD5);
             Mac mac = Mac.getInstance(secretKey.getAlgorithm());
             mac.init(secretKey);
-            byte[] bytes = mac.doFinal(dataBytes);
-            return bytes;
+            byte[] bytes = mac.doFinal(source);
+            return CodecData.bytes(bytes);
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
         }

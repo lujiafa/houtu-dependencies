@@ -1,8 +1,12 @@
 package com.houtu.util.crypto;
 
+import com.houtu.util.common.CodecData;
+import com.houtu.util.crypto.type.HmacSHAAlgorithm;
+
+import javax.crypto.KeyGenerator;
 import javax.crypto.Mac;
+import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
-import java.nio.charset.StandardCharsets;
 
 /**
  * @author lujiafa
@@ -13,138 +17,65 @@ import java.nio.charset.StandardCharsets;
 public class HMacSHAUtils {
 
     /**
-     * HmacSHA1加密算法
+     * 提供获取默认密钥
+     *   密钥限制说明：
+     *      HMAC_SHA1：密钥长度 ≤ 512位（64字节）
+     *      HMAC_SHA256：密钥长度 ≤ 512位（64字节）
+     *      HMAC_SHA384：密钥长度 ≤ 1024位（128字节）
+     *      HMAC_SHA512：密钥长度 ≤ 1024位（128字节）
+     *   最小密钥长度：
+     *      建议至少 128位（16字节）
+     *      对于高安全场景：至少 256位（32字节）
+     * @param algorithm
+     * @return
      */
-    public static final String ALGORITHM_1 = "HmacSHA1";
-
-    /**
-     * HmacSHA256加密算法
-     */
-    public static final String ALGORITHM_256 = "HmacSHA256";
-
-    /**
-     * HmacSHA512加密算法
-     */
-    public static final String ALGORITHM_512 = "HmacSHA512";
-
-    /**
-     * encryptHMacSHA1 - h-mac-sha1方式进行数据加密 <br>
-     *
-     * @param data    需加密数据【M】
-     * @param key     加密key【M】
-     * @param charset 字符串编码方式【O】,默认UTF-8
-     * @return byte[]
-     * @throws Exception
-     */
-    public static byte[] encryptHMacSHA1(String data, String key, String charset) {
+    public static CodecData getKey(HmacSHAAlgorithm algorithm) {
         try {
-            byte[] dataBytes = data.getBytes(charset == null ? StandardCharsets.UTF_8.name() : charset);
-            byte[] keyBytes = key.getBytes(charset == null ? StandardCharsets.UTF_8.name() : charset);
-            return encryptHMacSHA1(dataBytes, keyBytes);
-
+            KeyGenerator keyGen = KeyGenerator.getInstance(algorithm.getAlgorithm());
+            SecretKey secretKey = keyGen.generateKey();
+            return CodecData.bytes(secretKey.getEncoded());
         } catch (Exception e) {
-            if (e instanceof RuntimeException) {
-                throw (RuntimeException) e;
-            }
             throw new RuntimeException(e.getMessage(), e);
         }
     }
 
     /**
-     * encryptHMacSHA1 - h-mac-sha1方式进行数据加密 <br>
-     *
-     * @param data 需加密数据【M】
-     * @param key  加密key【M】
-     * @return byte[]
-     * @throws Exception
-     */
-    public static byte[] encryptHMacSHA1(byte[] data, byte[] key) {
-        return encryptHMac(data, key, ALGORITHM_1);
-    }
-
-    /**
-     * encryptHMacSHA256 - h-mac-sha256方式进行数据加密 <br>
-     *
-     * @param data    需加密数据【M】
-     * @param key     加密key【M】
-     * @param charset 字符串编码方式【O】,默认UTF-8
-     * @return byte[]
-     * @throws Exception
-     */
-    public static byte[] encryptHMacSHA256(String data, String key, String charset) {
-        try {
-            byte[] dataBytes = data.getBytes(charset == null ? StandardCharsets.UTF_8.name() : charset);
-            byte[] keyBytes = key.getBytes(charset == null ? StandardCharsets.UTF_8.name() : charset);
-            return encryptHMacSHA256(dataBytes, keyBytes);
-        } catch (Exception e) {
-            if (e instanceof RuntimeException) {
-                throw (RuntimeException) e;
-            }
-            throw new RuntimeException(e.getMessage(), e);
-        }
-    }
-
-    /**
-     * encryptHMacSHA256 - h-mac-sha256方式进行数据加密 <br>
-     *
-     * @param data 需加密数据【M】
-     * @param key  加密key【M】
-     * @return byte[]
-     * @throws Exception
-     */
-    public static byte[] encryptHMacSHA256(byte[] data, byte[] key) {
-        return encryptHMac(data, key, ALGORITHM_256);
-    }
-
-    /**
-     * encryptHMacSHA512 - h-mac-sha512方式进行数据加密 <br>
-     *
-     * @param data    需加密数据【M】
-     * @param key     加密key【M】
-     * @param charset 字符串编码方式【O】,默认UTF-8
-     * @return byte[]
-     * @throws Exception
-     */
-    public static byte[] encryptHMacSHA512(String data, String key, String charset) {
-        try {
-            byte[] dataBytes = data.getBytes(charset == null ? StandardCharsets.UTF_8.name() : charset);
-            byte[] keyBytes = key.getBytes(charset == null ? StandardCharsets.UTF_8.name() : charset);
-            return encryptHMacSHA512(dataBytes, keyBytes);
-        } catch (Exception e) {
-            if (e instanceof RuntimeException) {
-                throw (RuntimeException) e;
-            }
-            throw new RuntimeException(e.getMessage(), e);
-        }
-    }
-
-    /**
-     * encryptHMacSHA512 - h-mac-sha512方式进行数据加密 <br>
-     *
-     * @param data 需加密数据【M】
-     * @param key  加密key【M】
-     * @return byte[]
-     * @throws Exception
-     */
-    public static byte[] encryptHMacSHA512(byte[] data, byte[] key) {
-        return encryptHMac(data, key, ALGORITHM_512);
-    }
-
-    /**
-     * @param data      需加密数据
-     * @param key       加密key
+     * @param source    需加密数据【M】
+     * @param key       加密key【M】
      * @param algorithm 加密算法
      * @return byte[]
-     * @throws Exception
-     * @Title encryptHMac
      * @Description 过加密算法algorithm进行数据加密
      */
-    private static byte[] encryptHMac(byte[] data, byte[] key, String algorithm) {
+    public static CodecData hash(CodecData source, CodecData key, HmacSHAAlgorithm algorithm) {
+        return hash(source.bytes(), key.bytes(), algorithm);
+    }
+
+
+    /**
+     * @param source    需加密数据【M】
+     * @param key       加密key【M】
+     * @param algorithm 加密算法
+     * @return byte[]
+     * @Description 过加密算法algorithm进行数据加密
+     */
+    public static CodecData hash(byte[] source, CodecData key, HmacSHAAlgorithm algorithm) {
+        return hash(source, key.bytes(), algorithm);
+    }
+
+
+    /**
+     * @param source    需加密数据【M】
+     * @param key       加密key【M】
+     * @param algorithm 加密算法
+     * @return byte[]
+     * @Description 过加密算法algorithm进行数据加密
+     */
+    public static CodecData hash(byte[] source, byte[] key, HmacSHAAlgorithm algorithm) {
         try {
-            SecretKeySpec signingKey = new SecretKeySpec(key, algorithm);
-            Mac mac = Mac.getInstance(algorithm);
+            SecretKeySpec signingKey = new SecretKeySpec(key, algorithm.getAlgorithm());
+            Mac mac = Mac.getInstance(algorithm.getAlgorithm());
             mac.init(signingKey);
-            return mac.doFinal(data);
+            return CodecData.bytes(mac.doFinal(source));
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
         }

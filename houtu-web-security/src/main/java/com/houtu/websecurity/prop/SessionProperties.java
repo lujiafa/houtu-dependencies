@@ -10,6 +10,7 @@ public class SessionProperties {
     private final static int DEFAULT_SESSION_EXPIRE = 1800;
 
     private final static String DEFAULT_SESSION_ID_NAME = "sid";
+    private final static boolean DEFAULT_SESSION_DELAY = true;
     private final static String DEFAULT_SESSION_REDIS_KEY_PREFIX = "security:session:";
     private final static String DEFAULT_SESSION_EFFICIENT_CACHE_NAME = "session";
     private final static String DEFAULT_SESSION_EFFICIENT_CACHE_SYNC_CHANNEL = "session-sync";
@@ -18,6 +19,8 @@ public class SessionProperties {
      * session有效期（秒）
      **/
     protected Duration expire = Duration.ofSeconds(DEFAULT_SESSION_EXPIRE);
+
+    protected boolean delay = DEFAULT_SESSION_DELAY;
 
     /**
      * 登录URL地址(仅web中有用)
@@ -48,8 +51,8 @@ public class SessionProperties {
     private String efficientCacheSyncChannel = DEFAULT_SESSION_EFFICIENT_CACHE_SYNC_CHANNEL;
 
 
-    private String jwtSecretKey;
-
+    private String jwtSignatureKey;
+    private String jwtSignatureVerifyKey;
     private JWTSignatureAlgorithm jwtSignatureAlgorithm = JWTSignatureAlgorithm.HS256;
 
     private SessionRedisProperties redis;
@@ -60,6 +63,14 @@ public class SessionProperties {
 
     public void setExpire(Duration expire) {
         this.expire = expire;
+    }
+
+    public void setDelay(boolean delay) {
+        this.delay = delay;
+    }
+
+    public boolean getDelay() {
+        return this.delay;
     }
 
     public String getLoginUrl() {
@@ -118,12 +129,20 @@ public class SessionProperties {
         this.redis = redis;
     }
 
-    public String getJwtSecretKey() {
-        return jwtSecretKey;
+    public String getJwtSignatureKey() {
+        return jwtSignatureKey;
     }
 
-    public void setJwtSecretKey(String jwtSecretKey) {
-        this.jwtSecretKey = jwtSecretKey;
+    public void setJwtSignatureKey(String jwtSignatureKey) {
+        this.jwtSignatureKey = jwtSignatureKey;
+    }
+
+    public String getJwtSignatureVerifyKey() {
+        return jwtSignatureVerifyKey;
+    }
+
+    public void setJwtSignatureVerifyKey(String jwtSignatureVerifyKey) {
+        this.jwtSignatureVerifyKey = jwtSignatureVerifyKey;
     }
 
     public JWTSignatureAlgorithm getJwtSignatureAlgorithm() {
@@ -133,4 +152,5 @@ public class SessionProperties {
     public void setJwtSignatureAlgorithm(JWTSignatureAlgorithm jwtSignatureAlgorithm) {
         this.jwtSignatureAlgorithm = jwtSignatureAlgorithm;
     }
+
 }

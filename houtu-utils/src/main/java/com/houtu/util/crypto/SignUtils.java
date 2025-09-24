@@ -1,7 +1,7 @@
 package com.houtu.util.crypto;
 
-import com.houtu.util.data.HexUtils;
-import jakarta.annotation.Nonnull;
+import com.houtu.util.common.CodecData;
+import com.houtu.util.crypto.type.RSASignAlgorithm;
 import org.springframework.util.Assert;
 
 import java.io.UnsupportedEncodingException;
@@ -31,7 +31,7 @@ public class SignUtils {
 					queryStringBuilder.append("&");
 				queryStringBuilder.append("key=").append(key);
 			}
-			return HexUtils.toHex(MD5Utils.encrypt(queryStringBuilder.toString(), StandardCharsets.UTF_8.name()));
+			return MD5Utils.hash(queryStringBuilder.toString().getBytes(StandardCharsets.UTF_8)).hex();
 		});
 	}
 
@@ -48,47 +48,36 @@ public class SignUtils {
 					queryStringBuilder.append("&");
 				queryStringBuilder.append("key=").append(key);
 			}
-			return Objects.equals(sign, HexUtils.toHex(MD5Utils.encrypt(queryStringBuilder.toString(), StandardCharsets.UTF_8.name())));
+			return Objects.equals(sign, queryStringBuilder.toString().getBytes(StandardCharsets.UTF_8));
 		});
-	}
-
-	/**
-	 * @description 数据通过 HMacMD5 方式签名
-	 * @param paramMap 参数集合
-	 * @param signKey 秘钥
-	 * @return 16进制字符串
-	 */
-	public static String signHMacMD5(Map<String, String> paramMap, String signKey) {
-		return sign(paramMap, queryStringBuilder -> HexUtils.toHex(HMacMD5Utils.encryptHMAC(queryStringBuilder.toString(), signKey, StandardCharsets.UTF_8.name())));
 	}
 
 	/**
 	 * @description 数据通过 MD5WithRSA 方式签名
 	 * @param paramMap 参数集合
-	 * @param privateKey 私钥【Base64编码】
+	 * @param privateKeyBase64 私钥【Base64编码】
 	 * @return base64字符串
 	 */
-	public static String signMD5WithRSA(Map<String, String> paramMap, String privateKey) {
-		Assert.notNull(paramMap, "parameter paramMap cannot be null.");
-		Assert.hasText(privateKey, "parameter privateKey cannot be empty.");
-		StringBuilder stringBuilder = buildParam(paramMap, false);
-		try {
-			return Base64Utils.encode(RSAUtils.signMD5WithRSA(stringBuilder.toString().getBytes(StandardCharsets.UTF_8), Base64Utils.decode(privateKey)));
-		} catch (Exception e) {
-			throw new RuntimeException(e.getMessage(), e);
-		}
+	public static String signMD5WithRSA(Map<String, String> paramMap, String privateKeyBase64) {
+		return sign(paramMap, queryStringBuilder -> {
+			try {
+				return RSAUtils.sign(queryStringBuilder.toString().getBytes(StandardCharsets.UTF_8), CodecData.base64(privateKeyBase64), RSASignAlgorithm.MD5_WITH_RSA).base64();
+			} catch(Exception e) {
+				throw new RuntimeException(e.getMessage(), e);
+			}
+		});
 	}
 
 	/**
 	 * @description 数据通过 SHA1WithRSA 方式签名
 	 * @param paramMap 参数集合
-	 * @param privateKeyBase64 私钥
+	 * @param privateKeyBase64 私钥【Base64编码】
 	 * @return base64字符串
 	 */
 	public static String signSHA1WithRSA(Map<String, String> paramMap, String privateKeyBase64) {
 		return sign(paramMap, queryStringBuilder -> {
 			try {
-				return Base64Utils.encode(RSAUtils.signSHA1WithRSA(queryStringBuilder.toString().getBytes(StandardCharsets.UTF_8), Base64Utils.decode(privateKeyBase64)));
+				return RSAUtils.sign(queryStringBuilder.toString().getBytes(StandardCharsets.UTF_8), CodecData.base64(privateKeyBase64), RSASignAlgorithm.SHA1_WITH_RSA).base64();
 			} catch(Exception e) {
 				throw new RuntimeException(e.getMessage(), e);
 			}
@@ -96,91 +85,70 @@ public class SignUtils {
 	}
 
 	/**
-	 * @description 数据通过 SHAWithRSA256 方式签名
+	 * @description 数据通过 signSHA256WithRSA 方式签名
 	 * @param paramMap 参数集合
 	 * @param privateKeyBase64 私钥
 	 * @return base64字符串
 	 */
-	public static String signSHAWithRSA256(Map<String, String> paramMap, String privateKeyBase64) {
+	public static String signSHA256WithRSA(Map<String, String> paramMap, String privateKeyBase64) {
 		return sign(paramMap, queryStringBuilder -> {
 			try {
-				return Base64Utils.encode(RSAUtils.signSHA256WithRSA(queryStringBuilder.toString().getBytes(StandardCharsets.UTF_8), Base64Utils.decode(privateKeyBase64)));
+				return RSAUtils.sign(queryStringBuilder.toString().getBytes(StandardCharsets.UTF_8), CodecData.base64(privateKeyBase64), RSASignAlgorithm.SHA256_WITH_RSA).base64();
 			} catch(Exception e) {
 				throw new RuntimeException(e.getMessage(), e);
 			}
 		});
-	}
-
-	/**
-	 * @description 验证 HMacMD5 方式签名
-	 * @param paramMap 参数集合
-	 * @param signKey 秘钥
-	 * @param sign 16进制签名字符串
-	 * @return 验证结果
-	 */
-	public static boolean verifyHMacMD5(Map<String, String> paramMap, String signKey, String sign) {
-		Assert.notNull(paramMap, "parameter paramMap cannot be null.");
-		Assert.hasText(signKey, "parameter signKey cannot be empty.");
-		Assert.hasText(sign, "parameter sign cannot be empty.");
-		try {
-			return sign.equalsIgnoreCase(HexUtils.toHex(HMacMD5Utils.encryptHMAC(buildParam(paramMap, false).toString(), signKey, StandardCharsets.UTF_8.name())));
-		} catch (Exception e) {
-			throw new RuntimeException(e.getMessage(), e);
-		}
 	}
 
 	/**
 	 * @description 验证 MD5WithRSA 方式签名
 	 * @param paramMap 参数集合
-	 * @param publicKey 公钥【Base64编码】
+	 * @param publicKeyBase64 公钥【Base64编码】
 	 * @param sign 签名【Base64编码】
 	 * @return 验证结果
 	 */
-	public static boolean verifyMD5WithRSA(Map<String, String> paramMap, String publicKey, String sign) {
-		Assert.notNull(paramMap, "parameter paramMap cannot be null.");
-		Assert.hasText(publicKey, "parameter publicKey cannot be empty.");
-		Assert.hasText(sign, "parameter sign cannot be empty.");
-		try {
-			return RSAUtils.signVerifyMD5WithRSA(buildParam(paramMap, false).toString().getBytes(StandardCharsets.UTF_8), Base64Utils.decode(publicKey), Base64Utils.decode(sign));
-		} catch (Exception e) {
-			throw new RuntimeException(e.getMessage(), e);
-		}
+	public static boolean verifyMD5WithRSA(Map<String, String> paramMap, String publicKeyBase64, String sign) {
+		return verify(paramMap, queryStringBuilder -> {
+			try {
+				return RSAUtils.signVerify(CodecData.utf8(queryStringBuilder.toString()), CodecData.base64(publicKeyBase64), CodecData.base64(sign), RSASignAlgorithm.MD5_WITH_RSA);
+			} catch(Exception e) {
+				throw new RuntimeException(e.getMessage(), e);
+			}
+		});
 	}
 
 	/**
 	 * @description 验证 SHAWithRSA 方式签名
 	 * @param paramMap 参数集合
-	 * @param publicKey 公钥【Base64编码】
+	 * @param publicKeyBase64 公钥【Base64编码】
      * @param sign 签名【Base64编码】
 	 * @return 验证结果
 	 */
-	public static boolean verifySHAWithRSA(Map<String, String> paramMap, String publicKey, String sign) {
-		Assert.notNull(paramMap, "parameter paramMap cannot be null.");
-		Assert.hasText(publicKey, "parameter publicKey cannot be empty.");
-		Assert.hasText(sign, "parameter sign cannot be empty.");
-		try {
-			return RSAUtils.signVerifySHA1WithRSA(buildParam(paramMap, false).toString().getBytes(StandardCharsets.UTF_8), Base64Utils.decode(publicKey), Base64Utils.decode(sign));
-		} catch (Exception e) {
-			throw new RuntimeException(e.getMessage(), e);
-		}
+	public static boolean verifySHAWithRSA(Map<String, String> paramMap, String publicKeyBase64, String sign) {
+		return verify(paramMap, queryStringBuilder -> {
+			try {
+				return RSAUtils.signVerify(CodecData.utf8(queryStringBuilder.toString()), CodecData.base64(publicKeyBase64), CodecData.base64(sign), RSASignAlgorithm.SHA1_WITH_RSA);
+			} catch(Exception e) {
+				throw new RuntimeException(e.getMessage(), e);
+			}
+		});
 	}
 
 	/**
 	 * @description 验证 SHA256WithRSA 方式签名
 	 * @param paramMap 参数集合
-     * @param publicKey 公钥【Base64编码】
+     * @param publicKeyBase64 公钥【Base64编码】
      * @param sign 签名【Base64编码】
 	 * @return 验证结果
 	 */
-	public static boolean verifySHA256WithRSA(Map<String, String> paramMap, String publicKey, String sign) {
-		Assert.notNull(paramMap, "parameter paramMap cannot be null.");
-		Assert.hasText(publicKey, "parameter publicKey cannot be empty.");
-		Assert.hasText(sign, "parameter sign cannot be empty.");
-		try {
-			return RSAUtils.signVerifySHA256WithRSA(buildParam(paramMap, false).toString().getBytes(StandardCharsets.UTF_8), Base64Utils.decode(publicKey), Base64Utils.decode(sign));
-		} catch (Exception e) {
-			throw new RuntimeException(e.getMessage(), e);
-		}
+	public static boolean verifySHA256WithRSA(Map<String, String> paramMap, String publicKeyBase64, String sign) {
+		return verify(paramMap, queryStringBuilder -> {
+			try {
+				return RSAUtils.signVerify(CodecData.utf8(queryStringBuilder.toString()), CodecData.base64(publicKeyBase64), CodecData.base64(sign), RSASignAlgorithm.SHA256_WITH_RSA);
+			} catch(Exception e) {
+				throw new RuntimeException(e.getMessage(), e);
+			}
+		});
 	}
 
 	/**
@@ -189,7 +157,7 @@ public class SignUtils {
 	 * @param function 函数。参数为拼装queryString后的参数（不参与encode），返回值为已签名字符串【M】
 	 * @return base64字符串【M】
 	 */
-	public static String sign(Map<String, String> paramMap, Function<StringBuilder, String> function) {
+	 static String sign(Map<String, String> paramMap, Function<StringBuilder, String> function) {
 		Assert.notNull(paramMap, "parameter paramMap cannot be null.");
 		Assert.notNull(function, "parameter function cannot be null.");
 		try {
@@ -205,7 +173,7 @@ public class SignUtils {
 	 * @param function 函数，参数为签名组装字符串queryString(不参与encode)，返回签名验证结果【M】
 	 * @return 验证结果【M】
 	 */
-	public static boolean verify(Map<String, String> paramMap, Function<StringBuilder, Boolean> function) {
+	static boolean verify(Map<String, String> paramMap, Function<StringBuilder, Boolean> function) {
 		Assert.isTrue(function != null && paramMap != null , "parameter supplier cannot be null and paramMap cannot be null.");
 		return Boolean.TRUE.equals(function.apply(buildParam(paramMap, false)));
 	}

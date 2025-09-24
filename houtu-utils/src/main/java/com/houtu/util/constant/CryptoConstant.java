@@ -7,9 +7,21 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
  * @date 2017年4月25日
  * @Description 算法提供者常量类
  */
-public interface ProviderConstant {
+public interface CryptoConstant {
 	
 	/** 外置扩展安全提供方 **/
 	BouncyCastleProvider PROVIDER_BOUNCY_CASTLE = new BouncyCastleProvider();
+
+
+	String ALGORITHM_MD5 = "MD5";
+	String ALGORITHM_HMAC_MD5 = "HmacMD5";
+	String ALGORITHM_AES = "AES";
+	String ALGORITHM_RSA = "RSA";
+	String ALGORITHM_SM4 = "SM4";
+
+	String ALGORITHM_EC = "EC";
+
+	String ALGORITHM_SM2 = "SM2";
+	String ALGORITHM_HMAC_SM3 = "HmacSM3";
 
 }

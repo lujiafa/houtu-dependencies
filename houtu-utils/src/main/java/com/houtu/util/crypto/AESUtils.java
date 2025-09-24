@@ -1,12 +1,14 @@
 package com.houtu.util.crypto;
 
-import com.houtu.util.constant.ProviderConstant;
+import com.houtu.util.common.CodecData;
+import com.houtu.util.constant.CryptoConstant;
+import com.houtu.util.crypto.type.AESTransformation;
 
 import javax.crypto.Cipher;
+import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-import java.security.Provider;
 
 /**
  * @author lujiafa
@@ -14,205 +16,267 @@ import java.security.Provider;
  * @Description: AES加密/解密工具类
  */
 public final class AESUtils {
-	
-	/**
-	 * 密钥生成器算法
-	 */
-	public static final String ALGORITHM = "AES";
-	
-	/**
-	 /**
-	 * encrypt - AES加密 <br>
-	 *   采用默认加密算法 AES/ECB/NoPadding
-	 *   采用默认偏移量 IV = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0} <br>
-	 * @param data 需加密字数据【M】
-	 * @param keyBytes 密钥【M】
-	 * @return byte[] 加密后的数据
-	 * @throws Exception
-	 */
-	public static byte[] encrypt(byte[] data, byte[] keyBytes)
-			throws Exception {
-		return encrypt(data, keyBytes, AESTransformation.ECB(), null);
-	}
 
-	/**
-	 * encrypt - AES加密 <br>
-	 *   采用默认偏移量 IV = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-	 * @param data 需加密字数据【M】
-	 * @param keyBytes 密钥【M】
-	 * @param transformation <p>工作模式与填充方式，如："SM4/ECB/NoPadding。可以通过"AESTransformation.ECB().NoPadding()"获取提供。【M】</p>
-	 *                       <p>ECB：不需要初始化向量</p>
-	 *                       <p>CBC、CFB、OFB、CTR、GCM：需要初始化向量</p>
-	 * @return byte[] 加密后的数据
-	 * @throws Exception
-	 */
-	public static byte[] encrypt(byte[] data, byte[] keyBytes, AESTransformation transformation)
-			throws Exception {
-		return encrypt(data, keyBytes, transformation, new byte[16]);
-	}
+    /**
+     * 提供获取默认AES Key
+     *  AES密钥长度限制说明：
+     *    AES-128: 128位 (16字节)
+     *    AES-192: 192位 (24字节)
+     *    AES-256: 256位 (32字节)
+     *    不支持其他任意长度的密钥！
+     * @param transformation
+     * @return
+     */
+    public static CodecData getKey(AESTransformation transformation) {
+        try {
+            KeyGenerator keyGen = KeyGenerator.getInstance(CryptoConstant.ALGORITHM_AES);;
+            SecretKey secretKey = keyGen.generateKey();
+            return CodecData.bytes(secretKey.getEncoded());
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
 
-	/**
-	 * encrypt - AES加密 <br>
-	 * @Description: AES加密
-	 * @param data 需加密字数据【M】
-	 * @param keyBytes 密钥【M】
-	 * @param transformation <p>工作模式与填充方式，如："SM4/ECB/NoPadding。可以通过"AESTransformation.ECB().NoPadding()"获取提供。【M】</p>
-	 *                       <p>ECB：不需要初始化向量</p>
-	 *                       <p>CBC、CFB、OFB、CTR、GCM：需要初始化向量</p>
-	 * @param iv             向量，格式为16字节Byte数组【C】
-	 * @return  byte[] 加密后的数据
-	 * @throws Exception
-	 */
-	public static byte[] encrypt(byte[] data, byte[] keyBytes, AESTransformation transformation, byte[] iv)
-			throws Exception {
-		SecretKey secretKey = new SecretKeySpec(keyBytes, ALGORITHM);
-		// 创建密码器，它用于完成实际的加密操作（算法/模式/填充）
-		Cipher cipher = null;
-		if (transformation.getProvider() == null) {
-			cipher = Cipher.getInstance(transformation.toString());
-		} else {
-			cipher = Cipher.getInstance(transformation.toString(), transformation.getProvider());
-		}
-		switch (transformation.mode) {
-			case "ECB":
-				cipher.init(Cipher.ENCRYPT_MODE, secretKey);
-				break;
-			case "CBC":
-			case "CFB":
-			case "OFB":
-			case "CTR":
-			case "GCM":
-				cipher.init(Cipher.ENCRYPT_MODE, secretKey, new IvParameterSpec(iv == null ? new byte[16] : iv));
-				break;
-			default:
-				throw new Exception("暂不支持的加密模式");
-		}
-		return cipher.doFinal(data);
-	}
-
-	/**
-	 * decrypt - 解密 <br>
-	 *   采用默认解密算法 AES/ECB/NoPadding
-	 * @param encryptedBytes 需解密字数据【M】
-	 * @param keyBytes 密钥【M】
-	 * @throws Exception
-	 */
-	public static byte[] decrypt(byte[] encryptedBytes, byte[] keyBytes)
-			throws Exception {
-		return decrypt(encryptedBytes, keyBytes, AESTransformation.ECB(), null);
-	}
+    /**
+     * encrypt - AES加密 <br>
+     * 采用默认偏移量 IV = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+     *
+     * @param source         需加密字数据【M】
+     * @param key            密钥【M】
+     * @param transformation <p>工作模式与填充方式，如："SM4/ECB/NoPadding。可以通过"AESTransformation.ECB().NoPadding()"获取提供。【M】</p>
+     *                       <p>ECB：不需要初始化向量</p>
+     *                       <p>CBC、CFB、OFB、CTR、GCM：需要初始化向量</p>
+     * @return byte[] 加密后的数据
+     * @throws Exception
+     */
+    public static CodecData encrypt(CodecData source, CodecData key, AESTransformation transformation)
+            throws Exception {
+        return encrypt(source.bytes(), key, transformation, null);
+    }
 
 
-	/**
-	 * decrypt - 解密 <br>
-	 *   采用默认偏移量 IV = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0} <br>
-	 * @param encryptedBytes 需解密字数据【M】
-	 * @param keyBytes 密钥【M】
-	 * @param transformation <p>工作模式与填充方式，如："SM4/ECB/NoPadding。可以通过"AESTransformation.ECB().NoPadding()"获取提供。【M】</p>
-	 *                       <p>ECB：不需要初始化向量</p>
-	 *                       <p>CBC、CFB、OFB、CTR、GCM：需要初始化向量</p>
-	 * @throws Exception
-	 */
-	public static byte[] decrypt(byte[] encryptedBytes, byte[] keyBytes, AESTransformation transformation)
-			throws Exception {
-		return decrypt(encryptedBytes, keyBytes, transformation, new byte[16]);
-	}
+    /**
+     * encrypt - AES加密 <br>
+     * 采用默认偏移量 IV = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+     *
+     * @param source         需加密字数据【M】
+     * @param key            密钥【M】
+     * @param transformation <p>工作模式与填充方式，如："SM4/ECB/NoPadding。可以通过"AESTransformation.ECB().NoPadding()"获取提供。【M】</p>
+     *                       <p>ECB：不需要初始化向量</p>
+     *                       <p>CBC、CFB、OFB、CTR、GCM：需要初始化向量</p>
+     * @return byte[] 加密后的数据
+     * @throws Exception
+     */
+    public static CodecData encrypt(byte[] source, CodecData key, AESTransformation transformation)
+            throws Exception {
+        return encrypt(source, key, transformation, null);
+    }
 
-	/**
-	 * decrypt - 解密 <br>
-	 * @param encryptedBytes 需解密字数据【M】
-	 * @param keyBytes 密钥【M】
-	 * @param transformation <p>工作模式与填充方式，如："SM4/ECB/NoPadding。可以通过"AESTransformation.ECB().NoPadding()"获取提供。【M】</p>
-	 *                       <p>ECB：不需要初始化向量</p>
-	 *                       <p>CBC、CFB、OFB、CTR、GCM：需要初始化向量</p>
-	 * @param iv             向量，格式为16字节Byte数组【C】
-	 * @return byte[] 解密后的数据
-	 * @throws Exception 
-	 */
-	public static byte[] decrypt(byte[] encryptedBytes, byte[] keyBytes, AESTransformation transformation, byte[] iv)
-			throws Exception {
-		SecretKey secretKey = new SecretKeySpec(keyBytes, ALGORITHM);
-		// 创建密码器，它用于完成实际的加密操作（算法/模式/填充）
-		Cipher cipher = null;
-		if (transformation.getProvider() == null) {
-			cipher = Cipher.getInstance(transformation.toString());
-		} else {
-			cipher = Cipher.getInstance(transformation.toString(), transformation.getProvider());
-		}
-		switch (transformation.mode) {
-			case "ECB":
-				cipher.init(Cipher.DECRYPT_MODE, secretKey);
-				break;
-			case "CBC":
-			case "CFB":
-			case "OFB":
-			case "CTR":
-			case "GCM":
-				cipher.init(Cipher.DECRYPT_MODE, secretKey, new IvParameterSpec(iv == null ? new byte[16] : iv));
-				break;
-			default:
-				throw new Exception("暂不支持的解密模式");
-		}
-		return cipher.doFinal(encryptedBytes);
-	}
+    /**
+     * encrypt - AES加密 <br>
+     * 采用默认偏移量 IV = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+     *
+     * @param source         需加密字数据【M】
+     * @param key            密钥【M】
+     * @param transformation <p>工作模式与填充方式，如："SM4/ECB/NoPadding。可以通过"AESTransformation.ECB().NoPadding()"获取提供。【M】</p>
+     *                       <p>ECB：不需要初始化向量</p>
+     *                       <p>CBC、CFB、OFB、CTR、GCM：需要初始化向量</p>
+     * @return byte[] 加密后的数据
+     * @throws Exception
+     */
+    public static CodecData encrypt(byte[] source, byte[] key, AESTransformation transformation)
+            throws Exception {
+        return encrypt(source, key, transformation, null);
+    }
 
-	public static class AESTransformation {
-		private String mode;
-		private String padding = "NoPadding";
-		private Provider provider;
+    /**
+     * encrypt - AES加密 <br>
+     *
+     * @param source         需加密字数据【M】
+     * @param key            密钥【M】
+     * @param transformation <p>工作模式与填充方式，如："SM4/ECB/NoPadding。可以通过"AESTransformation.ECB().NoPadding()"获取提供。【M】</p>
+     *                       <p>ECB：不需要初始化向量</p>
+     *                       <p>CBC、CFB、OFB、CTR、GCM：需要初始化向量</p>
+     * @param iv             向量，格式为16字节Byte数组【C】
+     * @return byte[] 加密后的数据
+     * @throws Exception
+     * @Description: AES加密
+     */
+    public static CodecData encrypt(CodecData source, CodecData key, AESTransformation transformation, CodecData iv)
+            throws Exception {
+        return encrypt(source.bytes(), key.bytes(), transformation, iv == null ? null : iv.bytes());
+    }
 
-		public AESTransformation(String mode) {
-			this.mode = mode;
-		}
+    /**
+     * encrypt - AES加密 <br>
+     *
+     * @param source         需加密字数据【M】
+     * @param key            密钥【M】
+     * @param transformation <p>工作模式与填充方式，如："SM4/ECB/NoPadding。可以通过"AESTransformation.ECB().NoPadding()"获取提供。【M】</p>
+     *                       <p>ECB：不需要初始化向量</p>
+     *                       <p>CBC、CFB、OFB、CTR、GCM：需要初始化向量</p>
+     * @param iv             向量，格式为16字节Byte数组【C】
+     * @return byte[] 加密后的数据
+     * @throws Exception
+     * @Description: AES加密
+     */
+    public static CodecData encrypt(byte[] source, CodecData key, AESTransformation transformation, CodecData iv)
+            throws Exception {
+        return encrypt(source, key.bytes(), transformation, iv == null ? null : iv.bytes());
+    }
 
-		@Override
-		public String toString() {
-			return String.format("%s/%s/%s", ALGORITHM, mode, padding);
-		}
+    /**
+     * encrypt - AES加密 <br>
+     *
+     * @param source         需加密字数据【M】
+     * @param key            密钥【M】
+     * @param transformation <p>工作模式与填充方式，如："SM4/ECB/NoPadding。可以通过"AESTransformation.ECB().NoPadding()"获取提供。【M】</p>
+     *                       <p>ECB：不需要初始化向量</p>
+     *                       <p>CBC、CFB、OFB、CTR、GCM：需要初始化向量</p>
+     * @param iv             向量，格式为16字节Byte数组【C】
+     * @return byte[] 加密后的数据
+     * @throws Exception
+     * @Description: AES加密
+     */
+    public static CodecData encrypt(byte[] source, byte[] key, AESTransformation transformation, byte[] iv)
+            throws Exception {
+        SecretKey secretKey = new SecretKeySpec(key, CryptoConstant.ALGORITHM_AES);
+        // 创建密码器，它用于完成实际的加密操作（算法/模式/填充）
+        Cipher cipher = null;
+        if (transformation.getProvider() == null) {
+            cipher = Cipher.getInstance(transformation.getTransformation());
+        } else {
+            cipher = Cipher.getInstance(transformation.getTransformation(), transformation.getProvider());
+        }
+        if (transformation.isSupportIV()) {
+//            if (AESTransformation.GCM_NO_PADDING.equals(transformation)
+//                    || AESTransformation.GCM_PKCS5_PADDING.equals(transformation)
+//                    || AESTransformation.GCM_PKCS7_PADDING.equals(transformation)) {
+//                if (iv == null) {
+//                    iv = new byte[12];
+//                    new SecureRandom().nextBytes(iv);
+//                }
+//                cipher.init(Cipher.ENCRYPT_MODE, secretKey, new GCMParameterSpec(iv.length * 8, iv)); // GCM推荐IV长度为12字节
+//            } else {
+                if (iv == null) {
+                    iv = new byte[16];
+                }
+                cipher.init(Cipher.ENCRYPT_MODE, secretKey, new IvParameterSpec(iv));
+//            }
+        } else {
+            cipher.init(Cipher.ENCRYPT_MODE, secretKey);
+        }
+        return CodecData.bytes(cipher.doFinal(source));
+    }
 
-		public static AESTransformation ECB() {
-			return new AESTransformation( "ECB");
-		}
+    /**
+     * decrypt - 解密 <br>
+     * 采用默认偏移量 IV = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0} <br>
+     *
+     * @param encrypted      需解密字数据【M】
+     * @param key            密钥【M】
+     * @param transformation <p>工作模式与填充方式，如："SM4/ECB/NoPadding。可以通过"AESTransformation.ECB().NoPadding()"获取提供。【M】</p>
+     *                       <p>ECB：不需要初始化向量</p>
+     *                       <p>CBC、CFB、OFB、CTR、GCM：需要初始化向量</p>
+     * @throws Exception
+     */
+    public static CodecData decrypt(CodecData encrypted, CodecData key, AESTransformation transformation)
+            throws Exception {
+        return decrypt(encrypted.bytes(), key.bytes(), transformation, new byte[16]);
+    }
 
-		public static AESTransformation CBC() {
-			return new AESTransformation( "CBC");
-		}
+    /**
+     * decrypt - 解密 <br>
+     * 采用默认偏移量 IV = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0} <br>
+     *
+     * @param encrypted      需解密字数据【M】
+     * @param key            密钥【M】
+     * @param transformation <p>工作模式与填充方式，如："SM4/ECB/NoPadding。可以通过"AESTransformation.ECB().NoPadding()"获取提供。【M】</p>
+     *                       <p>ECB：不需要初始化向量</p>
+     *                       <p>CBC、CFB、OFB、CTR、GCM：需要初始化向量</p>
+     * @throws Exception
+     */
+    public static CodecData decrypt(byte[] encrypted, CodecData key, AESTransformation transformation)
+            throws Exception {
+        return decrypt(encrypted, key.bytes(), transformation, new byte[16]);
+    }
 
-		public static AESTransformation CFB() {
-			return new AESTransformation( "CFB");
-		}
+    /**
+     * decrypt - 解密 <br>
+     * 采用默认偏移量 IV = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0} <br>
+     *
+     * @param encrypted      需解密字数据【M】
+     * @param key            密钥【M】
+     * @param transformation <p>工作模式与填充方式，如："SM4/ECB/NoPadding。可以通过"AESTransformation.ECB().NoPadding()"获取提供。【M】</p>
+     *                       <p>ECB：不需要初始化向量</p>
+     *                       <p>CBC、CFB、OFB、CTR、GCM：需要初始化向量</p>
+     * @throws Exception
+     */
+    public static CodecData decrypt(byte[] encrypted, byte[] key, AESTransformation transformation)
+            throws Exception {
+        return decrypt(encrypted, key, transformation, new byte[16]);
+    }
 
-		public static AESTransformation OFB() {
-			return new AESTransformation( "OFB");
-		}
+    /**
+     * decrypt - 解密 <br>
+     * 采用默认偏移量 IV = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0} <br>
+     *
+     * @param encrypted      需解密字数据【M】
+     * @param key            密钥【M】
+     * @param transformation <p>工作模式与填充方式，如："SM4/ECB/NoPadding。可以通过"AESTransformation.ECB().NoPadding()"获取提供。【M】</p>
+     *                       <p>ECB：不需要初始化向量</p>
+     *                       <p>CBC、CFB、OFB、CTR、GCM：需要初始化向量</p>
+     * @param iv             向量，格式为16字节Byte数组【C】
+     * @throws Exception
+     */
+    public static CodecData decrypt(byte[] encrypted, CodecData key, AESTransformation transformation, CodecData iv)
+            throws Exception {
+        return decrypt(encrypted, key.bytes(), transformation, iv == null ? null : iv.bytes());
+    }
 
-		public static AESTransformation CTR() {
-			return new AESTransformation( "CTR");
-		}
+    /**
+     * decrypt - 解密 <br>
+     *
+     * @param encrypted      需解密字数据【M】
+     * @param key            密钥【M】
+     * @param transformation <p>工作模式与填充方式，如："SM4/ECB/NoPadding。可以通过"AESTransformation.ECB().NoPadding()"获取提供。【M】</p>
+     *                       <p>ECB：不需要初始化向量</p>
+     *                       <p>CBC、CFB、OFB、CTR、GCM：需要初始化向量</p>
+     * @param iv             向量，格式为16字节Byte数组【C】
+     * @return byte[] 解密后的数据
+     * @throws Exception
+     */
+    public static CodecData decrypt(byte[] encrypted, byte[] key, AESTransformation transformation, byte[] iv)
+            throws Exception {
+        SecretKey secretKey = new SecretKeySpec(key, CryptoConstant.ALGORITHM_AES);
+        // 创建密码器，它用于完成实际的加密操作（算法/模式/填充）
+        Cipher cipher = null;
+        if (transformation.getProvider() == null) {
+            cipher = Cipher.getInstance(transformation.getTransformation());
+        } else {
+            cipher = Cipher.getInstance(transformation.getTransformation(), transformation.getProvider());
+        }
+        if (transformation.isSupportIV()) {
+//            if (AESTransformation.GCM_NO_PADDING.equals(transformation)
+//                    || AESTransformation.GCM_PKCS5_PADDING.equals(transformation)
+//                    || AESTransformation.GCM_PKCS7_PADDING.equals(transformation)) {
+//                if (iv == null) {
+//                    iv = new byte[12];
+////                    SecureRandom random = new SecureRandom();
+////                    random.nextBytes(iv);
+//                }
+//                GCMParameterSpec spec = new GCMParameterSpec(128, iv);
+//                cipher.init(Cipher.DECRYPT_MODE, secretKey, spec);
+//            } else {
+                if (iv == null) {
+                    iv = new byte[16];
+                }
+                cipher.init(Cipher.DECRYPT_MODE, secretKey, new IvParameterSpec(iv));
+//            }
+        } else {
+            cipher.init(Cipher.DECRYPT_MODE, secretKey);
+        }
+        return CodecData.bytes(cipher.doFinal(encrypted));
+    }
 
-		public static AESTransformation GCM() {
-			return new AESTransformation( "GCM");
-		}
-
-		public AESTransformation PKCS7Padding() {
-			this.padding = "PKCS7Padding";
-			this.provider = ProviderConstant.PROVIDER_BOUNCY_CASTLE;
-			return this;
-		}
-
-		public AESTransformation PKCS5Padding() {
-			this.padding = "PKCS5Padding";
-			return this;
-		}
-
-		public AESTransformation NoPadding() {
-			this.padding = "NoPadding";
-			return this;
-		}
-
-		public Provider getProvider() {
-			return provider;
-		}
-	}
-	
 }

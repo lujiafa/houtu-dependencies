@@ -1,17 +1,20 @@
 package com.houtu.websecurity.session.repository;
 
 import com.houtu.util.common.CodeUtils;
+import com.houtu.util.common.CodecData;
 import com.houtu.util.common.DateUtils;
 import com.houtu.util.common.JsonUtils;
-import com.houtu.util.crypto.Base64Utils;
+import com.houtu.util.crypto.ECDSAUtils;
+import com.houtu.util.crypto.RSAUtils;
 import com.houtu.websecurity.prop.SessionProperties;
 import com.houtu.websecurity.session.Session;
 import com.houtu.websecurity.session.SessionRepository;
 import com.houtu.websecurity.session.simple.SimpleSession;
+import com.houtu.websecurity.session.type.JWTSignatureAlgorithm;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.*;
+import io.jsonwebtoken.security.SecurityException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
@@ -20,6 +23,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.util.StringUtils;
 
 import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+import java.security.Key;
+import java.security.PublicKey;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -36,8 +42,15 @@ public class JWTSessionRepository implements SessionRepository {
 
     protected SessionProperties sessionProperties;
 
+    private SecureDigestAlgorithm algorithm;
+    private Key signKey;
+    private Key signVerifyKey;
+
     public JWTSessionRepository(SessionProperties sessionProperties) {
         this.sessionProperties = sessionProperties;
+        initSignatureAlgorithm(sessionProperties.getJwtSignatureAlgorithm());
+        initSignKey(sessionProperties);
+        initVerifySecretKey(sessionProperties);
     }
 
     @Override
@@ -107,44 +120,96 @@ public class JWTSessionRepository implements SessionRepository {
                 .setSubject(session.getId())
                 .issuedAt(DateUtils.toDate(session.getCreateTime()))
                 .setExpiration(DateUtils.addSeconds(DateUtils.toDate(session.getCreateTime()), (int) expire))
-                .signWith(getSecretKey(), getSignatureAlgorithm())
+                .signWith(signKey, algorithm)
                 .compact();
     }
 
     protected Claims parseToken(String token) {
-        return Jwts.parser()
-                .setSigningKey(getSecretKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
-    }
-
-    protected SecretKey getSecretKey() {
-        return Keys.hmacShaKeyFor(Base64Utils.decode(sessionProperties.getJwtSecretKey()));
-    }
-
-    protected SignatureAlgorithm getSignatureAlgorithm() {
-        switch (sessionProperties.getJwtSignatureAlgorithm()) {
-            case HS256:
-                return SignatureAlgorithm.HS256;
-            case HS384:
-                return SignatureAlgorithm.HS384;
-            case HS512:
-                return SignatureAlgorithm.HS512;
-            case RS256:
-                return SignatureAlgorithm.RS256;
-            case RS384:
-                return SignatureAlgorithm.RS384;
-            case RS512:
-                return SignatureAlgorithm.RS512;
-            case ES256:
-                return SignatureAlgorithm.ES256;
-            case ES384:
-                return SignatureAlgorithm.ES384;
-            case ES512:
-                return SignatureAlgorithm.ES512;
+        if (signVerifyKey instanceof SecretKey secretKey) {
+            return Jwts.parser()
+                    .verifyWith(secretKey)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+        } else if (signVerifyKey instanceof PublicKey publicKey) {
+            return Jwts.parser()
+                    .verifyWith(publicKey)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
         }
-        return SignatureAlgorithm.HS256;
+        throw new RuntimeException("not support signVerifyKey type " + signVerifyKey.getClass().getName());
+    }
+
+    protected void initSignKey(SessionProperties sessionProperties) {
+        try {
+            switch (sessionProperties.getJwtSignatureAlgorithm()) {
+                case HS256, HS384, HS512:
+                    this.signKey = Keys.hmacShaKeyFor(CodecData.base64(sessionProperties.getJwtSignatureKey()).bytes());
+                    break;
+                case RS256, RS384, RS512:
+                    this.signKey = RSAUtils.getPrivateKey(CodecData.base64(sessionProperties.getJwtSignatureKey()).bytes());
+                case ES256, ES384, ES512:
+                    this.signKey = ECDSAUtils.getPrivateKey(CodecData.base64(sessionProperties.getJwtSignatureKey()).bytes());
+                default:
+                    throw new RuntimeException("not support algorithm");
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
+
+    protected void initVerifySecretKey(SessionProperties sessionProperties) {
+        try {
+            switch (sessionProperties.getJwtSignatureAlgorithm()) {
+                case HS256, HS384, HS512:
+                    String tmpVerifyKey = sessionProperties.getJwtSignatureVerifyKey() == null ? sessionProperties.getJwtSignatureKey() : sessionProperties.getJwtSignatureVerifyKey();
+                    this.signVerifyKey = Keys.hmacShaKeyFor(CodecData.base64(tmpVerifyKey).bytes());
+                    break;
+                case RS256, RS384, RS512:
+                    this.signVerifyKey = RSAUtils.getPublicKey(CodecData.base64(sessionProperties.getJwtSignatureVerifyKey()).bytes());
+                case ES256, ES384, ES512:
+                    this.signVerifyKey = ECDSAUtils.getPublicKey(CodecData.base64(sessionProperties.getJwtSignatureVerifyKey()).bytes());
+                default:
+                    throw new RuntimeException("not support algorithm");
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
+
+    protected void initSignatureAlgorithm(JWTSignatureAlgorithm jwtSignatureAlgorithm) {
+        switch (jwtSignatureAlgorithm) {
+            case HS256:
+                this.algorithm = Jwts.SIG.HS256;
+                break;
+            case HS384:
+                this.algorithm = Jwts.SIG.HS384;
+                break;
+            case HS512:
+                this.algorithm = Jwts.SIG.HS512;
+                break;
+            case RS256:
+                this.algorithm = Jwts.SIG.RS256;
+                break;
+            case RS384:
+                this.algorithm = Jwts.SIG.RS384;
+                break;
+            case RS512:
+                this.algorithm = Jwts.SIG.RS512;
+                break;
+            case ES256:
+                this.algorithm = Jwts.SIG.ES256;
+                break;
+            case ES384:
+                this.algorithm = Jwts.SIG.ES384;
+                break;
+            case ES512:
+                this.algorithm = Jwts.SIG.ES512;
+                break;
+            default:
+                throw new RuntimeException("not support algorithm");
+        }
     }
 
 }

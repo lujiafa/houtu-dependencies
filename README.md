@@ -66,40 +66,42 @@ version)</b>和<b>次版本号(Minor version)</b>对应，修订版本号之间�
 
 ## ⚙️ 配置
 
-| 模块                              | 配置项                                                    | 配置描述                                                                    | 默认值                 | 是否必须 |
-|---------------------------------|--------------------------------------------------------|-------------------------------------------------------------------------|---------------------|------|
-| houtu-core                      | houtu.core.decrypt.encrypt-keys                        | 已加密的配置项，会通过`decrypt-processor-class`对应类进行解密操作                           | -                   | 否    |
-| houtu-core                      | houtu.core.decrypt.decrypt-processor-class             | 自定义配置解密处理器类（Class<? extends com.houtu.core.env.DecryptProcessor>）       | -                   | 否    |
-| houtu-utils                     | houtu.util.httpclient.pool.max-total                   | 连接池最大连接数                                                                | 80                  | 否    |
-| houtu-utils                     | houtu.util.httpclient.pool.max-per-route               | 每个路由的默认最大连接                                                             | 10                  | 否    |
-| houtu-utils                     | houtu.util.httpclient.request.connect-timeout          | 连接超时时间（秒）                                                               | 5                   | 否    |
-| houtu-utils                     | houtu.util.httpclient.request.response-timeout         | 响应超时时间（秒）                                                               | 15                  | 否    |
-| houtu-utils                     | houtu.util.httpclient.proxy.hostname                   | 请求代理Hostname                                                            | -                   | 否    |
-| houtu-utils                     | houtu.util.httpclient.proxy.port                       | 请求代理端口                                                                  | -                   | 否    |
-| houtu-data-security             | houtu.data.security.secret-key                         | 默认SM4(SM4/ECB/PKCS5Padding)对称密钥。<br>示例：881100bb332299eeaa88cc66aaeebb99 | -                   | 是    |
-| houtu-monitor                   | houtu.monitor.business-name                            | 所属业务名称                                                                  | -                   | 是    |
-| houtu-monitor                   | houtu.monitor.svr-ip                                   | 服务器IP                                                                   | 动态获取本机IP            | 否    |
-| houtu-monitor                   | houtu.monitor.full-request                             | 是否打开全部请求监控                                                              | false               | 否    |
-| houtu-monitor                   | houtu.monitor.period                                   | 监控窗口周期                                                                  | 5s                  | 否    |
-| houtu-monitor                   | houtu.monitor.delay                                    | 监控数据延期多久处理                                                              | 500ms               | 否    |
-| houtu-monitor                   | houtu.monitor.collect-queue-capacity                   | 监控日志Collect队列容量                                                         | 2000                | 否    |
-| houtu-monitor                   | houtu.monitor.output-queue-capacity                    | 监控日志输出队列容量                                                              | 100                 | 否    |
-| houtu-web                       | houtu.web.exception-resolver                           | 是否启用统一异常解析器                                                             | true                | 否    |
-| houtu-web                       | houtu.web.combine-form-resolver-type                   | 复合参数解析器对Form参数处理方式                                                      | JSON                | 否    |
-| houtu-web-security              | houtu.web.session.session-id-name                      | 定义请求头数据中session id键名                                                    | "sid"               | 否    |
-| houtu-web-security              | houtu.web.session.expire                               | session有效期（秒）                                                           | 1800                | 否    |
-| houtu-web-security              | houtu.web.session.type                                 | 会话保持和持久化类型，支持JWT和CACHE                                                  | CACHE               | 否    |
-| houtu-web-security              | houtu.web.session.login-url                            | 会话失效登录URL地址(仅web场景中有用)                                                  | -                   | 否    |
-| houtu-web-security              | houtu.web.session.redis-base-key                       | 默认服务Session持久化Redis Key前缀(type=CACHE时，此值有效)                             | "security:session:" | 否    |
-| houtu-web-security              | houtu.web.session.efficient-cache-name                 | 高效二级缓存名称，支持Caffeine、Cache2k(type=CACHE且引入相关依赖时，此值有效)                    | "session"           | 否    |
-| houtu-web-security              | houtu.web.session.efficient-cache-sync-channel         | 高效二级缓存集群同步发布订阅频道名称(type=CACHE且引入相关依赖时，此值有效)                             | "session-sync"      | 否    |
-| houtu-web-security              | houtu.web.session.redis.*                              | 会话Redis配置，同SpringBoot引入的Redis配置，可缺省使用默认Redis                            | -                   | 否    |
-| houtu-web-security              | houtu.web.session.jwt-secret-key                       | JWT默认签名类型HmacSHA256的Base64密钥(type=JWT时，此值有效)                            | -                   | 否    |
-| houtu-web-security              | houtu.web.session.jwt-signature-algorithm              | JWT签名算法类型                                                               | HS256               | 否    |
-| houtu-web-security              | houtu.web.sign.sign-key                                | 默认HMacMD5验签密钥                                                           | -                   | 是    |
-| spring-cloud-houtu-loadbalancer | spring.cloud.loadbalancer.weight                       | 是否启用权重路由                                                                | true                | 否    |
-| spring-cloud-houtu-loadbalancer | spring.cloud.loadbalancer.hint                         | 是否启用hint灰度策略                                                            | true                | 否    |
-| spring-cloud-houtu-loadbalancer | spring.cloud.loadbalancer.disable-gateway-request-hint | 是否禁用请求头中的hint参数，仅Spring-Cloud-Gateway有效                                 | false               | 否    |
+| 模块                              | 配置项                                                    | 配置描述                                                                                       | 默认值                 | 是否必须 |
+|---------------------------------|--------------------------------------------------------|--------------------------------------------------------------------------------------------|---------------------|------|
+| houtu-core                      | houtu.core.decrypt.encrypt-keys                        | 已加密的配置项，会通过`decrypt-processor-class`对应类进行解密操作                                              | -                   | 否    |
+| houtu-core                      | houtu.core.decrypt.decrypt-processor-class             | 自定义配置解密处理器类（Class<? extends com.houtu.core.env.DecryptProcessor>）                          | -                   | 否    |
+| houtu-utils                     | houtu.util.httpclient.pool.max-total                   | 连接池最大连接数                                                                                   | 80                  | 否    |
+| houtu-utils                     | houtu.util.httpclient.pool.max-per-route               | 每个路由的默认最大连接                                                                                | 10                  | 否    |
+| houtu-utils                     | houtu.util.httpclient.request.connect-timeout          | 连接超时时间（秒）                                                                                  | 5                   | 否    |
+| houtu-utils                     | houtu.util.httpclient.request.response-timeout         | 响应超时时间（秒）                                                                                  | 15                  | 否    |
+| houtu-utils                     | houtu.util.httpclient.proxy.hostname                   | 请求代理Hostname                                                                               | -                   | 否    |
+| houtu-utils                     | houtu.util.httpclient.proxy.port                       | 请求代理端口                                                                                     | -                   | 否    |
+| houtu-data-security             | houtu.data.security.secret-key                         | 默认SM4(SM4/ECB/PKCS5Padding)对称Base64密钥。                                                     | -                   | 是    |
+| houtu-monitor                   | houtu.monitor.business-name                            | 所属业务名称                                                                                     | -                   | 是    |
+| houtu-monitor                   | houtu.monitor.svr-ip                                   | 服务器IP                                                                                      | 动态获取本机IP            | 否    |
+| houtu-monitor                   | houtu.monitor.full-request                             | 是否打开全部请求监控                                                                                 | false               | 否    |
+| houtu-monitor                   | houtu.monitor.period                                   | 监控窗口周期                                                                                     | 5s                  | 否    |
+| houtu-monitor                   | houtu.monitor.delay                                    | 监控数据延期多久处理                                                                                 | 500ms               | 否    |
+| houtu-monitor                   | houtu.monitor.collect-queue-capacity                   | 监控日志Collect队列容量                                                                            | 2000                | 否    |
+| houtu-monitor                   | houtu.monitor.output-queue-capacity                    | 监控日志输出队列容量                                                                                 | 100                 | 否    |
+| houtu-web                       | houtu.web.exception-resolver                           | 是否启用统一异常解析器                                                                                | true                | 否    |
+| houtu-web                       | houtu.web.combine-form-resolver-type                   | 复合参数解析器对Form参数处理方式                                                                         | JSON                | 否    |
+| houtu-web-security              | houtu.web.session.session-id-name                      | 定义请求头数据中session id键名                                                                       | "sid"               | 否    |
+| houtu-web-security              | houtu.web.session.expire                               | session有效期                                                                                 | 1800s               | 否    |
+| houtu-web-security              | houtu.web.session.delay                                | 是否启用通过请求触发session自动延期                                                                      | true                | 否    |
+| houtu-web-security              | houtu.web.session.type                                 | 会话保持和持久化类型，支持JWT和CACHE                                                                     | CACHE               | 否    |
+| houtu-web-security              | houtu.web.session.login-url                            | 会话失效登录URL地址(仅web场景中有用)                                                                     | -                   | 否    |
+| houtu-web-security              | houtu.web.session.redis-base-key                       | 默认服务Session持久化Redis Key前缀(type=CACHE时，此值有效)                                                | "security:session:" | 否    |
+| houtu-web-security              | houtu.web.session.efficient-cache-name                 | 高效二级缓存名称，支持Caffeine、Cache2k(type=CACHE且引入相关依赖时，此值有效)                                       | "session"           | 否    |
+| houtu-web-security              | houtu.web.session.efficient-cache-sync-channel         | 高效二级缓存集群同步发布订阅频道名称(type=CACHE且引入相关依赖时，此值有效)                                                | "session-sync"      | 否    |
+| houtu-web-security              | houtu.web.session.redis.*                              | 会话Redis配置，同SpringBoot引入的Redis配置，可缺省使用默认Redis                                               | -                   | 否    |
+| houtu-web-security              | houtu.web.session.jwt-signature-key                    | JWT签名Base64密钥(type=JWT时，此值有效)                                                              | -                   | 否    |
+| houtu-web-security              | houtu.web.session.jwt-signature-verify-key             | JWT验证签名类型HmacSHA的Base64密钥(type=JWT时，此值有效)，HmacSHA时可缺省等于houtu.web.session.jwt-signature-key | -                   | 否    |
+| houtu-web-security              | houtu.web.session.jwt-signature-algorithm              | JWT签名类型                                                                                    | -                   | 否    |
+| houtu-web-security              | houtu.web.sign.sign-key                                | 默认HMacMD5验签密钥                                                                              | -                   | 是    |
+| spring-cloud-houtu-loadbalancer | spring.cloud.loadbalancer.weight                       | 是否启用权重路由                                                                                   | true                | 否    |
+| spring-cloud-houtu-loadbalancer | spring.cloud.loadbalancer.hint                         | 是否启用hint灰度策略                                                                               | true                | 否    |
+| spring-cloud-houtu-loadbalancer | spring.cloud.loadbalancer.disable-gateway-request-hint | 是否禁用请求头中的hint参数，仅Spring-Cloud-Gateway有效                                                    | false               | 否    |
 
 ## 🤝 贡献
 

@@ -1,6 +1,8 @@
 package com.houtu.util.crypto;
 
-import com.houtu.util.constant.ProviderConstant;
+import com.houtu.util.constant.CryptoConstant;
+import com.houtu.util.common.CodecData;
+import com.houtu.util.crypto.type.SM4Transformation;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
@@ -13,37 +15,65 @@ import javax.crypto.spec.SecretKeySpec;
  */
 public class SM4Utils {
 
-    final static String ALGORITHM = "SM4";
-
-    public static byte[] getKey() throws Exception {
-        KeyGenerator keyGen = KeyGenerator.getInstance(ALGORITHM, ProviderConstant.PROVIDER_BOUNCY_CASTLE);
+    public static CodecData getKey() throws Exception {
+        KeyGenerator keyGen = KeyGenerator.getInstance(CryptoConstant.ALGORITHM_SM4, CryptoConstant.PROVIDER_BOUNCY_CASTLE);
         // SM4默认密钥长度为128位
-        keyGen.init(128);
+        //keyGen.init(128);
         SecretKey secretKey = keyGen.generateKey();
-        return secretKey.getEncoded();
+        return CodecData.bytes(secretKey.getEncoded());
     }
 
     /**
      * SM4加密
      *
      * @param data           加密源数据【M】
-     * @param keyBytes       密钥【M】
+     * @param key       密钥【M】
      * @param transformation <p>工作模式与填充方式，如："SM4/ECB/NoPadding。可以通过"SM4Utils.SM4Transformation.ECB().NoPadding()"获取提供。【M】</p>
      *                       <p>ECB：不需要初始化向量</p>
      *                       <p>CBC、CFB、OFB、CTR、GCM：需要初始化向量</p>
      * @return 加密数据
      * @throws Exception
      */
-    public static byte[] encrypt(byte[] data, byte[] keyBytes, SM4Transformation transformation) throws Exception {
-        return encrypt(data, keyBytes, null, transformation);
+    public static CodecData encrypt(CodecData data, CodecData key, SM4Transformation transformation) throws Exception {
+        return encrypt(data.bytes(), key.bytes(), null, transformation);
+    }
+
+    /**
+     * SM4加密
+     *
+     * @param data           加密源数据【M】
+     * @param key       密钥【M】
+     * @param transformation <p>工作模式与填充方式，如："SM4/ECB/NoPadding。可以通过"SM4Utils.SM4Transformation.ECB().NoPadding()"获取提供。【M】</p>
+     *                       <p>ECB：不需要初始化向量</p>
+     *                       <p>CBC、CFB、OFB、CTR、GCM：需要初始化向量</p>
+     * @return 加密数据
+     * @throws Exception
+     */
+    public static CodecData encrypt(byte[] data, CodecData key, SM4Transformation transformation) throws Exception {
+        return encrypt(data, key.bytes(), null, transformation);
+    }
+
+    /**
+     * SM4加密
+     *
+     * @param data           加密源数据【M】
+     * @param key       密钥【M】
+     * @param transformation <p>工作模式与填充方式，如："SM4/ECB/NoPadding。可以通过"SM4Utils.SM4Transformation.ECB().NoPadding()"获取提供。【M】</p>
+     *                       <p>ECB：不需要初始化向量</p>
+     *                       <p>CBC、CFB、OFB、CTR、GCM：需要初始化向量</p>
+     * @return 加密数据
+     * @throws Exception
+     */
+    public static CodecData encrypt(byte[] data, byte[] key, SM4Transformation transformation) throws Exception {
+        return encrypt(data, key, null, transformation);
     }
 
 
     /**
      * SM4加密
      *
-     * @param data           加密源数据【M】
-     * @param keyBytes       密钥【M】
+     * @param source           加密源数据【M】
+     * @param key       密钥【M】
      * @param iv             向量，格式为16字节Byte数组【C】
      * @param transformation <p>工作模式与填充方式，如："SM4/ECB/NoPadding。可以通过"SM4Utils.SM4Transformation.ECB().NoPadding()"获取提供。【M】</p>
      *                       <p>ECB：不需要初始化向量</p>
@@ -51,47 +81,85 @@ public class SM4Utils {
      * @return 加密数据
      * @throws Exception
      */
-    public static byte[] encrypt(byte[] data, byte[] keyBytes, byte[] iv, SM4Transformation transformation) throws Exception {
-        SecretKeySpec secretKeySpec = new SecretKeySpec(keyBytes, ALGORITHM);
-        Cipher encryptCipher = Cipher.getInstance(transformation.toString(), ProviderConstant.PROVIDER_BOUNCY_CASTLE);
-        switch (transformation.mode) {
-            case "ECB":
-                encryptCipher.init(Cipher.ENCRYPT_MODE, secretKeySpec);
-                break;
-            case "CBC":
-            case "CFB":
-            case "OFB":
-            case "CTR":
-            case "GCM":
-                encryptCipher.init(Cipher.ENCRYPT_MODE, secretKeySpec, new IvParameterSpec(iv == null ? new byte[16] : iv));
-                break;
-            default:
-                throw new Exception("暂不支持的加密模式");
+    public static CodecData encrypt(byte[] source, CodecData key, CodecData iv, SM4Transformation transformation) throws Exception {
+        return encrypt(source, key.bytes(), iv == null ? null : iv.bytes(), transformation);
+    }
+
+
+    /**
+     * SM4加密
+     *
+     * @param source           加密源数据【M】
+     * @param key       密钥【M】
+     * @param iv             向量，格式为16字节Byte数组【C】
+     * @param transformation <p>工作模式与填充方式，如："SM4/ECB/NoPadding。可以通过"SM4Utils.SM4Transformation.ECB().NoPadding()"获取提供。【M】</p>
+     *                       <p>ECB：不需要初始化向量</p>
+     *                       <p>CBC、CFB、OFB、CTR、GCM：需要初始化向量</p>
+     * @return 加密数据
+     * @throws Exception
+     */
+    public static CodecData encrypt(byte[] source, byte[] key, byte[] iv, SM4Transformation transformation) throws Exception {
+        SecretKeySpec secretKeySpec = new SecretKeySpec(key, CryptoConstant.ALGORITHM_SM4);
+        Cipher encryptCipher = Cipher.getInstance(transformation.getTransformation(), transformation.getProvider());
+        if (transformation.isSupportIV()) {
+            encryptCipher.init(Cipher.ENCRYPT_MODE, secretKeySpec, new IvParameterSpec(iv == null ? new byte[16] : iv));
+        } else {
+            encryptCipher.init(Cipher.ENCRYPT_MODE, secretKeySpec);
         }
-        return encryptCipher.doFinal(data);
+        return CodecData.bytes(encryptCipher.doFinal(source));
     }
 
     /**
      * SM4解密
      *
-     * @param encodeData     密文数据【M】
-     * @param keyBytes       密钥【M】
+     * @param encrypted     密文数据【M】
+     * @param key            密钥【M】
      * @param transformation <p>工作模式与填充方式，如："SM4/ECB/NoPadding。可以通过"SM4Utils.SM4Transformation.ECB().NoPadding()"获取提供。【M】</p>
      *                       <p>ECB：不需要初始化向量</p>
      *                       <p>CBC、CFB、OFB、CTR、GCM：需要初始化向量</p>
      * @return 解密数据
      * @throws Exception
      */
-    public static byte[] decrypt(byte[] encodeData, byte[] keyBytes, SM4Transformation transformation) throws Exception {
-        return decrypt(encodeData, keyBytes, null, transformation);
+    public static CodecData decrypt(CodecData encrypted, CodecData key, SM4Transformation transformation) throws Exception {
+        return decrypt(encrypted.bytes(), key.bytes(), null, transformation);
+    }
+
+    /**
+     * SM4解密
+     *
+     * @param encrypted     密文数据【M】
+     * @param key            密钥【M】
+     * @param transformation <p>工作模式与填充方式，如："SM4/ECB/NoPadding。可以通过"SM4Utils.SM4Transformation.ECB().NoPadding()"获取提供。【M】</p>
+     *                       <p>ECB：不需要初始化向量</p>
+     *                       <p>CBC、CFB、OFB、CTR、GCM：需要初始化向量</p>
+     * @return 解密数据
+     * @throws Exception
+     */
+    public static CodecData decrypt(byte[] encrypted, CodecData key, SM4Transformation transformation) throws Exception {
+        return decrypt(encrypted, key.bytes(), null, transformation);
+    }
+
+    /**
+     * SM4解密
+     *
+     * @param encrypted     密文数据【M】
+     * @param key            密钥【M】
+     * @param transformation <p>工作模式与填充方式，如："SM4/ECB/NoPadding。可以通过"SM4Utils.SM4Transformation.ECB().NoPadding()"获取提供。【M】</p>
+     *                       <p>ECB：不需要初始化向量</p>
+     *                       <p>CBC、CFB、OFB、CTR、GCM：需要初始化向量</p>
+     * @return 解密数据
+     * @throws Exception
+     */
+    public static CodecData decrypt(byte[] encrypted, byte[] key, SM4Transformation transformation) throws Exception {
+        return decrypt(encrypted, key, null, transformation);
     }
 
 
     /**
      * SM4解密
      *
-     * @param encodeData     密文数据【M】
-     * @param keyBytes       密钥【M】
+     * @param encrypted      密文数据【M】
+     * @param key       密钥【M】
      * @param iv             向量，格式为16字节Byte数组【C】
      * @param transformation <p>工作模式与填充方式，如："SM4/ECB/NoPadding。可以通过"SM4Utils.SM4Transformation.ECB().NoPadding()"获取提供。【M】</p>
      *                       <p>ECB：不需要初始化向量</p>
@@ -99,78 +167,32 @@ public class SM4Utils {
      * @return 解密数据
      * @throws Exception
      */
-    public static byte[] decrypt(byte[] encodeData, byte[] keyBytes, byte[] iv, SM4Transformation transformation) throws Exception {
-        SecretKeySpec secretKeySpec = new SecretKeySpec(keyBytes, ALGORITHM);
-        Cipher encryptCipher = Cipher.getInstance(transformation.toString(), ProviderConstant.PROVIDER_BOUNCY_CASTLE);
-        switch (transformation.mode) {
-            case "ECB":
-                encryptCipher.init(Cipher.DECRYPT_MODE, secretKeySpec);
-                break;
-            case "CBC":
-            case "CFB":
-            case "OFB":
-            case "CTR":
-            case "GCM":
-                encryptCipher.init(Cipher.DECRYPT_MODE, secretKeySpec, new IvParameterSpec(iv == null ? new byte[16] : iv));
-                break;
-            default:
-                throw new Exception("暂不支持的解密模式");
-        }
-        return encryptCipher.doFinal(encodeData);
+    public static CodecData decrypt(byte[] encrypted, CodecData key, CodecData iv, SM4Transformation transformation) throws Exception {
+        return decrypt(encrypted, key.bytes(), iv == null ? null : iv.bytes(), transformation);
     }
 
-    public static class SM4Transformation {
-        private String mode;
-        private String padding = "NoPadding";
 
-        public SM4Transformation(String mode) {
-            this.mode = mode;
+    /**
+     * SM4解密
+     *
+     * @param encrypted      密文数据【M】
+     * @param key       密钥【M】
+     * @param iv             向量，格式为16字节Byte数组【C】
+     * @param transformation <p>工作模式与填充方式，如："SM4/ECB/NoPadding。可以通过"SM4Utils.SM4Transformation.ECB().NoPadding()"获取提供。【M】</p>
+     *                       <p>ECB：不需要初始化向量</p>
+     *                       <p>CBC、CFB、OFB、CTR、GCM：需要初始化向量</p>
+     * @return 解密数据
+     * @throws Exception
+     */
+    public static CodecData decrypt(byte[] encrypted, byte[] key, byte[] iv, SM4Transformation transformation) throws Exception {
+        SecretKeySpec secretKeySpec = new SecretKeySpec(key, CryptoConstant.ALGORITHM_SM4);
+        Cipher encryptCipher = Cipher.getInstance(transformation.getTransformation(), transformation.getProvider());
+        if (transformation.isSupportIV()) {
+            encryptCipher.init(Cipher.DECRYPT_MODE, secretKeySpec, new IvParameterSpec(iv == null ? new byte[16] : iv));
+        } else {
+            encryptCipher.init(Cipher.DECRYPT_MODE, secretKeySpec);
         }
-
-        @Override
-        public String toString() {
-            return String.format("%s/%s/%s", ALGORITHM, mode, padding);
-        }
-
-        public static SM4Transformation ECB() {
-            return new SM4Transformation( "ECB");
-        }
-
-        public static SM4Transformation CBC() {
-            return new SM4Transformation( "CBC");
-        }
-
-        public static SM4Transformation CFB() {
-            return new SM4Transformation( "CFB");
-        }
-
-        public static SM4Transformation OFB() {
-            return new SM4Transformation( "OFB");
-        }
-
-        public static SM4Transformation CTR() {
-            return new SM4Transformation( "CTR");
-        }
-
-        public static SM4Transformation GCM() {
-            return new SM4Transformation( "GCM");
-        }
-
-        public SM4Transformation PKCS7Padding() {
-            this.padding = "PKCS7Padding";
-            return this;
-        }
-
-        public SM4Transformation PKCS5Padding() {
-            this.padding = "PKCS5Padding";
-            return this;
-        }
-
-        public SM4Transformation NoPadding() {
-            this.padding = "NoPadding";
-            return this;
-        }
-
+        return CodecData.bytes(encryptCipher.doFinal(encrypted));
     }
 
 }

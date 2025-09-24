@@ -3,7 +3,7 @@
 		{
 			"name": "houtu.data.security.secret-key",
 			"type": "java.lang.String",
-			"description": "Data encryption key."
+			"description": "Data encryption key (base64)."
 		}
 	]
 }
