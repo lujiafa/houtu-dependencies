@@ -29,8 +29,8 @@ public class SessionConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public SessionValidator sessionValidator() {
-        return new SimpleSessionValidator();
+    public SessionValidator sessionValidator(SessionProperties sessionProperties) {
+        return new SimpleSessionValidator(sessionProperties);
     }
 
 
