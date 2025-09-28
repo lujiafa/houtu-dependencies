@@ -9,6 +9,9 @@ import org.springframework.core.env.ConfigurableEnvironment;
 /**
  * @Description 解密环境变量配置。
  * 参考：org.springframework.cloud.bootstrap.encrypt.DecryptEnvironmentPostProcessor
+ * 远程配置加载：
+ *    org.springframework.cloud.bootstrap.config.PropertySourceBootstrapConfiguration
+ *      -> org.springframework.cloud.bootstrap.config.PropertySourceLocator
  * @author jonlu
  * @date 2019年5月29日
  */
