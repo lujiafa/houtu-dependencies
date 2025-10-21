@@ -35,6 +35,13 @@ version)</b>和<b>次版本号(Minor version)</b>对应，修订版本号之间�
 | 3.1.1 | jdk17  |   3.1.11   |   2022.0.5   |      2022.0.0.2      |
 | 2.7.1 | jdk1.8 |   2.7.18   |   2021.0.8   |      2021.0.4.0      |
 
+> ### 注
+> * spring-cloud-alibaba 加载配置模块`nacos-config`在版本高于或等于`2023.0.1.3`后，已调整加载方式为`spring.config.import`
+    加载方式。参考文档如下：
+    >
+* [https://github.com/alibaba/spring-cloud-alibaba/issues/3998](https://github.com/alibaba/spring-cloud-alibaba/issues/3998)
+>   * [https://sca.aliyun.com/docs/2023/user-guide/nacos/quick-start](https://sca.aliyun.com/docs/2023/user-guide/nacos/quick-start)
+
 ## 🚀 模块描述
 
 - **houtu-core**: 核心基础模块，定义基础支持类和桥接SpringBoot容器；
@@ -98,6 +105,7 @@ version)</b>和<b>次版本号(Minor version)</b>对应，修订版本号之间�
 | houtu-web-security              | houtu.web.session.jwt-signature-key                    | JWT签名Base64密钥(type=JWT时，此值有效)                                                              | -                   | 否    |
 | houtu-web-security              | houtu.web.session.jwt-signature-verify-key             | JWT验证签名类型HmacSHA的Base64密钥(type=JWT时，此值有效)，HmacSHA时可缺省等于houtu.web.session.jwt-signature-key | -                   | 否    |
 | houtu-web-security              | houtu.web.session.jwt-signature-algorithm              | JWT签名类型                                                                                    | -                   | 否    |
+| houtu-web-security              | houtu.web.security.enabled                             | 安全模块是否启用，启用则启用安全处理模块                                                                       | true                | 否    |
 | houtu-web-security              | houtu.web.sign.sign-key                                | 默认HMacMD5验签密钥                                                                              | -                   | 是    |
 | spring-cloud-houtu-loadbalancer | spring.cloud.loadbalancer.weight                       | 是否启用权重路由                                                                                   | true                | 否    |
 | spring-cloud-houtu-loadbalancer | spring.cloud.loadbalancer.hint                         | 是否启用hint灰度策略                                                                               | true                | 否    |

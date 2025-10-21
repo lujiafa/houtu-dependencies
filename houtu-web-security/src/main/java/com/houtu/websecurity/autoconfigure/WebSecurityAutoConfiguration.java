@@ -8,8 +8,10 @@ import com.houtu.websecurity.session.SessionValidator;
 import com.houtu.websecurity.sign.SignatureValidator;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
@@ -20,8 +22,10 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @AutoConfiguration
 @AutoConfigureOrder(Ordered.LOWEST_PRECEDENCE)
+@AutoConfigureAfter(WebSessionAutoConfiguration.class)
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
-@Import({SessionConfiguration.class, PermissionConfiguration.class, SignatureConfiguration.class})
+@ConditionalOnProperty(prefix = "houtu.web.security", name = "enabled", havingValue = "true", matchIfMissing = true)
+@Import({PermissionConfiguration.class, SignatureConfiguration.class})
 public class WebSecurityAutoConfiguration {
 
     @Bean

@@ -65,7 +65,14 @@
     {
       "name": "houtu.web.session.jwt-signature-algorithm",
       "type": "com.houtu.websecurity.session.type.JWTSignatureAlgorithm",
-      "description": "JWT signature algorithm."
+      "description": "JWT signature algorithm.",
+      "defaultValue": "HS256"
+    },
+    {
+      "name": "houtu.web.security.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Whether to enable security, default true.",
+      "defaultValue": true
     },
     {
       "name": "houtu.web.sign.sign-key",

@@ -4,6 +4,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.SpringApplicationRunListener;
 import org.springframework.boot.env.EnvironmentPostProcessor;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.core.Ordered;
 import org.springframework.core.env.ConfigurableEnvironment;
 
 /**
@@ -15,7 +16,7 @@ import org.springframework.core.env.ConfigurableEnvironment;
  * @author jonlu
  * @date 2019年5月29日
  */
-public class DecryptEnvPostProcessor implements EnvironmentPostProcessor, SpringApplicationRunListener {
+public class DecryptEnvPostProcessor implements EnvironmentPostProcessor, SpringApplicationRunListener, Ordered {
 
     static final StandardDecryptionPropertySource DECRYPT_PROPERTY_SOURCE = new StandardDecryptionPropertySource();
 
@@ -29,4 +30,8 @@ public class DecryptEnvPostProcessor implements EnvironmentPostProcessor, Spring
         DECRYPT_PROPERTY_SOURCE.reset(context.getEnvironment());
     }
 
+    @Override
+    public int getOrder() {
+        return Ordered.LOWEST_PRECEDENCE;
+    }
 }

@@ -1,1 +1,2 @@
+com.houtu.websecurity.autoconfigure.WebSessionAutoConfiguration
 com.houtu.websecurity.autoconfigure.WebSecurityAutoConfiguration
