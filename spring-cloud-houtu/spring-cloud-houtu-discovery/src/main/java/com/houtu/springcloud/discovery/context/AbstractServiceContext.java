@@ -1,7 +1,6 @@
 package com.houtu.springcloud.discovery.context;
 
 import com.houtu.springcloud.discovery.type.ServiceStatus;
-import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.RandomUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,7 +41,7 @@ public abstract class AbstractServiceContext extends TimerTask implements Servic
         updateServiceState(processStatus(serviceRegistry.getStatus(registration)));
     }
 
-    protected abstract @Nonnull ServiceStatus processStatus(Object statusObject);
+    protected abstract ServiceStatus processStatus(Object statusObject);
 
     protected void updateServiceState(ServiceStatus status) {
         Assert.notNull(status, "Service registry state change error");

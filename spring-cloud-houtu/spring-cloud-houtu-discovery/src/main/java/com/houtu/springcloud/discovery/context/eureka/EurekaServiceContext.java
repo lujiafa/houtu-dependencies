@@ -2,7 +2,6 @@ package com.houtu.springcloud.discovery.context.eureka;
 
 import com.houtu.springcloud.discovery.context.AbstractServiceContext;
 import com.houtu.springcloud.discovery.type.ServiceStatus;
-import jakarta.annotation.Nonnull;
 import org.springframework.cloud.netflix.eureka.serviceregistry.EurekaRegistration;
 import org.springframework.cloud.netflix.eureka.serviceregistry.EurekaServiceRegistry;
 
@@ -16,7 +15,6 @@ public class EurekaServiceContext extends AbstractServiceContext {
         super(serviceRegistry, registration);
     }
 
-    @Nonnull
     @Override
     protected ServiceStatus processStatus(Object statusObject) {
         if (statusObject instanceof Map<?,?> map) {

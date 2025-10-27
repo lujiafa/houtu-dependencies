@@ -1,11 +1,9 @@
 package com.houtu.util.http;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JavaType;
 import com.houtu.util.common.IntrospectorUtils;
 import com.houtu.util.common.JsonUtils;
 import com.houtu.util.prop.HttpClientProperties;
-import jakarta.annotation.Nonnull;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
@@ -15,19 +13,16 @@ import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
-import org.apache.hc.client5.http.ssl.TrustAllStrategy;
 import org.apache.hc.core5.http.*;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.apache.hc.core5.http.message.BasicNameValuePair;
 import org.apache.hc.core5.net.URIBuilder;
-import org.apache.hc.core5.ssl.SSLContextBuilder;
 import org.apache.hc.core5.util.Timeout;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.HttpClientErrorException;
 
-import javax.net.ssl.SSLContext;
 import java.io.InputStream;
 import java.net.URI;
 import java.nio.charset.Charset;
@@ -383,7 +378,7 @@ public class HttpClients {
             return charset;
         }
 
-        public @Nonnull <T> T convert(Class<T> clazz) {
+        public <T> T convert(Class<T> clazz) {
             if (statusCode == HttpStatus.SC_OK) {
                 if (CharSequence.class.isAssignableFrom(clazz)) {
                     return (T) content;

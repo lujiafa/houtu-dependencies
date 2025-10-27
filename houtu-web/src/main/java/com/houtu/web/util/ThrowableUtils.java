@@ -1,7 +1,5 @@
 package com.houtu.web.util;
 
-import jakarta.annotation.Nonnull;
-
 import java.util.HashSet;
 import java.util.Set;
 
@@ -18,7 +16,7 @@ public class ThrowableUtils {
      * @param clazz 错误码对象类型
      * @return 错误码对象
      */
-    public static <T> T getThrowable(@Nonnull Throwable throwable, @Nonnull Class<T> clazz) {
+    public static <T> T getThrowable(Throwable throwable, Class<T> clazz) {
         if (clazz.isInstance(throwable))
             return (T) throwable;
         Throwable nestedThrowable = throwable.getCause();

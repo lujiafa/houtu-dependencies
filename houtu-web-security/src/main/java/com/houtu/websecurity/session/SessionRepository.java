@@ -1,11 +1,7 @@
 package com.houtu.websecurity.session;
 
-import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
-import java.util.Map;
-import java.util.function.Function;
 
 /**
  * 会话持久接口
