@@ -9,8 +9,6 @@ import com.alibaba.nacos.api.naming.listener.NamingEvent;
 import com.alibaba.nacos.api.naming.pojo.Instance;
 import com.houtu.springcloud.discovery.context.AbstractServiceContext;
 import com.houtu.springcloud.discovery.type.ServiceStatus;
-import jakarta.annotation.Nonnull;
-import org.springframework.beans.factory.SmartInitializingSingleton;
 
 import java.util.List;
 import java.util.Map;
@@ -25,7 +23,6 @@ public class NacosServiceContext extends AbstractServiceContext {
 		this.nacosServiceManager = nacosServiceManager;
 	}
 
-	@Nonnull
 	@Override
 	protected ServiceStatus processStatus(Object statusObject) {
 		return ServiceStatus.of(statusObject);

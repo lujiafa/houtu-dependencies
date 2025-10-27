@@ -1,7 +1,6 @@
 package com.houtu.springcloud.feign.util;
 
 import com.houtu.util.crypto.Base64Utils;
-import jakarta.annotation.Nonnull;
 
 import java.nio.charset.StandardCharsets;
 
@@ -17,7 +16,7 @@ public final class ExceptionHeader {
      * @param serviceName 服务名称【M】
      * @return 编码后的服务名称【M】
      */
-    public static String encode(@Nonnull String serviceName) {
+    public static String encode(String serviceName) {
         return Base64Utils.encode(serviceName.getBytes(StandardCharsets.UTF_8));
     }
 
@@ -27,7 +26,7 @@ public final class ExceptionHeader {
      * @param header 响应头【M】
      * @return 解码后的服务名称【M】
      */
-    public static String decode(@Nonnull String header) {
+    public static String decode(String header) {
         return new String(Base64Utils.decode(header), StandardCharsets.UTF_8);
     }
 }

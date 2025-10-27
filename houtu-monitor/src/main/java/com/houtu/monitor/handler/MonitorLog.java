@@ -3,7 +3,6 @@ package com.houtu.monitor.handler;
 import com.houtu.monitor.handler.metric.sample.MetricOutput;
 import com.houtu.monitor.handler.metric.sample.MetricSample;
 import com.houtu.util.common.SystemUtils;
-import jakarta.annotation.Nonnull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.SmartLifecycle;
@@ -260,7 +259,7 @@ public final class MonitorLog implements SmartLifecycle {
             private final AtomicBoolean running;
             private final MonitorWriter writer;
 
-            public OutTask(@Nonnull AtomicBoolean running, @Nonnull MonitorWriter writer) {
+            public OutTask(AtomicBoolean running, MonitorWriter writer) {
                 this.running = running;
                 this.writer = writer;
             }

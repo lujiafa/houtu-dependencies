@@ -1,6 +1,5 @@
 package com.houtu.cache.util;
 
-import jakarta.annotation.Nonnull;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.*;
@@ -26,7 +25,7 @@ public class RedissonConnectionFactoryBeanUtils {
      * @param redisson redisson客户端对象
      * @return RedisConnectionFactory
      */
-    public static RedisConnectionFactory getRedisConnectionFactory(@Nonnull RedissonClient redisson) {
+    public static RedisConnectionFactory getRedisConnectionFactory(RedissonClient redisson) {
         return new RedissonConnectionFactory(redisson);
     }
 
