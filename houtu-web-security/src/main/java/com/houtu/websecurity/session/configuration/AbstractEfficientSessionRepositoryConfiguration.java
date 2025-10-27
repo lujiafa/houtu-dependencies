@@ -30,7 +30,7 @@ public abstract class AbstractEfficientSessionRepositoryConfiguration<T> {
         EfficientSessionRepositoryMessageListener sessionMessageListener = new EfficientSessionRepositoryMessageListener(sessionRepository.getCache(), redisTemplate, syncChannel);
         RedisMessageListenerContainer sessionMessageListenerContainer = new RedisMessageListenerContainer();
         sessionMessageListenerContainer.setConnectionFactory(redisTemplate.getConnectionFactory());
-        sessionMessageListenerContainer.addMessageListener(sessionMessageListener, Topic.channel(syncChannel));
+        sessionMessageListenerContainer.addMessageListener(sessionMessageListener, () -> syncChannel);
         return sessionMessageListenerContainer;
     }
 }

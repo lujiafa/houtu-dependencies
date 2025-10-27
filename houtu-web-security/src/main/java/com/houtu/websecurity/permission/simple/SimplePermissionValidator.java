@@ -11,7 +11,7 @@ import com.houtu.websecurity.permission.Logic;
 import com.houtu.websecurity.permission.PermissionValidator;
 import com.houtu.websecurity.session.Session;
 import com.houtu.websecurity.session.SessionContext;
-import jakarta.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

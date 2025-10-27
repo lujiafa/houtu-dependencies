@@ -1,9 +1,6 @@
 package com.houtu.cache.util;
 
-import com.houtu.core.context.SpringApplicationContext;
 import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
-import org.springframework.boot.ssl.SslBundle;
-import org.springframework.boot.ssl.SslBundles;
 import org.springframework.data.redis.connection.*;
 import org.springframework.util.StringUtils;
 
@@ -13,17 +10,17 @@ import java.util.List;
 
 public final class RedisConfigUtils {
 
-    public static SslBundle getSslBundle(RedisProperties redisProperties) {
-        RedisProperties.Ssl ssl = redisProperties.getSsl();
-        if (ssl == null || !ssl.isEnabled()) {
-            return null;
-        }
-        SslBundles sslBundles = SpringApplicationContext.getBean("sslBundles", SslBundles.class);
-        if (sslBundles != null) {
-            return sslBundles.getBundle(ssl.getBundle());
-        }
-        return SslBundle.systemDefault();
-    }
+//    public static SslBundle getSslBundle(RedisProperties redisProperties) {
+//        RedisProperties.Ssl ssl = redisProperties.getSsl();
+//        if (ssl == null || !ssl.isEnabled()) {
+//            return null;
+//        }
+//        SslBundles sslBundles = SpringApplicationContext.getBean("sslBundles", SslBundles.class);
+//        if (sslBundles != null) {
+//            return sslBundles.getBundle(ssl.getBundle());
+//        }
+//        return SslBundle.systemDefault();
+//    }
 
 
 
@@ -39,7 +36,7 @@ public final class RedisConfigUtils {
             List<RedisNode> nodes = new ArrayList<>();
             List<String> hostPortStringList = redisProperties.getSentinel().getNodes();
             for (String nodeStr : hostPortStringList) {
-                nodes.add(RedisNode.fromString(nodeStr, 6379));
+                nodes.add(RedisNode.fromString(nodeStr));
             }
             config.setSentinels(nodes);
             config.setUsername(redisProperties.getUsername());
@@ -73,7 +70,7 @@ public final class RedisConfigUtils {
             List<RedisNode> nodes = new ArrayList<>();
             List<String> hostPortStringList = redisProperties.getCluster().getNodes();
             for (String nodeStr : hostPortStringList) {
-                nodes.add(RedisNode.fromString(nodeStr, 6379));
+                nodes.add(RedisNode.fromString(nodeStr));
             }
             config.setClusterNodes(nodes);
 

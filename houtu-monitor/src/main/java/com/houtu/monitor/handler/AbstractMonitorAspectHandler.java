@@ -25,21 +25,21 @@ public abstract class AbstractMonitorAspectHandler<T extends Annotation> {
 		Integer code = null;
 		try {
 			Object object = handler.proceed();
-			if (object instanceof BaseResponseData responseData) {
-				code = responseData.getCode();
+			if (object instanceof BaseResponseData) {
+				code = ((BaseResponseData) object).getCode();
 			} else {
 				code = ErrorCodeConstant.SUCCESS;
 			}
 			return object;
 		} catch (Throwable e) {
-			if (e instanceof BusinessException businessException) {
-				code = businessException.getErrorCode().getCode();
+			if (e instanceof BusinessException) {
+				code = ((BusinessException) e).getErrorCode().getCode();
 			} else {
 				Throwable ex = e;
 				Set<Throwable> nestedExceptions = new HashSet<>();
 				while (ex != null && !nestedExceptions.contains(ex)) {
-					if (ex instanceof BusinessException businessException) {
-						code = businessException.getErrorCode().getCode();
+					if (ex instanceof BusinessException) {
+						code = ((BusinessException) ex).getErrorCode().getCode();
 						break;
 					}
 					nestedExceptions.add(ex);

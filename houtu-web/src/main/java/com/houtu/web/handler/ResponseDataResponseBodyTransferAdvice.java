@@ -3,7 +3,7 @@ package com.houtu.web.handler;
 import com.houtu.web.model.EmbedResponseData;
 import com.houtu.web.model.ResponseData;
 import com.houtu.web.prop.WebProperties;
-import jakarta.validation.constraints.NotNull;
+import javax.validation.constraints.NotNull;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;

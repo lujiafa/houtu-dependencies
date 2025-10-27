@@ -6,8 +6,8 @@ import com.houtu.springcloud.feign.constant.FeignConstant;
 import com.houtu.springcloud.feign.util.ExceptionHeader;
 import com.houtu.web.handler.HandlerExceptionResolverCustomizer;
 import feign.codec.DecodeException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -29,7 +29,8 @@ public class FeignHandlerExceptionResolverCustomizer implements HandlerException
     @Override
     public ErrorCode process(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
         Throwable e = ex;
-        if ((e instanceof DecodeException || (e = e.getCause()) instanceof DecodeException) && e.getCause() instanceof FeignThroughBusinessException throughBusinessException) {
+        if ((e instanceof DecodeException || (e = e.getCause()) instanceof DecodeException) && e.getCause() instanceof FeignThroughBusinessException) {
+            FeignThroughBusinessException throughBusinessException = (FeignThroughBusinessException) e.getCause();
             if (logger.isDebugEnabled()) {
                 logger.debug("Feign透传异常|FeignThroughBusinessException|{}|code={},message={}", ExceptionHeader.decode(throughBusinessException.getServiceName()), throughBusinessException.getErrorCode().getCode(), throughBusinessException.getErrorCode().getMessage());
             }

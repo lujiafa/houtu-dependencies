@@ -4,10 +4,10 @@ import com.houtu.core.constant.ErrorCodeConstant;
 import com.houtu.core.exception.ErrorCode;
 import com.houtu.util.constant.CharConstant;
 import com.houtu.web.handler.HandlerExceptionResolverCustomizer;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.ConstraintViolationException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
 import org.springframework.core.Ordered;
 
 import java.util.Set;
@@ -20,8 +20,8 @@ public class ValidationHandlerExceptionResolverCustomizer implements HandlerExce
 
 	@Override
 	public ErrorCode process(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
-		if (ex instanceof ConstraintViolationException actualException) {// 违反约束异常
-			Set<ConstraintViolation<?>> violations = actualException.getConstraintViolations();
+		if (ex instanceof ConstraintViolationException) {// 违反约束异常
+			Set<ConstraintViolation<?>> violations = ((ConstraintViolationException) ex).getConstraintViolations();
 			StringBuilder tempStringBuilder = new StringBuilder();
 			for (ConstraintViolation<?> item : violations) {
 				if (tempStringBuilder.length() == 0) {

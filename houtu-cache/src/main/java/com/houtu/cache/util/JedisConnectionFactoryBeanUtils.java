@@ -2,9 +2,6 @@ package com.houtu.cache.util;
 
 import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
 import org.springframework.boot.context.properties.PropertyMapper;
-import org.springframework.boot.ssl.SslBundle;
-import org.springframework.boot.ssl.SslOptions;
-import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.jedis.JedisClientConfiguration;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
@@ -12,7 +9,6 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 import redis.clients.jedis.JedisPoolConfig;
 
-import javax.net.ssl.SSLParameters;
 import java.net.URI;
 
 public final class JedisConnectionFactoryBeanUtils {
@@ -21,10 +17,9 @@ public final class JedisConnectionFactoryBeanUtils {
      * 获取RedisConnectionFactory，主要适用于实例化对象到Spring容器中。
      * 参考：org.springframework.boot.autoconfigure.data.redis.RedisConnectionConfiguration、org.springframework.boot.autoconfigure.data.redis.JedisConnectionConfiguration
      * @param redisProperties redis配置
-     * @param virtualThreads 是否使用虚拟线程
      * @return RedisConnectionFactory 对象
      */
-    public static RedisConnectionFactory getRedisConnectionFactory(RedisProperties redisProperties, boolean virtualThreads) {
+    public static RedisConnectionFactory getRedisConnectionFactory(RedisProperties redisProperties) {
         JedisClientConfiguration clientConfiguration = getJedisClientConfiguration(redisProperties);
         JedisConnectionFactory connectionFactory;
         if (redisProperties.getSentinel() != null) {
@@ -33,11 +28,6 @@ public final class JedisConnectionFactoryBeanUtils {
             connectionFactory = new JedisConnectionFactory(RedisConfigUtils.getClusterConfiguration(redisProperties), clientConfiguration);
         } else {
             connectionFactory = new JedisConnectionFactory(RedisConfigUtils.getStandaloneConfig(redisProperties), clientConfiguration);
-        }
-        if (virtualThreads) {
-            SimpleAsyncTaskExecutor executor = new SimpleAsyncTaskExecutor("redis-jedis-");
-            executor.setVirtualThreads(true);
-            connectionFactory.setExecutor(executor);
         }
         return connectionFactory;
     }
@@ -52,18 +42,12 @@ public final class JedisConnectionFactoryBeanUtils {
         // 参考 JedisConnectionConfiguration
         JedisClientConfiguration.JedisClientConfigurationBuilder builder = JedisClientConfiguration.builder();
         PropertyMapper map = PropertyMapper.get().alwaysApplyingWhenNonNull();
+        map.from(redisProperties.isSsl()).whenTrue().toCall(builder::useSsl);
         map.from(redisProperties.getTimeout()).to(builder::readTimeout);
         map.from(redisProperties.getConnectTimeout()).to(builder::connectTimeout);
         map.from(redisProperties.getClientName()).whenHasText().to(builder::clientName);
-        SslBundle sslBundle = RedisConfigUtils.getSslBundle(redisProperties);
-        if (sslBundle != null) {
-            JedisClientConfiguration.JedisSslClientConfigurationBuilder sslBuilder = builder.useSsl();
-            sslBuilder.sslSocketFactory(sslBundle.createSslContext().getSocketFactory());
-            SslOptions sslOptions = sslBundle.getOptions();
-            SSLParameters sslParameters = new SSLParameters();
-            map.from(sslOptions.getCiphers()).to(sslParameters::setCipherSuites);
-            map.from(sslOptions.getEnabledProtocols()).to(sslParameters::setProtocols);
-            sslBuilder.sslParameters(sslParameters);
+        if (redisProperties.isSsl()) {
+            builder.useSsl();
         }
         boolean poolEnabled = redisProperties.getJedis().getPool().getEnabled() != null ? redisProperties.getLettuce().getPool().getEnabled() : ClassUtils.isPresent("org.apache.commons.pool2.ObjectPool",
                 redisProperties.getClass().getClassLoader());

@@ -3,7 +3,7 @@ package com.houtu.websecurity.session.repository;
 import com.houtu.websecurity.constant.RedisScriptConstant;
 import com.houtu.websecurity.prop.SessionProperties;
 import com.houtu.websecurity.session.Session;
-import jakarta.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequest;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.util.Assert;
 

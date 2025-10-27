@@ -16,14 +16,14 @@ public class LocaleBeanPostProcessor implements BeanPostProcessor, Ordered {
 
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-        if (bean instanceof AbstractLocaleResolver localeResolver) {
-            Locale locale = getLocale(localeResolver);
+        if (bean instanceof AbstractLocaleResolver) {
+            Locale locale = getLocale((AbstractLocaleResolver) bean);
             if (locale != null) {
                 LocaleContextHolder.setDefaultLocale(locale);
             }
         }
-        if (bean instanceof AbstractLocaleContextResolver localeResolver) {
-            TimeZone timeZone = localeResolver.getDefaultTimeZone();
+        if (bean instanceof AbstractLocaleContextResolver) {
+            TimeZone timeZone = ((AbstractLocaleContextResolver) bean).getDefaultTimeZone();
             if (timeZone != null) {
                 LocaleContextHolder.setDefaultTimeZone(timeZone);
             }

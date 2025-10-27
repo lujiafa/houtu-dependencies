@@ -34,7 +34,8 @@ public class HintBasedServiceInstanceListSupplier extends org.springframework.cl
 
     protected String getHint(Object requestContext) {
         String hint;
-        if (requestContext instanceof RequestDataContext context) {
+        if (requestContext instanceof RequestDataContext) {
+            RequestDataContext context = (RequestDataContext) requestContext;
             if (context.getClientRequest() != null) {
                 HttpHeaders headers = context.getClientRequest().getHeaders();
                 if (headers != null && StringUtils.hasText(hint = headers.getFirst(this.properties.getHintHeaderName()))) {
@@ -48,8 +49,8 @@ public class HintBasedServiceInstanceListSupplier extends org.springframework.cl
             return hint;
         }
 
-        if (requestContext instanceof HintRequestContext hintRequestContext
-                && StringUtils.hasText(hint = hintRequestContext.getHint())) {
+        if (requestContext instanceof HintRequestContext
+                && StringUtils.hasText(hint = ((HintRequestContext) requestContext).getHint())) {
             return hint;
         }
 

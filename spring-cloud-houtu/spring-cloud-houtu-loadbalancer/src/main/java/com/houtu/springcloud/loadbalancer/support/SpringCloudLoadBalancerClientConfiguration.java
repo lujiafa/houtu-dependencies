@@ -93,7 +93,7 @@ public class SpringCloudLoadBalancerClientConfiguration {
                 serviceInstanceListSupplierBuilder.with(SpringCloudHintDelegateCreator.build());
             }
             if (springCloudLoadBalancerProperties.isWeight()) {
-                serviceInstanceListSupplierBuilder.withWeighted(SpringCloudWeightFunction.build());
+//                serviceInstanceListSupplierBuilder.withWeighted(SpringCloudWeightFunction.build());
             }
             return serviceInstanceListSupplierBuilder.build(context);
         }
@@ -111,7 +111,7 @@ public class SpringCloudLoadBalancerClientConfiguration {
                 serviceInstanceListSupplierBuilder.with(SpringCloudHintDelegateCreator.build());
             }
             if (springCloudLoadBalancerProperties.isWeight()) {
-                serviceInstanceListSupplierBuilder.withWeighted(SpringCloudWeightFunction.build());
+//                serviceInstanceListSupplierBuilder.withWeighted(SpringCloudWeightFunction.build());
             }
             return serviceInstanceListSupplierBuilder.build(context);
         }
@@ -136,7 +136,7 @@ public class SpringCloudLoadBalancerClientConfiguration {
                 serviceInstanceListSupplierBuilder.with(SpringCloudHintDelegateCreator.build());
             }
             if (springCloudLoadBalancerProperties.isWeight()) {
-                serviceInstanceListSupplierBuilder.withWeighted(SpringCloudWeightFunction.build());
+//                serviceInstanceListSupplierBuilder.withWeighted(SpringCloudWeightFunction.build());
             }
             return serviceInstanceListSupplierBuilder.build(context);
         }
@@ -154,7 +154,7 @@ public class SpringCloudLoadBalancerClientConfiguration {
                 serviceInstanceListSupplierBuilder.with(SpringCloudHintDelegateCreator.build());
             }
             if (springCloudLoadBalancerProperties.isWeight()) {
-                serviceInstanceListSupplierBuilder.withWeighted(SpringCloudWeightFunction.build());
+//                serviceInstanceListSupplierBuilder.withWeighted(SpringCloudWeightFunction.build());
             }
             return serviceInstanceListSupplierBuilder.build(context);
         }

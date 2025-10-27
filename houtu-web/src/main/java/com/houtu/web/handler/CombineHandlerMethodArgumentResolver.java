@@ -10,9 +10,6 @@ import com.houtu.web.model.BaseDTO;
 import com.houtu.web.model.BaseForm;
 import com.houtu.web.type.CombineFormResolverType;
 import com.houtu.web.util.CachingStreamHttpServletRequest;
-import jakarta.servlet.*;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.MethodParameter;
@@ -31,6 +28,7 @@ import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
+import org.springframework.web.method.annotation.ModelAttributeMethodProcessor;
 import org.springframework.web.method.annotation.ModelFactory;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
@@ -38,7 +36,8 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.method.annotation.AbstractMessageConverterMethodArgumentResolver;
 
-import java.io.IOException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.*;
 
 /**
@@ -52,6 +51,7 @@ public class CombineHandlerMethodArgumentResolver extends AbstractMessageConvert
     private final List<MediaType> formMediaTypes = new ArrayList<>();
 
     private CombineFormResolverType combineFormArgumentResolverType;
+    private CustomModelAttributeMethodProcessor customModelAttributeMethodProcessor;
 
     public CombineHandlerMethodArgumentResolver(List<HttpMessageConverter<?>> converters,
                                                 List<Object> requestResponseBodyAdvice,
@@ -59,6 +59,7 @@ public class CombineHandlerMethodArgumentResolver extends AbstractMessageConvert
         super(converters, requestResponseBodyAdvice);
         this.combineFormArgumentResolverType = combineFormArgumentResolverType;
         formMediaTypes.addAll(new FormHttpMessageConverter().getSupportedMediaTypes());
+        customModelAttributeMethodProcessor = new CustomModelAttributeMethodProcessor();
     }
 
     @Override
@@ -77,8 +78,8 @@ public class CombineHandlerMethodArgumentResolver extends AbstractMessageConvert
         if (HashMap.class.isAssignableFrom(parameter.getParameterType()) && supportResolverRequestBody(request, parameter)) {
             request.setAttribute(WebSupportConstant.CACHING_STREAM_ENABLE_ATTR_NAME, AnnotationUtils.getAnnotationByPriorityMethod(parameter.getMethod(), CachingParam.class) != null);
             Object bodyArg = readWithMessageConverters(webRequest, parameter, parameter.getNestedGenericParameterType());
-            if (bodyArg instanceof HashMap hashMap) {
-                return hashMap;
+            if (bodyArg instanceof HashMap) {
+                return (HashMap) bodyArg;
             }
         }
         return Collections.emptyMap();
@@ -113,15 +114,14 @@ public class CombineHandlerMethodArgumentResolver extends AbstractMessageConvert
         if (CombineFormResolverType.JSON.equals(combineFormArgumentResolverType)) {
             Map<String, String> urlEncodedParams = WebUtils.getUrlEncodedParams(request);
             arg = JsonUtils.convertValue(urlEncodedParams, parameter.getParameterType());
-            binder = binderFactory.createBinder(webRequest, arg, name, type);
+            binder = binderFactory.createBinder(webRequest, arg, name);
         } else {
             /**
              * 参考 ServletModelAttributeMethodProcessor与ModelAttributeMethodProcessor
              */
-            binder = binderFactory.createBinder(webRequest, null, name, type);
+            arg = customModelAttributeMethodProcessor.createAttribute(name, parameter, binderFactory, webRequest);
+            binder = binderFactory.createBinder(webRequest, arg, name);
             ServletRequestDataBinder servletBinder = (ServletRequestDataBinder) binder;
-            servletBinder.construct(request);
-            arg = binder.getTarget();
             servletBinder.bind(request);
         }
 
@@ -206,5 +206,16 @@ public class CombineHandlerMethodArgumentResolver extends AbstractMessageConvert
     @Override
     public int getOrder() {
         return Ordered.HIGHEST_PRECEDENCE + 10;
+    }
+
+    static class CustomModelAttributeMethodProcessor extends ModelAttributeMethodProcessor {
+        public CustomModelAttributeMethodProcessor() {
+            super(false);
+        }
+
+        @Override
+        public Object createAttribute(String attributeName, MethodParameter parameter, WebDataBinderFactory binderFactory, NativeWebRequest webRequest) throws Exception {
+            return super.createAttribute(attributeName, parameter, binderFactory, webRequest);
+        }
     }
 }

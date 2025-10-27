@@ -3,16 +3,11 @@ package com.houtu.util.web;
 import com.houtu.util.common.JsonUtils;
 import com.houtu.util.common.XmlUtils;
 import com.houtu.util.constant.CharConstant;
-import jakarta.servlet.ServletRequest;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
-import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -20,6 +15,10 @@ import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import javax.servlet.ServletRequest;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.InetAddress;
@@ -61,8 +60,8 @@ public class WebUtils extends org.springframework.web.util.WebUtils {
      */
     public static ServletRequestAttributes getServletRequestAttributes() {
         RequestAttributes reqAttr = RequestContextHolder.getRequestAttributes();
-        if (reqAttr instanceof ServletRequestAttributes servletRequestAttributes) {
-            return servletRequestAttributes;
+        if (reqAttr instanceof ServletRequestAttributes) {
+            return (ServletRequestAttributes) reqAttr;
         }
         throw new RuntimeException("ServletRequestAttributes fetch failed, please check the configuration is correct.");
     }
@@ -331,7 +330,7 @@ public class WebUtils extends org.springframework.web.util.WebUtils {
             try {
                 List<MediaType> mediaTypes = MediaType.parseMediaTypes(headerAccept);
                 if (mediaTypes != null && mediaTypes.size() > 0) {
-                    MimeTypeUtils.sortBySpecificity(mediaTypes);
+                    mediaTypes.sort(MediaType.SPECIFICITY_COMPARATOR);
                     return mediaTypes;
                 }
             } catch (Exception e) {

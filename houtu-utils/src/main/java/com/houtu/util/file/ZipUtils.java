@@ -2,6 +2,7 @@ package com.houtu.util.file;
 
 import com.houtu.util.constant.CharConstant;
 import org.springframework.util.Assert;
+import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
 
 import java.io.*;
@@ -75,7 +76,7 @@ public final class ZipUtils {
                     if (!parent.exists())
                         parent.mkdirs();
                     try (InputStream is = zipFile.getInputStream(entry); OutputStream os = new FileOutputStream(file)) {
-                        is.transferTo(os);
+                        StreamUtils.copy(is, os);
                         os.flush();
                     }
                 }

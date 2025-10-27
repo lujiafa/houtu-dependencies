@@ -6,20 +6,18 @@ import com.houtu.core.exception.ErrorCode;
 import com.houtu.util.constant.CharConstant;
 import com.houtu.web.util.ThrowableUtils;
 import com.houtu.web.view.SmartErrorView;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.MessageSourceResolvable;
 import org.springframework.core.Ordered;
 import org.springframework.util.Assert;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
-import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.ModelAndView;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,8 +49,8 @@ public class UnifiedHandlerExceptionResolver implements HandlerExceptionResolver
             if (logger.isDebugEnabled()) {
                 logger.debug("业务异常|code={}, message={}|{}", errorCode.getCode(), errorCode.getMessage(), ex.getMessage());
             }
-        } else if (ex instanceof BindException actualException) { // 数据绑定异常
-            BindingResult bindingResult = actualException.getBindingResult();
+        } else if (ex instanceof BindException) { // 数据绑定异常
+            BindingResult bindingResult = ((BindException) ex).getBindingResult();
             List<ObjectError> allErrors = bindingResult.getAllErrors();
             StringBuilder tempStringBuilder = new StringBuilder();
             for (ObjectError oe : allErrors) {
@@ -63,19 +61,6 @@ public class UnifiedHandlerExceptionResolver implements HandlerExceptionResolver
             }
             if (logger.isDebugEnabled()) {
                 logger.debug("数据绑定失败|BindException|{}", tempStringBuilder);
-            }
-            errorCode = ErrorCode.build(ErrorCodeConstant.PARAMETER_ERROR, request.getLocale(), new Object[]{tempStringBuilder.toString()});
-        } else if (ex instanceof HandlerMethodValidationException actualException) {
-            List<? extends MessageSourceResolvable> allErrors = actualException.getAllErrors();
-            StringBuilder tempStringBuilder = new StringBuilder();
-            for (MessageSourceResolvable messageSourceResolvable : allErrors) {
-                if (tempStringBuilder.length() > 0) {
-                    tempStringBuilder.append(CharConstant.SEMICOLON);
-                }
-                tempStringBuilder.append(messageSourceResolvable.getDefaultMessage());
-            }
-            if (logger.isDebugEnabled()) {
-                logger.debug("数据绑定失败|HandlerMethodValidationException|{}", tempStringBuilder);
             }
             errorCode = ErrorCode.build(ErrorCodeConstant.PARAMETER_ERROR, request.getLocale(), new Object[]{tempStringBuilder.toString()});
         } else {

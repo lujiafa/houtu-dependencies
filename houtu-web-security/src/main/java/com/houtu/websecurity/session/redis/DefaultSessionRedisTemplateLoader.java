@@ -27,10 +27,10 @@ public class DefaultSessionRedisTemplateLoader implements SessionRedisTemplateLo
             RedisConnectionFactory redisConnectionFactory = null;
             switch (clientType) {
                 case LETTUCE:
-                    redisConnectionFactory = LettuceConnectionFactoryBeanUtils.getRedisConnectionFactory(redisProperties, false);
+                    redisConnectionFactory = LettuceConnectionFactoryBeanUtils.getRedisConnectionFactory(redisProperties);
                     break;
                 case JEDIS:
-                    redisConnectionFactory = JedisConnectionFactoryBeanUtils.getRedisConnectionFactory(redisProperties, false);
+                    redisConnectionFactory = JedisConnectionFactoryBeanUtils.getRedisConnectionFactory(redisProperties);
                     break;
 //                case REDISSON:
 //                    redisConnectionFactory = RedissonConnectionFactoryBeanUtils.getRedisConnectionFactory(RedissonConnectionFactoryBeanUtils.redisson(redisProperties));
@@ -54,7 +54,8 @@ public class DefaultSessionRedisTemplateLoader implements SessionRedisTemplateLo
     @Override
     public void afterPropertiesSet() throws Exception {
         if (!systemDefault) {
-            if (redisTemplate.getConnectionFactory() instanceof InitializingBean initializingBean) {
+            if (redisTemplate.getConnectionFactory() instanceof InitializingBean) {
+                InitializingBean initializingBean = (InitializingBean) redisTemplate.getConnectionFactory();
                 initializingBean.afterPropertiesSet();
             }
             redisTemplate.afterPropertiesSet();
@@ -64,10 +65,12 @@ public class DefaultSessionRedisTemplateLoader implements SessionRedisTemplateLo
     @Override
     public void destroy() throws Exception {
         if (!systemDefault) {
-            if (redisTemplate.getConnectionFactory() instanceof DisposableBean disposableBean) {
+            if (redisTemplate.getConnectionFactory() instanceof DisposableBean) {
+                DisposableBean disposableBean = (DisposableBean) redisTemplate.getConnectionFactory();
                 disposableBean.destroy();
             }
-            if (redisTemplate instanceof DisposableBean disposableBean) {
+            if (redisTemplate instanceof DisposableBean) {
+                DisposableBean disposableBean = (DisposableBean) redisTemplate;
                 disposableBean.destroy();
             }
         }
@@ -76,10 +79,12 @@ public class DefaultSessionRedisTemplateLoader implements SessionRedisTemplateLo
     @Override
     public void start() {
         if (!systemDefault) {
-            if (redisTemplate.getConnectionFactory() instanceof Lifecycle lifecycle) {
+            if (redisTemplate.getConnectionFactory() instanceof Lifecycle) {
+                Lifecycle lifecycle = (Lifecycle) redisTemplate.getConnectionFactory();
                 lifecycle.start();
             }
-            if (redisTemplate instanceof Lifecycle lifecycle) {
+            if (redisTemplate instanceof Lifecycle) {
+                Lifecycle lifecycle = (Lifecycle) redisTemplate;
                 lifecycle.start();
             }
         }
@@ -88,10 +93,12 @@ public class DefaultSessionRedisTemplateLoader implements SessionRedisTemplateLo
     @Override
     public void stop() {
         if (!systemDefault) {
-            if (redisTemplate.getConnectionFactory() instanceof Lifecycle lifecycle) {
+            if (redisTemplate.getConnectionFactory() instanceof Lifecycle) {
+                Lifecycle lifecycle = (Lifecycle) redisTemplate.getConnectionFactory();
                 lifecycle.stop();
             }
-            if (redisTemplate instanceof Lifecycle lifecycle) {
+            if (redisTemplate instanceof Lifecycle) {
+                Lifecycle lifecycle = (Lifecycle) redisTemplate;
                 lifecycle.stop();
             }
         }
@@ -101,10 +108,12 @@ public class DefaultSessionRedisTemplateLoader implements SessionRedisTemplateLo
     public boolean isRunning() {
         boolean running = false;
         if (!systemDefault) {
-            if (redisTemplate.getConnectionFactory() instanceof Lifecycle lifecycle) {
+            if (redisTemplate.getConnectionFactory() instanceof Lifecycle) {
+                Lifecycle lifecycle = (Lifecycle) redisTemplate.getConnectionFactory();
                 running |= lifecycle.isRunning();
             }
-            if (redisTemplate instanceof Lifecycle lifecycle) {
+            if (redisTemplate instanceof Lifecycle) {
+                Lifecycle lifecycle = (Lifecycle) redisTemplate;
                 running |= lifecycle.isRunning();
             }
         }

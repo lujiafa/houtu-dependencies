@@ -4,8 +4,8 @@ import com.houtu.websecurity.constant.SecurityConstant;
 import com.houtu.websecurity.prop.SessionProperties;
 import com.houtu.websecurity.session.Session;
 import com.houtu.websecurity.session.SessionRepository;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import org.springframework.util.Assert;
 
 import java.util.Collections;

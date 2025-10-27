@@ -4,7 +4,7 @@ import com.houtu.springcloud.feign.anotation.AutoFeign;
 import com.houtu.springcloud.feign.constant.FeignConstant;
 import com.houtu.util.common.AnnotationUtils;
 import com.houtu.util.constant.CharConstant;
-import jakarta.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequest;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.cloud.openfeign.FeignClient;

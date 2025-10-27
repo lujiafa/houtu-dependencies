@@ -13,17 +13,16 @@ import com.houtu.websecurity.session.simple.SimpleSession;
 import com.houtu.websecurity.session.type.JWTSignatureAlgorithm;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.*;
-import io.jsonwebtoken.security.SecurityException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SecureDigestAlgorithm;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.util.StringUtils;
 
 import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.security.Key;
 import java.security.PublicKey;
 import java.util.Collections;
@@ -125,15 +124,15 @@ public class JWTSessionRepository implements SessionRepository {
     }
 
     protected Claims parseToken(String token) {
-        if (signVerifyKey instanceof SecretKey secretKey) {
+        if (signVerifyKey instanceof SecretKey) {
             return Jwts.parser()
-                    .verifyWith(secretKey)
+                    .verifyWith((SecretKey) signVerifyKey)
                     .build()
                     .parseClaimsJws(token)
                     .getBody();
-        } else if (signVerifyKey instanceof PublicKey publicKey) {
+        } else if (signVerifyKey instanceof PublicKey) {
             return Jwts.parser()
-                    .verifyWith(publicKey)
+                    .verifyWith((PublicKey) signVerifyKey)
                     .build()
                     .parseClaimsJws(token)
                     .getBody();
@@ -144,12 +143,18 @@ public class JWTSessionRepository implements SessionRepository {
     protected void initSignKey(SessionProperties sessionProperties) {
         try {
             switch (sessionProperties.getJwtSignatureAlgorithm()) {
-                case HS256, HS384, HS512:
+                case HS256:
+                case HS384:
+                case HS512:
                     this.signKey = Keys.hmacShaKeyFor(CodecData.base64(sessionProperties.getJwtSignatureKey()).bytes());
                     break;
-                case RS256, RS384, RS512:
+                case RS256:
+                case RS384:
+                case RS512:
                     this.signKey = RSAUtils.getPrivateKey(CodecData.base64(sessionProperties.getJwtSignatureKey()).bytes());
-                case ES256, ES384, ES512:
+                case ES256:
+                case ES384:
+                case ES512:
                     this.signKey = ECDSAUtils.getPrivateKey(CodecData.base64(sessionProperties.getJwtSignatureKey()).bytes());
                 default:
                     throw new RuntimeException("not support algorithm");
@@ -162,13 +167,19 @@ public class JWTSessionRepository implements SessionRepository {
     protected void initVerifySecretKey(SessionProperties sessionProperties) {
         try {
             switch (sessionProperties.getJwtSignatureAlgorithm()) {
-                case HS256, HS384, HS512:
+                case HS256:
+                case HS384:
+                case HS512:
                     String tmpVerifyKey = sessionProperties.getJwtSignatureVerifyKey() == null ? sessionProperties.getJwtSignatureKey() : sessionProperties.getJwtSignatureVerifyKey();
                     this.signVerifyKey = Keys.hmacShaKeyFor(CodecData.base64(tmpVerifyKey).bytes());
                     break;
-                case RS256, RS384, RS512:
+                case RS256:
+                case RS384:
+                case RS512:
                     this.signVerifyKey = RSAUtils.getPublicKey(CodecData.base64(sessionProperties.getJwtSignatureVerifyKey()).bytes());
-                case ES256, ES384, ES512:
+                case ES256:
+                case ES384:
+                case ES512:
                     this.signVerifyKey = ECDSAUtils.getPublicKey(CodecData.base64(sessionProperties.getJwtSignatureVerifyKey()).bytes());
                 default:
                     throw new RuntimeException("not support algorithm");

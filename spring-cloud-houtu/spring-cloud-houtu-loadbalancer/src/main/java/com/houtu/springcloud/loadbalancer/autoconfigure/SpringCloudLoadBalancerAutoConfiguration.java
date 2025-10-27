@@ -9,7 +9,7 @@ import com.houtu.springcloud.loadbalancer.support.hint.HintGatewayWebFilter;
 import com.houtu.springcloud.loadbalancer.support.hint.HintRequestHandlerInterceptor;
 import com.houtu.springcloud.loadbalancer.support.hint.HintWebFilter;
 import feign.Feign;
-import jakarta.servlet.Servlet;
+import javax.servlet.Servlet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.AutoConfiguration;

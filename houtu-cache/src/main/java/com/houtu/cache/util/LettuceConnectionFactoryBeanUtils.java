@@ -4,8 +4,6 @@ import io.lettuce.core.ReadFrom;
 import io.lettuce.core.api.StatefulConnection;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
-import org.springframework.boot.ssl.SslBundle;
-import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.lettuce.LettuceClientConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
@@ -21,10 +19,9 @@ public final class LettuceConnectionFactoryBeanUtils {
      * 获取RedisConnectionFactory，主要适用于实例化对象到Spring容器中。
      * 参考：org.springframework.boot.autoconfigure.data.redis.RedisConnectionConfiguration、org.springframework.boot.autoconfigure.data.redis.JedisConnectionConfiguration
      * @param redisProperties redis配置
-     * @param virtualThreads 是否使用虚拟线程
      * @return RedisConnectionFactory
      */
-    public static RedisConnectionFactory getRedisConnectionFactory(RedisProperties redisProperties, boolean virtualThreads) {
+    public static RedisConnectionFactory getRedisConnectionFactory(RedisProperties redisProperties) {
         LettuceClientConfiguration clientConfiguration = getLettuceClientConfiguration(redisProperties);
         LettuceConnectionFactory connectionFactory;
         if (redisProperties.getSentinel() != null) {
@@ -33,11 +30,6 @@ public final class LettuceConnectionFactoryBeanUtils {
             connectionFactory = new LettuceConnectionFactory(RedisConfigUtils.getClusterConfiguration(redisProperties), clientConfiguration);
         } else {
             connectionFactory = new LettuceConnectionFactory(RedisConfigUtils.getStandaloneConfig(redisProperties), clientConfiguration);
-        }
-        if (virtualThreads) {
-            SimpleAsyncTaskExecutor executor = new SimpleAsyncTaskExecutor("redis-lettuce-");
-            executor.setVirtualThreads(true);
-            connectionFactory.setExecutor(executor);
         }
         return connectionFactory;
     }
@@ -63,8 +55,7 @@ public final class LettuceConnectionFactoryBeanUtils {
         } else {
             builder = LettuceClientConfiguration.builder();
         }
-        SslBundle sslBundle = RedisConfigUtils.getSslBundle(redisProperties);
-        if (sslBundle != null) {
+        if (redisProperties.isSsl()) {
             builder.useSsl();
         }
         if (StringUtils.hasLength(redisProperties.getUrl())) {
@@ -84,10 +75,6 @@ public final class LettuceConnectionFactoryBeanUtils {
             RedisProperties.Lettuce lettuce = redisProperties.getLettuce();
             if (lettuce.getShutdownTimeout() != null && !lettuce.getShutdownTimeout().isZero()) {
                 builder.shutdownTimeout(lettuce.getShutdownTimeout());
-            }
-            String readFrom = lettuce.getReadFrom();
-            if (readFrom != null) {
-                builder.readFrom(getReadFrom(readFrom));
             }
         }
         if (StringUtils.hasText(redisProperties.getClientName())) {

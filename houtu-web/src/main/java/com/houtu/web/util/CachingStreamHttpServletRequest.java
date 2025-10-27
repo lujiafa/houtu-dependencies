@@ -3,14 +3,15 @@ package com.houtu.web.util;
 import com.houtu.core.constant.ErrorCodeConstant;
 import com.houtu.core.exception.BusinessException;
 import com.houtu.core.exception.ErrorCode;
-import jakarta.servlet.ReadListener;
-import jakarta.servlet.ServletInputStream;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletRequestWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
 
+import javax.servlet.ReadListener;
+import javax.servlet.ServletInputStream;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
 import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -112,7 +113,7 @@ public class CachingStreamHttpServletRequest extends HttpServletRequestWrapper i
         }
         try {
             ServletInputStream servletInputStream = super.getInputStream();
-            servletInputStream.transferTo(cachingOutputStream = new ByteArrayOutputStream());
+            StreamUtils.copy(servletInputStream, cachingOutputStream = new ByteArrayOutputStream());
             servletInputStream.close();
         } catch (Exception e) {
             logger.error("获取请求数据异常|{}", e.getMessage(), e);

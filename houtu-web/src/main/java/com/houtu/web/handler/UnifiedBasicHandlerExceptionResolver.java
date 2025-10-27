@@ -1,14 +1,14 @@
 package com.houtu.web.handler;
 
 import com.houtu.web.view.SmartErrorView;
-import jakarta.servlet.UnavailableException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.core.Ordered;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.resource.NoResourceFoundException;
+
+import javax.servlet.UnavailableException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * @date 2018年6月4日
@@ -21,10 +21,7 @@ public class UnifiedBasicHandlerExceptionResolver implements HandlerExceptionRes
                                          HttpServletResponse response,
                                          Object handler,
                                          Exception ex) {
-        if (ex instanceof NoResourceFoundException) {
-            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            return new ModelAndView(new SmartErrorView());
-        } else  if (ex instanceof HttpRequestMethodNotSupportedException) {
+        if (ex instanceof HttpRequestMethodNotSupportedException) {
             response.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
             return new ModelAndView(new SmartErrorView());
         } else if (ex instanceof UnavailableException) {

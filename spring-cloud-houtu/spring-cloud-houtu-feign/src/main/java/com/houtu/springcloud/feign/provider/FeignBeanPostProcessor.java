@@ -20,7 +20,8 @@ public class FeignBeanPostProcessor implements BeanPostProcessor, Ordered {
 
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-        if (bean instanceof RequestMappingHandlerAdapter requestMappingHandlerAdapter) {
+        if (bean instanceof RequestMappingHandlerAdapter) {
+            RequestMappingHandlerAdapter requestMappingHandlerAdapter = (RequestMappingHandlerAdapter) bean;
             Field contentNegotiationManagerField = ReflectionUtils.findField(requestMappingHandlerAdapter.getClass(), "contentNegotiationManager");
             contentNegotiationManagerField.setAccessible(true);
             ContentNegotiationManager contentNegotiationManager = (ContentNegotiationManager) ReflectionUtils.getField(contentNegotiationManagerField, requestMappingHandlerAdapter);

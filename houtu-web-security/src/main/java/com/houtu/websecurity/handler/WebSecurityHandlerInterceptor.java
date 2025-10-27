@@ -19,8 +19,8 @@ import com.houtu.websecurity.session.Session;
 import com.houtu.websecurity.session.SessionContext;
 import com.houtu.websecurity.session.SessionValidator;
 import com.houtu.websecurity.sign.SignatureValidator;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import org.springframework.core.Ordered;
 import org.springframework.core.env.Environment;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -68,9 +68,9 @@ public class WebSecurityHandlerInterceptor implements HandlerInterceptor, Ordere
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        if (handler instanceof HandlerMethod handlerMethod) {
+        if (handler instanceof HandlerMethod) {
             try {
-                Method method = handlerMethod.getMethod();
+                Method method = ((HandlerMethod) handler).getMethod();
                 SecurityContext securityContext = buildSecurityContext(request, response, method);
                 if (securityContext.getCheckSession() != null && securityContext.getCheckSession().value()) {
                     checkSession(securityContext);

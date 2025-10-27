@@ -5,7 +5,6 @@ import org.redisson.api.RedissonClient;
 import org.redisson.config.*;
 import org.redisson.spring.data.connection.RedissonConnectionFactory;
 import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
-import org.springframework.boot.ssl.SslBundle;
 import org.springframework.data.redis.connection.RedisClusterConfiguration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisSentinelConfiguration;
@@ -81,8 +80,8 @@ public class RedissonConnectionFactoryBeanUtils {
      */
     public static RedissonClient redisson(RedisProperties redisProperties) {
         Config config = new Config();
-        SslBundle sslBundle = RedisConfigUtils.getSslBundle(redisProperties);
-        String addressPrefix = sslBundle == null ? "redis://" : "rediss://";
+        boolean ssl = redisProperties.isSsl();
+        String addressPrefix = ssl ? "rediss://" : "redis://";
         BaseConfig c;
         if (redisProperties.getSentinel() != null) {
             RedisSentinelConfiguration sentinelConfig = RedisConfigUtils.getSentinelConfig(redisProperties);
@@ -119,20 +118,20 @@ public class RedissonConnectionFactoryBeanUtils {
         if (redisProperties.getTimeout() != null) {
             c.setTimeout((int) redisProperties.getTimeout().toMillis());
         }
-        if (sslBundle != null) {
-            c.setSslCiphers(sslBundle.getOptions().getCiphers());
-            c.setSslProtocols(sslBundle.getOptions().getEnabledProtocols());
-            c.setSslTrustManagerFactory(sslBundle.getManagers().getTrustManagerFactory());
-            c.setSslKeyManagerFactory(sslBundle.getManagers().getKeyManagerFactory());
-        }
+//        if (sslBundle != null) {
+//            c.setSslCiphers(sslBundle.getOptions().getCiphers());
+//            c.setSslProtocols(sslBundle.getOptions().getEnabledProtocols());
+//            c.setSslTrustManagerFactory(sslBundle.getManagers().getTrustManagerFactory());
+//            c.setSslKeyManagerFactory(sslBundle.getManagers().getKeyManagerFactory());
+//        }
         if (redisProperties.getLettuce() != null && redisProperties.getLettuce().getPool() != null) {
-            if (c instanceof BaseMasterSlaveServersConfig baseMasterSlaveServersConfig) {
-                baseMasterSlaveServersConfig.setSlaveConnectionMinimumIdleSize(redisProperties.getLettuce().getPool().getMinIdle())
+            if (c instanceof BaseMasterSlaveServersConfig) {
+                ((BaseMasterSlaveServersConfig) c).setSlaveConnectionMinimumIdleSize(redisProperties.getLettuce().getPool().getMinIdle())
                         .setSlaveConnectionPoolSize(redisProperties.getLettuce().getPool().getMaxActive())
                         .setMasterConnectionMinimumIdleSize(redisProperties.getLettuce().getPool().getMinIdle())
                         .setMasterConnectionPoolSize(redisProperties.getLettuce().getPool().getMaxActive());
-            } else if (c instanceof SingleServerConfig singleServerConfig) {
-                singleServerConfig.setConnectionMinimumIdleSize(redisProperties.getLettuce().getPool().getMinIdle())
+            } else if (c instanceof SingleServerConfig) {
+                ((SingleServerConfig) c).setConnectionMinimumIdleSize(redisProperties.getLettuce().getPool().getMinIdle())
                         .setConnectionPoolSize(redisProperties.getLettuce().getPool().getMaxActive());
             }
         }

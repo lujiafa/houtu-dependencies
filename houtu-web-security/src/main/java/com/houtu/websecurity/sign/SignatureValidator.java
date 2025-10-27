@@ -5,7 +5,7 @@ import com.houtu.websecurity.exception.SessionException;
 import com.houtu.websecurity.exception.SignatureException;
 
 import com.houtu.websecurity.handler.SecurityContext;
-import jakarta.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
 import java.util.Map;
 

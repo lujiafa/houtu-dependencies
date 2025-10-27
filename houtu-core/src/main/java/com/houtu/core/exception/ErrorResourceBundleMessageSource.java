@@ -8,6 +8,7 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentMap;
@@ -16,7 +17,7 @@ public class ErrorResourceBundleMessageSource extends ReloadableResourceBundleMe
 
     final static String CLASSPATH_RESOURCE_PATTERN = "classpath*:";
 
-    private List<String> fileExtensions = List.of(".properties", ".xml");
+private List<String> fileExtensions = Arrays.asList(".properties", ".xml");
     private PathMatchingResourcePatternResolver pathMatchingResourcePatternResolver = new PathMatchingResourcePatternResolver();
 
     @Override

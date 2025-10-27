@@ -17,8 +17,8 @@ public class WebSecurityWebMvcConfigurer implements WebMvcConfigurer {
 	public void addInterceptors(InterceptorRegistry registry) {
 		for (HandlerInterceptor handlerInterceptor : interceptors) {
 			InterceptorRegistration interceptorRegistration = registry.addInterceptor(handlerInterceptor);
-			if (handlerInterceptor instanceof Ordered ordered) {
-				interceptorRegistration.order(ordered.getOrder());
+			if (handlerInterceptor instanceof Ordered) {
+				interceptorRegistration.order(((Ordered) handlerInterceptor).getOrder());
 			}
 		}
 	}

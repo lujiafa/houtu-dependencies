@@ -1,6 +1,5 @@
 package com.houtu.websecurity.session.repository;
 
-import jakarta.annotation.Nullable;
 import org.springframework.cache.Cache;
 import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.MessageListener;
@@ -26,7 +25,7 @@ public class EfficientSessionRepositoryMessageListener implements MessageListene
     }
 
     @Override
-    public void onMessage(Message message, @Nullable byte[] pattern) {
+    public void onMessage(Message message, byte[] pattern) {
         String messageChannel = (String) redisTemplate.getStringSerializer().deserialize(message.getChannel());
         if (!Objects.equals(channelName, messageChannel)) return;
         String sessionId = (String) redisTemplate.getValueSerializer().deserialize(message.getBody());

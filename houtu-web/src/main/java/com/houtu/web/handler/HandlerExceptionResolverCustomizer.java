@@ -1,8 +1,8 @@
 package com.houtu.web.handler;
 
 import com.houtu.core.exception.ErrorCode;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * 异常错误码解析器

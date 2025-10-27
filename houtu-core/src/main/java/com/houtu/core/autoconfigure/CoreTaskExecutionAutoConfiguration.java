@@ -12,10 +12,10 @@ import org.springframework.boot.autoconfigure.task.TaskExecutionAutoConfiguratio
 import org.springframework.boot.autoconfigure.task.TaskExecutionProperties;
 import org.springframework.boot.autoconfigure.task.TaskSchedulingProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.boot.task.ThreadPoolTaskExecutorBuilder;
-import org.springframework.boot.task.ThreadPoolTaskExecutorCustomizer;
-import org.springframework.boot.task.ThreadPoolTaskSchedulerBuilder;
-import org.springframework.boot.task.ThreadPoolTaskSchedulerCustomizer;
+import org.springframework.boot.task.TaskExecutorBuilder;
+import org.springframework.boot.task.TaskExecutorCustomizer;
+import org.springframework.boot.task.TaskSchedulerBuilder;
+import org.springframework.boot.task.TaskSchedulerCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.task.TaskDecorator;
@@ -34,9 +34,9 @@ public class CoreTaskExecutionAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     @ConditionalOnClass({ThreadPoolTaskExecutor.class})
-    public ThreadPoolTaskExecutorBuilder threadPoolTaskExecutorBuilder(TaskExecutionProperties properties, ObjectProvider<ThreadPoolTaskExecutorCustomizer> threadPoolTaskExecutorCustomizers, ObjectProvider<TaskDecorator> taskDecorator) {
+    public TaskExecutorBuilder threadPoolTaskExecutorBuilder(TaskExecutionProperties properties, ObjectProvider<TaskExecutorCustomizer> threadPoolTaskExecutorCustomizers, ObjectProvider<TaskDecorator> taskDecorator) {
         TaskExecutionProperties.Pool pool = properties.getPool();
-        ThreadPoolTaskExecutorBuilder builder = new TransferTaskExecutorBuilder();
+        TaskExecutorBuilder builder = new TransferTaskExecutorBuilder();
         builder = builder.queueCapacity(pool.getQueueCapacity());
         builder = builder.corePoolSize(pool.getCoreSize());
         builder = builder.maxPoolSize(pool.getMaxSize());
@@ -56,8 +56,8 @@ public class CoreTaskExecutionAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     @ConditionalOnClass({ThreadPoolTaskScheduler.class})
-    public ThreadPoolTaskSchedulerBuilder threadPoolTaskSchedulerBuilder(TaskSchedulingProperties properties, ObjectProvider<ThreadPoolTaskSchedulerCustomizer> threadPoolTaskSchedulerCustomizers) {
-        ThreadPoolTaskSchedulerBuilder builder = new TransferTaskSchedulerBuilder();
+    public TaskSchedulerBuilder threadPoolTaskSchedulerBuilder(TaskSchedulingProperties properties, ObjectProvider<TaskSchedulerCustomizer> threadPoolTaskSchedulerCustomizers) {
+        TaskSchedulerBuilder builder = new TransferTaskSchedulerBuilder();
         builder = builder.poolSize(properties.getPool().getSize());
         TaskSchedulingProperties.Shutdown shutdown = properties.getShutdown();
         builder = builder.awaitTermination(shutdown.isAwaitTermination());
