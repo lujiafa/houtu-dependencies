@@ -4,7 +4,7 @@
 <dependency>
     <groupId>com.houtu</groupId>
     <artifactId>spring-cloud-houtu-discovery</artifactId>
-    <version>3.5.1-SNAPSHOT</version>
+    <version>2.7.1-SNAPSHOT</version>
 </dependency>
 ```
 ### 1.1 服务状态上下文
@@ -19,7 +19,7 @@
 <dependency>
     <groupId>com.houtu</groupId>
     <artifactId>spring-cloud-houtu-loadbalancer</artifactId>
-    <version>3.5.1-SNAPSHOT</version>
+    <version>2.7.1-SNAPSHOT</version>
 </dependency>
 ```
 ### 2.1 Hint概要
@@ -187,7 +187,7 @@ spring:
 <dependency>
     <groupId>com.houtu</groupId>
     <artifactId>spring-cloud-houtu-feign</artifactId>
-    <version>3.5.1-SNAPSHOT</version>
+    <version>2.7.1-SNAPSHOT</version>
 </dependency>
 ```
 
@@ -209,7 +209,7 @@ spring:
 <dependency>
     <groupId>com.houtu</groupId>
     <artifactId>spring-cloud-houtu-alibaba-sentinel</artifactId>
-    <version>3.5.1-SNAPSHOT</version>
+    <version>2.7.1-SNAPSHOT</version>
 </dependency>
 ```
 

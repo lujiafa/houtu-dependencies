@@ -6,20 +6,20 @@
 
     <groupId>com.houtu</groupId>
     <artifactId>houtu-dependencies</artifactId>
-    <version>3.5.1-SNAPSHOT</version>
+    <version>2.7.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <properties>
-        <java.version>17</java.version>
+        <java.version>1.8</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <skipTests>true</skipTests>
-        <spring-boot-starter-parent.version>3.5.3</spring-boot-starter-parent.version>
+        <spring-boot-starter-parent.version>2.7.18</spring-boot-starter-parent.version>
         <jakarta.xml.bind-api.version>4.0.2</jakarta.xml.bind-api.version>
         <cache2k.version>2.6.1.Final</cache2k.version>
         <io.jsonwebtoken.version>0.12.7</io.jsonwebtoken.version>
         <redisson.version>3.51.0</redisson.version>
-        <com.houtu.version>3.5.1-SNAPSHOT</com.houtu.version>
+        <com.houtu.version>2.7.1-SNAPSHOT</com.houtu.version>
     </properties>
 
     <modules>
@@ -101,7 +101,7 @@
             </dependency>
             <dependency>
                 <groupId>org.redisson</groupId>
-                <artifactId>redisson-spring-data-35</artifactId>
+                <artifactId>redisson-spring-data-27</artifactId>
                 <version>${redisson.version}</version>
             </dependency>
 

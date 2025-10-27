@@ -28,17 +28,7 @@ version)</b>和<b>次版本号(Minor version)</b>对应，修订版本号之间�
 
 | houtu |  jdk   | springboot | spring cloud |  spring cloud alibaba   |
 |:-----:|:------:|:----------:|:------------:|:-----------------------:|
-| 3.5.1 | jdk17  |   3.5.7    |   2025.0.0   | 2023.0.1.2 - 2025.0.0.0 |
-| 3.4.1 | jdk17  |   3.4.11   |   2024.0.2   |       2023.0.1.2        |
-| 3.3.1 | jdk17  |   3.3.13   |   2023.0.6   |       2023.0.1.2        |
-| 3.2.1 | jdk17  |   3.2.12   |   2023.0.6   |       2023.0.1.2        |
-| 3.1.1 | jdk17  |   3.1.12   |   2022.0.5   |       2022.0.0.2        |
 | 2.7.1 | jdk1.8 |   2.7.18   |   2021.0.9   |       2021.0.4.0        |
-
-> ### 注
-> * `Spring Cloud Alibaba`配置模块`spring-cloud-starter-alibaba-nacos-config`在版本高于或等于`2023.0.1.3`后，已调整加载方式为`spring.config.import`加载。参考文档如下：
-> * [https://github.com/alibaba/spring-cloud-alibaba/issues/3998](https://github.com/alibaba/spring-cloud-alibaba/issues/3998)
-> * [https://sca.aliyun.com/docs/2023/user-guide/nacos/quick-start](https://sca.aliyun.com/docs/2023/user-guide/nacos/quick-start)
 
 ## 🚀 模块描述
 
