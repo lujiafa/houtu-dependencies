@@ -1,8 +1,7 @@
 package com.houtu.springcloud.feign.consumer;
 
 import com.houtu.core.exception.ErrorCode;
-import com.houtu.core.web.EmbedResponseData;
-import com.houtu.core.web.ResponseData;
+import com.houtu.core.web.BaseResponseData;
 import com.houtu.springcloud.feign.provider.FeignThroughBusinessException;
 import com.houtu.springcloud.feign.util.ExceptionHeader;
 import feign.FeignException;
@@ -59,8 +58,7 @@ public class FeignDelegateDecoder implements Decoder {
         if (exceptionValues != null
                 && response.status() == HttpStatus.OK.value()
                 && !exceptionValues.isEmpty()) {
-            if (ResponseData.class.isAssignableFrom(type.getClass())
-                    || EmbedResponseData.class.isAssignableFrom(type.getClass())
+            if (BaseResponseData.class.isAssignableFrom(type.getClass())
                     || Map.class.isAssignableFrom(type.getClass())) {
                 return;
             }

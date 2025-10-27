@@ -1,10 +1,11 @@
-package com.houtu.core.web;
+package com.houtu.web.model;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.houtu.core.constant.ErrorCodeConstant;
 import com.houtu.core.context.SpringApplicationContext;
 import com.houtu.core.exception.ErrorCode;
+import com.houtu.core.web.BaseResponseData;
 import org.springframework.util.Assert;
 
 import java.util.LinkedHashMap;
@@ -15,19 +16,26 @@ import java.util.Map;
  * @date 2016年9月11日
  * @Description 响应数据
  */
-public class EmbedResponseData extends LinkedHashMap<String, Object> {
+public class EmbedResponseData extends LinkedHashMap<String, Object> implements BaseResponseData<Object> {
 
 	private static final long serialVersionUID = 1L;
 
 	public final static String CODE_NAME = "code";
 	public final static String MESSAGE_NAME = "message";
 
+	@Override
 	public int getCode() {
 		return (Integer) get(CODE_NAME);
 	}
 
+	@Override
 	public String getMessage() {
 		return (String) get(MESSAGE_NAME);
+	}
+
+	@Override
+	public Object getData() {
+		return this;
 	}
 
 	/**

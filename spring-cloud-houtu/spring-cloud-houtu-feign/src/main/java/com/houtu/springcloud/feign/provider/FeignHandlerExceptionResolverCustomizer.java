@@ -4,7 +4,7 @@ import com.houtu.core.context.SpringApplicationContext;
 import com.houtu.core.exception.ErrorCode;
 import com.houtu.springcloud.feign.constant.FeignConstant;
 import com.houtu.springcloud.feign.util.ExceptionHeader;
-import com.houtu.web.handler.ExceptionProcessor;
+import com.houtu.web.handler.HandlerExceptionResolverCustomizer;
 import feign.codec.DecodeException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -20,9 +20,9 @@ import java.util.Objects;
  * @date 2018年6月4日
  * @Description Feign默认提供全局异常处理
  */
-public class FeignExceptionProcessor implements ExceptionProcessor, InitializingBean, Ordered {
+public class FeignHandlerExceptionResolverCustomizer implements HandlerExceptionResolverCustomizer, InitializingBean, Ordered {
 
-    Logger logger = LoggerFactory.getLogger(FeignExceptionProcessor.class);
+    Logger logger = LoggerFactory.getLogger(FeignHandlerExceptionResolverCustomizer.class);
 
     private String exceptionHeader;
 

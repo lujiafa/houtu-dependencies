@@ -51,8 +51,8 @@ public class WebAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     @ConditionalOnProperty(prefix = WebProperties.PROPERTIES_PREFIX, value = "exception-resolver", havingValue = "true", matchIfMissing = true)
-    public UnifiedHandlerExceptionResolver unifiedHandlerExceptionResolver(ObjectProvider<List<ExceptionProcessor>> errorCodeResolversProvider) {
-        List<ExceptionProcessor> errorCodeResolvers = errorCodeResolversProvider.getIfAvailable();
+    public UnifiedHandlerExceptionResolver unifiedHandlerExceptionResolver(ObjectProvider<List<HandlerExceptionResolverCustomizer>> customizersObjectProvider) {
+        List<HandlerExceptionResolverCustomizer> errorCodeResolvers = customizersObjectProvider.getIfAvailable();
         if (errorCodeResolvers == null || errorCodeResolvers.isEmpty()) {
             return new UnifiedHandlerExceptionResolver();
         }

@@ -1,7 +1,8 @@
-package com.houtu.core.web;
+package com.houtu.web.model;
 
 import com.houtu.core.constant.ErrorCodeConstant;
 import com.houtu.core.exception.ErrorCode;
+import com.houtu.core.web.BaseResponseData;
 import org.springframework.util.Assert;
 
 import java.io.Serializable;
@@ -11,7 +12,7 @@ import java.io.Serializable;
  * @date 2016年9月11日
  * @Description 响应数据
  */
-public class ResponseData<T> implements Serializable {
+public class ResponseData<T> implements BaseResponseData, Serializable {
 	
 	private static final long serialVersionUID = 1L;
 
@@ -19,6 +20,7 @@ public class ResponseData<T> implements Serializable {
 	private String message = ErrorCodeConstant.SUCCESS_MESSAGE;
 	private T data;
 
+	@Override
 	public int getCode() {
 		return code;
 	}
@@ -27,6 +29,7 @@ public class ResponseData<T> implements Serializable {
 		this.code = code;
 	}
 
+	@Override
 	public String getMessage() {
 		return message;
 	}
@@ -35,6 +38,7 @@ public class ResponseData<T> implements Serializable {
 		this.message = message;
 	}
 
+	@Override
 	public T getData() {
 		return data;
 	}
@@ -42,7 +46,7 @@ public class ResponseData<T> implements Serializable {
 	void setData(T data) {
 		this.data = data;
 	}
-	
+
 	/**
 	 * @Title hasSuccess
 	 * @Description 判断状态是否为成功

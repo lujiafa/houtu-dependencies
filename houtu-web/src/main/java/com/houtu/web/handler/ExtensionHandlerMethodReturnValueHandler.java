@@ -2,8 +2,7 @@ package com.houtu.web.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.houtu.core.context.SpringApplicationContext;
-import com.houtu.core.web.EmbedResponseData;
-import com.houtu.core.web.ResponseData;
+import com.houtu.core.web.BaseResponseData;
 import com.houtu.web.model.BaseDTO;
 import com.houtu.web.model.BaseVO;
 import org.slf4j.Logger;
@@ -47,8 +46,7 @@ public class ExtensionHandlerMethodReturnValueHandler extends RequestResponseBod
 
     @Override
     public boolean supportsReturnType(MethodParameter returnType) {
-        if (ResponseData.class.isAssignableFrom(returnType.getParameterType())
-                || EmbedResponseData.class.isAssignableFrom(returnType.getParameterType())
+        if (BaseResponseData.class.isAssignableFrom(returnType.getParameterType())
                 || BaseDTO.class.isAssignableFrom(returnType.getParameterType())
                 || BaseVO.class.isAssignableFrom(returnType.getParameterType())) {
             return true;

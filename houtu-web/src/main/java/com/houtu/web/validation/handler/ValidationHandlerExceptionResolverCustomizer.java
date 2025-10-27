@@ -3,7 +3,7 @@ package com.houtu.web.validation.handler;
 import com.houtu.core.constant.ErrorCodeConstant;
 import com.houtu.core.exception.ErrorCode;
 import com.houtu.util.constant.CharConstant;
-import com.houtu.web.handler.ExceptionProcessor;
+import com.houtu.web.handler.HandlerExceptionResolverCustomizer;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.ConstraintViolation;
@@ -16,7 +16,7 @@ import java.util.Set;
  * @date 2018年6月4日
  * @Description 全局异常处理
  */
-public class ValidationExceptionProcessor implements ExceptionProcessor, Ordered {
+public class ValidationHandlerExceptionResolverCustomizer implements HandlerExceptionResolverCustomizer, Ordered {
 
 	@Override
 	public ErrorCode process(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {

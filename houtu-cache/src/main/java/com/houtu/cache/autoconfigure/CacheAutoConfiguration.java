@@ -30,7 +30,7 @@ public class CacheAutoConfiguration {
     @Configuration
     @ConditionalOnClass(org.redisson.api.RedissonClient.class)
     static class RedissonClientConfiguration {
-        @Bean
+        @Bean(destroyMethod = "shutdown")
         @ConditionalOnMissingBean
         public static org.redisson.api.RedissonClient redissonClient(Environment environment, RedisProperties redisProperties) {
             String config = environment.getProperty("spring.redis.redisson.config");

@@ -11,7 +11,7 @@ import org.springframework.core.Ordered;
  */
 @AutoConfiguration
 @AutoConfigureOrder(Ordered.LOWEST_PRECEDENCE)
-@Import({ServiceContextConfiguration.ZookeeperConfiguration.class, ServiceContextConfiguration.ConsulConfiguration.class, ServiceContextConfiguration.EurekaConfiguration.class, ServiceContextConfiguration.NacosConfiguration.class, ServiceStatusHealthConfiguration.ActuatorServiceStatusHealthConfiguration.class, ServiceStatusHealthConfiguration.WebMvcServiceStatusHealthConfiguration.class, ServiceStatusHealthConfiguration.ReactiveServiceStatusHealthConfiguration.class})
+@Import({ServiceContextConfiguration.ZookeeperConfiguration.class, ServiceContextConfiguration.ConsulConfiguration.class, ServiceContextConfiguration.EurekaConfiguration.class, ServiceContextConfiguration.NacosConfiguration.class, ServiceStatusHealthConfiguration.ActuatorServiceStatusHealthConfiguration.class})
 public class DiscoveryAutoConfiguration {
 
 }

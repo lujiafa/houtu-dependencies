@@ -31,13 +31,13 @@ public class UnifiedHandlerExceptionResolver implements HandlerExceptionResolver
 
     protected final Logger logger = LoggerFactory.getLogger(UnifiedHandlerExceptionResolver.class);
 
-    private List<ExceptionProcessor> errorCodeResolvers = new ArrayList<>();
+    private List<HandlerExceptionResolverCustomizer> customizers = new ArrayList<>();
 
     public UnifiedHandlerExceptionResolver() {}
 
-    public UnifiedHandlerExceptionResolver(List<ExceptionProcessor> errorCodeResolvers) {
-        Assert.notNull(errorCodeResolvers, "errorCodeResolvers must not be null");
-        this.errorCodeResolvers = errorCodeResolvers;
+    public UnifiedHandlerExceptionResolver(List<HandlerExceptionResolverCustomizer> customizers) {
+        Assert.notNull(customizers, "customizers must not be null");
+        this.customizers = customizers;
     }
 
     @Override
@@ -46,7 +46,7 @@ public class UnifiedHandlerExceptionResolver implements HandlerExceptionResolver
                                          Object handler,
                                          Exception ex) {
         ErrorCode errorCode;
-        if ((errorCode = customErrorCodeProcess(request, response, handler, ex)) != null
+        if ((errorCode = customizers(request, response, handler, ex)) != null
             || (errorCode = resolveBusinessException(ex)) != null) {
             if (logger.isDebugEnabled()) {
                 logger.debug("业务异常|code={}, message={}|{}", errorCode.getCode(), errorCode.getMessage(), ex.getMessage());
@@ -82,7 +82,7 @@ public class UnifiedHandlerExceptionResolver implements HandlerExceptionResolver
             logger.error(ex.getMessage(), ex);
             errorCode = ErrorCode.build(ErrorCodeConstant.SERVER_BUSY, request.getLocale());
         }
-        return new ModelAndView(new SmartErrorView(errorCode));
+        return new ModelAndView(new SmartErrorView(wrapErrorCode(errorCode)));
     }
 
     /**
@@ -93,13 +93,13 @@ public class UnifiedHandlerExceptionResolver implements HandlerExceptionResolver
      * @param ex 异常对象
      * @return 自定义异常码
      */
-    ErrorCode customErrorCodeProcess(HttpServletRequest request,
+    ErrorCode customizers(HttpServletRequest request,
                                      HttpServletResponse response,
                                      Object handler,
                                      Exception ex) {
-        if (errorCodeResolvers.isEmpty())
+        if (customizers.isEmpty())
             return null;
-        for (ExceptionProcessor resolver : errorCodeResolvers) {
+        for (HandlerExceptionResolverCustomizer resolver : customizers) {
             ErrorCode errorCode = resolver.process(request, response, handler, ex);
             if (errorCode != null)
                 return errorCode;
@@ -117,6 +117,10 @@ public class UnifiedHandlerExceptionResolver implements HandlerExceptionResolver
         if (businessException != null)
             return businessException.getErrorCode();
         return null;
+    }
+
+    protected ErrorCode wrapErrorCode(ErrorCode errorCode) {
+        return errorCode;
     }
 
     @Override

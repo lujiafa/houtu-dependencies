@@ -1,7 +1,7 @@
 package com.houtu.web.handler;
 
-import com.houtu.core.web.EmbedResponseData;
-import com.houtu.core.web.ResponseData;
+import com.houtu.web.model.EmbedResponseData;
+import com.houtu.web.model.ResponseData;
 import com.houtu.web.prop.WebProperties;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.core.MethodParameter;

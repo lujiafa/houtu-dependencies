@@ -2,13 +2,7 @@ package com.houtu.monitor.handler;
 
 import com.houtu.core.constant.ErrorCodeConstant;
 import com.houtu.core.exception.BusinessException;
-import com.houtu.core.web.EmbedResponseData;
-import com.houtu.core.web.ResponseData;
-import org.aopalliance.intercept.Joinpoint;
-import org.aspectj.lang.JoinPoint;
-import org.aspectj.lang.ProceedingJoinPoint;
-import org.aspectj.lang.annotation.Around;
-import org.aspectj.lang.reflect.MethodSignature;
+import com.houtu.core.web.BaseResponseData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,8 +10,6 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.function.Function;
-import java.util.function.Supplier;
 
 /**
  * @author jon
@@ -33,9 +25,7 @@ public abstract class AbstractMonitorAspectHandler<T extends Annotation> {
 		Integer code = null;
 		try {
 			Object object = handler.proceed();
-			if (object instanceof ResponseData<?> responseData) {
-				code = responseData.getCode();
-			} else if (object instanceof EmbedResponseData responseData) {
+			if (object instanceof BaseResponseData responseData) {
 				code = responseData.getCode();
 			} else {
 				code = ErrorCodeConstant.SUCCESS;

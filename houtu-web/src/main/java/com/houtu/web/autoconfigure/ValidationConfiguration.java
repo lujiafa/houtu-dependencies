@@ -1,8 +1,8 @@
 package com.houtu.web.autoconfigure;
 
-import com.houtu.web.handler.ExceptionProcessor;
+import com.houtu.web.handler.HandlerExceptionResolverCustomizer;
 import com.houtu.web.prop.WebProperties;
-import com.houtu.web.validation.handler.ValidationExceptionProcessor;
+import com.houtu.web.validation.handler.ValidationHandlerExceptionResolverCustomizer;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -27,8 +27,8 @@ public class ValidationConfiguration {
 	@Bean
 	@ConditionalOnMissingBean
 	@ConditionalOnProperty(prefix = WebProperties.PROPERTIES_PREFIX, value = {"exceptionResolver", "exception-resolver"}, havingValue = "true", matchIfMissing = true)
-	public ExceptionProcessor validationExceptionErrorCodeResolver() {
-		return new ValidationExceptionProcessor();
+	public HandlerExceptionResolverCustomizer validationExceptionErrorCodeResolver() {
+		return new ValidationHandlerExceptionResolverCustomizer();
 	}
 
 
