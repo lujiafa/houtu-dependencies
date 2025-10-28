@@ -26,7 +26,7 @@ public class EfficientSessionRepositoryMessageListener implements MessageListene
     }
 
     @Override
-    public void onMessage(Message message, @Nullable byte[] pattern) {
+    public void onMessage(Message message, byte[] pattern) {
         String messageChannel = (String) redisTemplate.getStringSerializer().deserialize(message.getChannel());
         if (!Objects.equals(channelName, messageChannel)) return;
         String sessionId = (String) redisTemplate.getValueSerializer().deserialize(message.getBody());

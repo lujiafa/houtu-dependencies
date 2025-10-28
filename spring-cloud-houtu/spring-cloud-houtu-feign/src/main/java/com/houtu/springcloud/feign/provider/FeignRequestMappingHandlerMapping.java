@@ -11,7 +11,6 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.context.MessageSource;
 import org.springframework.core.MethodIntrospector;
 import org.springframework.core.annotation.AnnotatedElementUtils;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
@@ -142,7 +141,6 @@ public class FeignRequestMappingHandlerMapping extends RequestMappingHandlerMapp
 		return handler instanceof String ? new InternalHandlerMethod((String)handler, this.obtainApplicationContext().getAutowireCapableBeanFactory(), this.obtainApplicationContext(), method, autoFeign) : new InternalHandlerMethod(handler, method, autoFeign);
 	}
 
-	@Nullable
 	private RequestMappingInfo createRequestMappingInfo(AnnotatedElement element) {
 		RequestMapping requestMapping = (RequestMapping)AnnotatedElementUtils.findMergedAnnotation(element, RequestMapping.class);
 		RequestCondition<?> condition = element instanceof Class ? this.getCustomTypeCondition((Class)element) : this.getCustomMethodCondition((Method)element);
