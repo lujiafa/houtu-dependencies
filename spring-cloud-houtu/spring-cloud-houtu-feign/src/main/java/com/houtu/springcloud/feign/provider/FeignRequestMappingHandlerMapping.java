@@ -4,14 +4,12 @@ import com.houtu.springcloud.feign.anotation.AutoFeign;
 import com.houtu.springcloud.feign.constant.FeignConstant;
 import com.houtu.util.common.AnnotationUtils;
 import com.houtu.util.constant.CharConstant;
-import javax.servlet.http.HttpServletRequest;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.context.MessageSource;
 import org.springframework.core.MethodIntrospector;
 import org.springframework.core.annotation.AnnotatedElementUtils;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
@@ -23,6 +21,7 @@ import org.springframework.web.servlet.mvc.condition.RequestCondition;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
+import javax.servlet.http.HttpServletRequest;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
@@ -142,7 +141,6 @@ public class FeignRequestMappingHandlerMapping extends RequestMappingHandlerMapp
 		return handler instanceof String ? new InternalHandlerMethod((String)handler, this.obtainApplicationContext().getAutowireCapableBeanFactory(), this.obtainApplicationContext(), method, autoFeign) : new InternalHandlerMethod(handler, method, autoFeign);
 	}
 
-	@Nullable
 	private RequestMappingInfo createRequestMappingInfo(AnnotatedElement element) {
 		RequestMapping requestMapping = (RequestMapping)AnnotatedElementUtils.findMergedAnnotation(element, RequestMapping.class);
 		RequestCondition<?> condition = element instanceof Class ? this.getCustomTypeCondition((Class)element) : this.getCustomMethodCondition((Method)element);

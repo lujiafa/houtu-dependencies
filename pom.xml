@@ -15,7 +15,6 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <skipTests>true</skipTests>
         <spring-boot-starter-parent.version>2.7.18</spring-boot-starter-parent.version>
-<!--        <javax.xml.bind-api.version>4.0.2</javax.xml.bind-api.version>-->
         <cache2k.version>2.6.1.Final</cache2k.version>
         <io.jsonwebtoken.version>0.12.7</io.jsonwebtoken.version>
         <redisson.version>3.51.0</redisson.version>

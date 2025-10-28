@@ -52,12 +52,6 @@
             <version>${javax.mail.version}</version>
         </dependency>
 
-<!--        <dependency>-->
-<!--            <groupId>javax.xml.bind</groupId>-->
-<!--            <artifactId>jaxb-api</artifactId>-->
-<!--            <version>${javax.xml.bind-api.version}</version>-->
-<!--        </dependency>-->
-
         <!-- jdom2 -->
         <dependency>
             <groupId>org.jdom</groupId>

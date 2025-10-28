@@ -90,7 +90,7 @@ public class SecurityWatchAspect implements Ordered {
         IdentityHashMap<String, String> recoveryMap = new IdentityHashMap<>();
         if (!getters.isEmpty()) {
             Map<String, String> encryptedProcessMap = new ConcurrentHashMap<>(getters.size());
-            List<String> origins = getters.stream().map(g -> g.get()).toList();
+            List<String> origins = getters.stream().map(g -> g.get()).collect(Collectors.toList());
             origins.parallelStream().forEach(o -> {
                 if (encryptedProcessMap.get(o) == null) {
                     encryptedProcessMap.put(o, securityProcessor.encrypt(securityContext.getMethod(), o));
@@ -121,9 +121,9 @@ public class SecurityWatchAspect implements Ordered {
             if (arg == null
                     || (!Arrays.stream(parameterAnnotations[i]).parallel().anyMatch(annotation -> annotation instanceof SecurityParam) && !(arg instanceof SecurityObject)))
                 continue;
-            if (arg instanceof String _arg) {
+            if (arg instanceof String) {
                 if (getters != null) {
-                    getters.add(() -> _arg);
+                    getters.add(() -> (String) arg);
                 }
                 if (setters != null) {
                     int finalI = i;
@@ -136,15 +136,15 @@ public class SecurityWatchAspect implements Ordered {
     }
 
     Object decryptResult(SecurityContext securityContext, Object result) {
-        if (result instanceof String _result) {
+        if (result instanceof String) {
             IdentityHashMap<String, String> recoveryMap = securityContext.getRecoveryMap();
             if (recoveryMap != null) {
-                String original = securityContext.getRecoveryMap().get(_result);
+                String original = securityContext.getRecoveryMap().get((String) result);
                 if (original != null) {
                     return original;
                 }
             }
-            return securityProcessor.decrypt(securityContext.getMethod(), _result);
+            return securityProcessor.decrypt(securityContext.getMethod(), (String) result);
         }
         List<Supplier<String>> getters = new ArrayList<>();
         List<SecuritySetter> setters = new ArrayList<>();
@@ -152,7 +152,7 @@ public class SecurityWatchAspect implements Ordered {
         if (!getters.isEmpty()) {
             IdentityHashMap<String, String> recoveryMap = securityContext.getRecoveryMap();
             Map<String, String> decryptProcessMap = recoveryMap == null ? new ConcurrentHashMap<>(getters.size()) : new ConcurrentHashMap<>(recoveryMap);
-            List<String> encrypts = getters.stream().map(g -> g.get()).toList();
+            List<String> encrypts = getters.stream().map(g -> g.get()).collect(Collectors.toList());
             encrypts.parallelStream().forEach(o -> {
                 if (decryptProcessMap.get(o) == null) {
                     decryptProcessMap.put(o, securityProcessor.decrypt(securityContext.getMethod(), o));
@@ -186,14 +186,14 @@ public class SecurityWatchAspect implements Ordered {
                     field.setAccessible(true);
                     Object value = field.get(object);
                     if (value == null) continue;
-                    if (value instanceof String _value) {
+                    if (value instanceof String) {
                         if (getters != null) {
-                            getters.add(() -> _value);
+                            getters.add(() -> (String) value);
                         }
                         if (setters != null) {
                             setters.add(m -> {
                                 try {
-                                    String newValue = m.get(_value);
+                                    String newValue = m.get((String) value);
                                     if (newValue != null) {
                                         field.set(object, newValue);
                                     }
@@ -218,14 +218,14 @@ public class SecurityWatchAspect implements Ordered {
             for (int i = 0; i < length; i++) {
                 Object value = Array.get(object, i);
                 if (value == null) continue;
-                if (value instanceof String _value) {
+                if (value instanceof String) {
                     int finalI = i;
                     if (getters != null) {
-                        getters.add(() -> _value);
+                        getters.add(() -> (String) value);
                     }
                     if (setters != null) {
                         setters.add(m -> {
-                            String newValue = m.get(_value);
+                            String newValue = m.get((String) value);
                             if (newValue != null) {
                                 Array.set(object, finalI, newValue);
                             }
@@ -248,10 +248,10 @@ public class SecurityWatchAspect implements Ordered {
                     collection.clear();
                     for (int i = 0; i < origins.size(); i++) {
                         Object value = origins.get(i);
-                        if (value instanceof String _value) {
-                            String newValue = m.get(_value);
+                        if (value instanceof String) {
+                            String newValue = m.get((String) value);
                             if (newValue == null) {
-                                collection.add(_value);
+                                collection.add((String) value);
                             } else {
                                 collection.add(newValue);
                             }
@@ -262,7 +262,8 @@ public class SecurityWatchAspect implements Ordered {
                     }
                 });
             }
-        } else if (object instanceof Map map) {
+        } else if (object instanceof Map) {
+            Map<String, Object> map = (Map<String, Object>) object;
             if (map.isEmpty() || isImmutable(object.getClass())) return;
             processedSet.add(object);
             Map<String, Object> origins = new LinkedHashMap<>(map);
@@ -277,16 +278,16 @@ public class SecurityWatchAspect implements Ordered {
                     for (Map.Entry<String, Object> entry : entries) {
                         String key = entry.getKey();
                         Object value = entry.getValue();
-                        if (value instanceof String _value) {
+                        if (value instanceof String) {
                             if (encryptMapKeysSet.contains(key)) {
-                                String newValue = m.get(_value);
+                                String newValue = m.get((String) value);
                                 if (newValue == null) {
-                                    m.put(key, _value);
+                                    m.put(key, (String) value);
                                 } else {
                                     map.put(key, newValue);
                                 }
                             } else {
-                                map.put(key, _value);
+                                map.put(key, (String) value);
                             }
                         } else {
                             map.put(key, value);

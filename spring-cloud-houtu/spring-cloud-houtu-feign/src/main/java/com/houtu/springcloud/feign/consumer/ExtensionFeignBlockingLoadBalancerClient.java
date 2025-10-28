@@ -3,13 +3,9 @@ package com.houtu.springcloud.feign.consumer;
 import feign.Client;
 import feign.Request;
 import org.slf4j.Logger;
-import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerClient;
 import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
 import org.springframework.cloud.openfeign.loadbalancer.FeignBlockingLoadBalancerClient;
-import org.springframework.cloud.openfeign.loadbalancer.LoadBalancerFeignRequestTransformer;
-
-import java.util.List;
 
 /**
  * @Description 扩展FeignBlockingLoadBalancerClient
@@ -20,15 +16,15 @@ public class ExtensionFeignBlockingLoadBalancerClient extends FeignBlockingLoadB
 
     private static final Logger logger = org.slf4j.LoggerFactory.getLogger(ExtensionFeignBlockingLoadBalancerClient.class);
 
-    public ExtensionFeignBlockingLoadBalancerClient(Client delegate, LoadBalancerClient loadBalancerClient, LoadBalancerClientFactory loadBalancerClientFactory, List<LoadBalancerFeignRequestTransformer> transformers) {
-        super(delegate, loadBalancerClient, loadBalancerClientFactory, transformers);
+    public ExtensionFeignBlockingLoadBalancerClient(Client delegate, LoadBalancerClient loadBalancerClient, LoadBalancerClientFactory loadBalancerClientFactory) {
+        super(delegate, loadBalancerClient, loadBalancerClientFactory);
     }
 
     @Override
-    protected Request buildRequest(Request request, String reconstructedUrl, ServiceInstance instance) {
+    protected Request buildRequest(Request request, String reconstructedUrl) {
         if (logger.isDebugEnabled()) {
             logger.debug("FeignClient-buildRequest|{}|{}|{}", request.httpMethod().name(), request.url(), reconstructedUrl);
         }
-        return super.buildRequest(request, reconstructedUrl, instance);
+        return super.buildRequest(request, reconstructedUrl);
     }
 }

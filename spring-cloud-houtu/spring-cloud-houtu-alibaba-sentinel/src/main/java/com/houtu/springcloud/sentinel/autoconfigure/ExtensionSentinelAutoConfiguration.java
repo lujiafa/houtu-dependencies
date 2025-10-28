@@ -1,8 +1,8 @@
 package com.houtu.springcloud.sentinel.autoconfigure;
 
 import com.alibaba.cloud.sentinel.SentinelProperties;
-import com.alibaba.csp.sentinel.adapter.spring.webmvc_v6x.callback.BlockExceptionHandler;
-import com.alibaba.csp.sentinel.adapter.spring.webmvc_v6x.config.SentinelWebMvcConfig;
+import com.alibaba.csp.sentinel.adapter.spring.webmvc.callback.BlockExceptionHandler;
+import com.alibaba.csp.sentinel.adapter.spring.webmvc.config.SentinelWebMvcConfig;
 import com.alibaba.csp.sentinel.datasource.WritableDataSource;
 import com.houtu.springcloud.sentinel.handler.SimpleBlockExceptionHandler;
 import com.houtu.springcloud.sentinel.handler.WritableDataSourceBeanProcessor;

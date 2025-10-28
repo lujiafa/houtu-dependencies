@@ -10,19 +10,6 @@ import java.util.List;
 
 public final class RedisConfigUtils {
 
-//    public static SslBundle getSslBundle(RedisProperties redisProperties) {
-//        RedisProperties.Ssl ssl = redisProperties.getSsl();
-//        if (ssl == null || !ssl.isEnabled()) {
-//            return null;
-//        }
-//        SslBundles sslBundles = SpringApplicationContext.getBean("sslBundles", SslBundles.class);
-//        if (sslBundles != null) {
-//            return sslBundles.getBundle(ssl.getBundle());
-//        }
-//        return SslBundle.systemDefault();
-//    }
-
-
 
     /**
      * 参考：RedisConnectionConfiguration

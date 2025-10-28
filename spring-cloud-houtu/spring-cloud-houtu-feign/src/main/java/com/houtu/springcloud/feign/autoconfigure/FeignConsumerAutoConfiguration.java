@@ -22,7 +22,6 @@ import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
 import org.springframework.cloud.openfeign.FeignAutoConfiguration;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.cloud.openfeign.loadbalancer.FeignLoadBalancerAutoConfiguration;
-import org.springframework.cloud.openfeign.loadbalancer.LoadBalancerFeignRequestTransformer;
 import org.springframework.cloud.openfeign.loadbalancer.OnRetryNotEnabledCondition;
 import org.springframework.cloud.openfeign.support.HttpMessageConverterCustomizer;
 import org.springframework.cloud.openfeign.support.ResponseEntityDecoder;
@@ -32,7 +31,6 @@ import org.springframework.context.annotation.Conditional;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLSocketFactory;
-import java.util.List;
 
 @AutoConfiguration(
         before = {FeignLoadBalancerAutoConfiguration.class, FeignAutoConfiguration.class},
@@ -44,9 +42,9 @@ public class FeignConsumerAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     @Conditional({OnRetryNotEnabledCondition.class})
-    public Client feignClient(LoadBalancerClient loadBalancerClient, LoadBalancerClientFactory loadBalancerClientFactory, List<LoadBalancerFeignRequestTransformer> transformers) {
+    public Client feignClient(LoadBalancerClient loadBalancerClient, LoadBalancerClientFactory loadBalancerClientFactory) {
         // 参考 DefaultFeignLoadBalancerConfiguration
-        return new ExtensionFeignBlockingLoadBalancerClient(new Client.Default((SSLSocketFactory) null, (HostnameVerifier) null), loadBalancerClient, loadBalancerClientFactory, transformers);
+        return new ExtensionFeignBlockingLoadBalancerClient(new Client.Default((SSLSocketFactory) null, (HostnameVerifier) null), loadBalancerClient, loadBalancerClientFactory);
     }
 
     @Bean
@@ -54,8 +52,8 @@ public class FeignConsumerAutoConfiguration {
     @ConditionalOnClass(name = {"org.springframework.retry.support.RetryTemplate"})
     @ConditionalOnBean({LoadBalancedRetryFactory.class})
     @ConditionalOnProperty(value = {"spring.cloud.loadbalancer.retry.enabled"}, havingValue = "true", matchIfMissing = true)
-    public Client feignRetryClient(LoadBalancerClient loadBalancerClient, LoadBalancedRetryFactory loadBalancedRetryFactory, LoadBalancerClientFactory loadBalancerClientFactory, List<LoadBalancerFeignRequestTransformer> transformers) {
-        return new ExtensionRetryableFeignBlockingLoadBalancerClient(new Client.Default((SSLSocketFactory) null, (HostnameVerifier) null), loadBalancerClient, loadBalancedRetryFactory, loadBalancerClientFactory, transformers);
+    public Client feignRetryClient(LoadBalancerClient loadBalancerClient, LoadBalancedRetryFactory loadBalancedRetryFactory, LoadBalancerClientFactory loadBalancerClientFactory) {
+        return new ExtensionRetryableFeignBlockingLoadBalancerClient(new Client.Default((SSLSocketFactory) null, (HostnameVerifier) null), loadBalancerClient, loadBalancedRetryFactory, loadBalancerClientFactory);
     }
 
     @Bean

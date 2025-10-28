@@ -23,7 +23,7 @@ public class WritableDataSourceBeanProcessor implements BeanPostProcessor, Smart
 
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-        if (bean instanceof WritableDataSource writeableDataSource) {
+        if (bean instanceof WritableDataSource) {
             ResolvableType beanType = ResolvableType.forType(bean.getClass());
             if (ResolvableType.forClassWithGenerics(
                     WritableDataSource.class,

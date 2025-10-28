@@ -1,6 +1,6 @@
 package com.houtu.springcloud.loadbalancer.type;
 
-//import com.houtu.springcloud.loadbalancer.support.SpringCloudWeightFunction;
+import com.houtu.springcloud.loadbalancer.support.SpringCloudWeightFunction;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.util.ClassUtils;
 
@@ -9,8 +9,7 @@ public enum ServiceInstanceType {
     NACOS("nacos.cluster", "nacos.weight"),
     DEFAULT("cluster", "weight");
 
-//    static final Class<?> NACOS_CLASS = ClassUtils.isPresent("com.alibaba.cloud.nacos.NacosServiceInstance", SpringCloudWeightFunction.class.getClassLoader()) ? ClassUtils.resolveClassName("com.alibaba.cloud.nacos.NacosServiceInstance", SpringCloudWeightFunction.class.getClassLoader()) : null;
-    static final Class<?> NACOS_CLASS = null;
+    static final Class<?> NACOS_CLASS = ClassUtils.isPresent("com.alibaba.cloud.nacos.NacosServiceInstance", SpringCloudWeightFunction.class.getClassLoader()) ? ClassUtils.resolveClassName("com.alibaba.cloud.nacos.NacosServiceInstance", SpringCloudWeightFunction.class.getClassLoader()) : null;
 
     private String clusterName;
     private String weightName;
