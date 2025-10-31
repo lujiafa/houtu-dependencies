@@ -13,6 +13,11 @@ import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentMap;
 
+/**
+ * @ClassName ErrorResourceBundleMessageSource
+ * @date 2020年6月12日
+ * @Description 错误信息资源文件
+ */
 public class ErrorResourceBundleMessageSource extends ReloadableResourceBundleMessageSource {
 
     final static String CLASSPATH_RESOURCE_PATTERN = "classpath*:";

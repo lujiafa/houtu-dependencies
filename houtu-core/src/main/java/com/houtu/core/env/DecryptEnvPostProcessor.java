@@ -20,6 +20,12 @@ public class DecryptEnvPostProcessor implements EnvironmentPostProcessor, Spring
 
     static final StandardDecryptionPropertySource DECRYPT_PROPERTY_SOURCE = new StandardDecryptionPropertySource();
 
+    public DecryptEnvPostProcessor() {
+    }
+
+    public DecryptEnvPostProcessor(SpringApplication application, String[] args) {
+    }
+
     @Override
     public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
         DECRYPT_PROPERTY_SOURCE.reset(environment);
