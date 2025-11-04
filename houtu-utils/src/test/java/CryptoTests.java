@@ -4,8 +4,6 @@ import com.houtu.util.crypto.extension.ECDSAKeyPair;
 import com.houtu.util.crypto.extension.RSAKeyPair;
 import com.houtu.util.crypto.extension.SM2KeyPair;
 import com.houtu.util.crypto.type.*;
-import org.apache.commons.lang3.RandomStringUtils;
-import org.bouncycastle.jcajce.provider.digest.SM3;
 import org.springframework.util.Assert;
 
 import java.nio.charset.StandardCharsets;
@@ -69,14 +67,44 @@ public class CryptoTests {
         /**
          * AES
          */
-        String aesKey = "1234567890abcdef1234567890abcdef";
-        for (AESTransformation transformation : AESTransformation.values()) {
+        for (AESKeySize keySize : AESKeySize.values()) {
+            CodecData aesKey = AESUtils.getKey(keySize);
+            for (AESTransformation transformation : AESTransformation.values()) {
+                CodecData data = CodecData.utf8(source);
+                if (transformation.getTransformation().contains("NoPadding")) {
+                    data = AESUtils.padding(data);
+                }
+                String encrypted = AESUtils.encrypt(data, aesKey, transformation).base64();
+                Assert.isTrue(Objects.equals(data.base64(), AESUtils.decrypt(CodecData.base64(encrypted), aesKey, transformation).base64()), "aes " + transformation.getTransformation() + " assert fail.");
+            }
+        }
+
+        /**
+         * DES
+         */
+        String desKey = DESUtils.getKey().hex();
+        for (DESTransformation transformation : DESTransformation.values()) {
             CodecData data = CodecData.utf8(source);
             if (transformation.getTransformation().contains("NoPadding")) {
-                data = aseCustomPadding(data);
+                data = DESUtils.padding(data);
             }
-            String encrypted = AESUtils.encrypt(data, CodecData.hex(aesKey), transformation).base64();
-            Assert.isTrue(Objects.equals(data.base64(), AESUtils.decrypt(CodecData.base64(encrypted), CodecData.hex(aesKey), transformation).base64()), "aes " + transformation.getTransformation() + " assert fail.");
+            String encrypted = DESUtils.encrypt(data, CodecData.hex(desKey), transformation).base64();
+            Assert.isTrue(Objects.equals(data.base64(), DESUtils.decrypt(CodecData.base64(encrypted), CodecData.hex(desKey), transformation).base64()), "des " + transformation.getTransformation() + " assert fail.");
+        }
+
+        /**
+         * 3DES
+         */
+        for (DESedeKeySize keySize : DESedeKeySize.values()) {
+            CodecData desedeKey = DESedeUtils.getKey(keySize);
+            for (DESedeTransformation transformation : DESedeTransformation.values()) {
+                CodecData data = CodecData.utf8(source);
+                if (transformation.getTransformation().contains("NoPadding")) {
+                    data = DESUtils.padding(data);
+                }
+                String encrypted = DESedeUtils.encrypt(data, desedeKey, transformation).base64();
+                Assert.isTrue(Objects.equals(data.base64(), DESedeUtils.decrypt(CodecData.base64(encrypted), desedeKey, transformation).base64()), "3des " + transformation.getTransformation() + " assert fail.");
+            }
         }
 
         /**
@@ -86,7 +114,7 @@ public class CryptoTests {
         for (SM4Transformation transformation : SM4Transformation.values()) {
             CodecData data = CodecData.utf8(source);
             if (transformation.getTransformation().contains("NoPadding")) {
-                data = aseCustomPadding(data);
+                data = SM4Utils.padding(data);
             }
             String encrypted = SM4Utils.encrypt(data, sm4Key, transformation).base64();
             Assert.isTrue(data.base64().equals(SM4Utils.decrypt(CodecData.base64(encrypted), sm4Key, transformation).base64()), "sm4 " + transformation.getTransformation() + " assert fail.");
@@ -111,7 +139,7 @@ public class CryptoTests {
                 byte[] tmp_source = CodecData.utf8(source).bytes();
                 if (transformation == RSATransformationAlgorithm.RSA_NONE_NO_PADDING
                         || transformation == RSATransformationAlgorithm.RSA_ECB_NO_PADDING) {
-                    tmp_source = rsaCustomPadding(source.getBytes(StandardCharsets.UTF_8), 1024);
+                    tmp_source = rsaCustomPadding(source.getBytes(StandardCharsets.UTF_8), rsaKeySize.getKeySize());
                 }
                 String base64 = RSAUtils.encryptByPrivateKey(CodecData.bytes(tmp_source), CodecData.base64(privateKey), transformation).base64();
                 Assert.isTrue(source.equals(RSAUtils.decryptByPublicKey(CodecData.base64(base64), CodecData.base64(publicKey), transformation).utf8()), transformation.getTransformationAlgorithm() + " assert fail.");
@@ -126,7 +154,7 @@ public class CryptoTests {
                 byte[] tmp_source = CodecData.utf8(source).bytes();
                 if (transformation == RSATransformationAlgorithm.RSA_NONE_NO_PADDING
                         || transformation == RSATransformationAlgorithm.RSA_ECB_NO_PADDING) {
-                    tmp_source = rsaCustomPadding(source.getBytes(StandardCharsets.UTF_8), 1024);
+                    tmp_source = rsaCustomPadding(source.getBytes(StandardCharsets.UTF_8), rsaKeySize.getKeySize());
                 }
                 String base64 = RSAUtils.encryptByPublicKey(CodecData.bytes(tmp_source), CodecData.base64(publicKey), transformation).base64();
                 Assert.isTrue(source.equals(RSAUtils.decryptByPrivateKey(CodecData.base64(base64), CodecData.base64(privateKey), transformation).utf8()), transformation.getTransformationAlgorithm() + " assert fail.");
@@ -178,13 +206,5 @@ public class CryptoTests {
         return padded;
     }
 
-    private static CodecData aseCustomPadding(CodecData data) {
-        if (data.bytes().length % 16 == 0) {
-            return data;
-        }
-        byte[] bytes = new byte[(data.bytes().length / 16 + 1) * 16];
-        System.arraycopy(data.bytes(), 0, bytes, 0, data.bytes().length);
-        return CodecData.bytes(bytes);
-    }
 
 }
