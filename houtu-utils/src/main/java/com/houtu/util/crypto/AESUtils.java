@@ -2,6 +2,7 @@ package com.houtu.util.crypto;
 
 import com.houtu.util.common.CodecData;
 import com.houtu.util.constant.CryptoConstant;
+import com.houtu.util.crypto.type.AESKeySize;
 import com.houtu.util.crypto.type.AESTransformation;
 
 import javax.crypto.Cipher;
@@ -9,6 +10,7 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+import java.security.SecureRandom;
 
 /**
  * @author lujiafa
@@ -19,17 +21,18 @@ public final class AESUtils {
 
     /**
      * 提供获取默认AES Key
-     *  AES密钥长度限制说明：
-     *    AES-128: 128位 (16字节)
-     *    AES-192: 192位 (24字节)
-     *    AES-256: 256位 (32字节)
-     *    不支持其他任意长度的密钥！
-     * @param transformation
+     * AES密钥长度限制说明：
+     * AES-128: 128位 (16字节)
+     * AES-192: 192位 (24字节)
+     * AES-256: 256位 (32字节)
+     * 不支持其他任意长度的密钥！
+     *
      * @return
      */
-    public static CodecData getKey(AESTransformation transformation) {
+    public static CodecData getKey(AESKeySize keySize) {
         try {
-            KeyGenerator keyGen = KeyGenerator.getInstance(CryptoConstant.ALGORITHM_AES);;
+            KeyGenerator keyGen = KeyGenerator.getInstance(CryptoConstant.ALGORITHM_AES);
+            keyGen.init(128,  new SecureRandom());
             SecretKey secretKey = keyGen.generateKey();
             return CodecData.bytes(secretKey.getEncoded());
         } catch (Exception e) {
@@ -43,7 +46,7 @@ public final class AESUtils {
      *
      * @param source         需加密字数据【M】
      * @param key            密钥【M】
-     * @param transformation <p>工作模式与填充方式，如："SM4/ECB/NoPadding。可以通过"AESTransformation.ECB().NoPadding()"获取提供。【M】</p>
+     * @param transformation <p>工作模式与填充方式，如："AES/ECB/NoPadding。【M】</p>
      *                       <p>ECB：不需要初始化向量</p>
      *                       <p>CBC、CFB、OFB、CTR、GCM：需要初始化向量</p>
      * @return byte[] 加密后的数据
@@ -61,7 +64,7 @@ public final class AESUtils {
      *
      * @param source         需加密字数据【M】
      * @param key            密钥【M】
-     * @param transformation <p>工作模式与填充方式，如："SM4/ECB/NoPadding。可以通过"AESTransformation.ECB().NoPadding()"获取提供。【M】</p>
+     * @param transformation <p>工作模式与填充方式，如："AES/ECB/NoPadding。【M】</p>
      *                       <p>ECB：不需要初始化向量</p>
      *                       <p>CBC、CFB、OFB、CTR、GCM：需要初始化向量</p>
      * @return byte[] 加密后的数据
@@ -78,7 +81,7 @@ public final class AESUtils {
      *
      * @param source         需加密字数据【M】
      * @param key            密钥【M】
-     * @param transformation <p>工作模式与填充方式，如："SM4/ECB/NoPadding。可以通过"AESTransformation.ECB().NoPadding()"获取提供。【M】</p>
+     * @param transformation <p>工作模式与填充方式，如："AES/ECB/NoPadding。【M】</p>
      *                       <p>ECB：不需要初始化向量</p>
      *                       <p>CBC、CFB、OFB、CTR、GCM：需要初始化向量</p>
      * @return byte[] 加密后的数据
@@ -94,7 +97,7 @@ public final class AESUtils {
      *
      * @param source         需加密字数据【M】
      * @param key            密钥【M】
-     * @param transformation <p>工作模式与填充方式，如："SM4/ECB/NoPadding。可以通过"AESTransformation.ECB().NoPadding()"获取提供。【M】</p>
+     * @param transformation <p>工作模式与填充方式，如："AES/ECB/NoPadding。【M】</p>
      *                       <p>ECB：不需要初始化向量</p>
      *                       <p>CBC、CFB、OFB、CTR、GCM：需要初始化向量</p>
      * @param iv             向量，格式为16字节Byte数组【C】
@@ -112,7 +115,7 @@ public final class AESUtils {
      *
      * @param source         需加密字数据【M】
      * @param key            密钥【M】
-     * @param transformation <p>工作模式与填充方式，如："SM4/ECB/NoPadding。可以通过"AESTransformation.ECB().NoPadding()"获取提供。【M】</p>
+     * @param transformation <p>工作模式与填充方式，如："AES/ECB/NoPadding。【M】</p>
      *                       <p>ECB：不需要初始化向量</p>
      *                       <p>CBC、CFB、OFB、CTR、GCM：需要初始化向量</p>
      * @param iv             向量，格式为16字节Byte数组【C】
@@ -130,7 +133,7 @@ public final class AESUtils {
      *
      * @param source         需加密字数据【M】
      * @param key            密钥【M】
-     * @param transformation <p>工作模式与填充方式，如："SM4/ECB/NoPadding。可以通过"AESTransformation.ECB().NoPadding()"获取提供。【M】</p>
+     * @param transformation <p>工作模式与填充方式，如："AES/ECB/NoPadding。【M】</p>
      *                       <p>ECB：不需要初始化向量</p>
      *                       <p>CBC、CFB、OFB、CTR、GCM：需要初始化向量</p>
      * @param iv             向量，格式为16字节Byte数组【C】
@@ -149,20 +152,10 @@ public final class AESUtils {
             cipher = Cipher.getInstance(transformation.getTransformation(), transformation.getProvider());
         }
         if (transformation.isSupportIV()) {
-//            if (AESTransformation.GCM_NO_PADDING.equals(transformation)
-//                    || AESTransformation.GCM_PKCS5_PADDING.equals(transformation)
-//                    || AESTransformation.GCM_PKCS7_PADDING.equals(transformation)) {
-//                if (iv == null) {
-//                    iv = new byte[12];
-//                    new SecureRandom().nextBytes(iv);
-//                }
-//                cipher.init(Cipher.ENCRYPT_MODE, secretKey, new GCMParameterSpec(iv.length * 8, iv)); // GCM推荐IV长度为12字节
-//            } else {
-                if (iv == null) {
-                    iv = new byte[16];
-                }
-                cipher.init(Cipher.ENCRYPT_MODE, secretKey, new IvParameterSpec(iv));
-//            }
+            if (iv == null) {
+                iv = new byte[16];
+            }
+            cipher.init(Cipher.ENCRYPT_MODE, secretKey, new IvParameterSpec(iv));
         } else {
             cipher.init(Cipher.ENCRYPT_MODE, secretKey);
         }
@@ -175,7 +168,7 @@ public final class AESUtils {
      *
      * @param encrypted      需解密字数据【M】
      * @param key            密钥【M】
-     * @param transformation <p>工作模式与填充方式，如："SM4/ECB/NoPadding。可以通过"AESTransformation.ECB().NoPadding()"获取提供。【M】</p>
+     * @param transformation <p>工作模式与填充方式，如："AES/ECB/NoPadding。【M】</p>
      *                       <p>ECB：不需要初始化向量</p>
      *                       <p>CBC、CFB、OFB、CTR、GCM：需要初始化向量</p>
      * @throws Exception
@@ -191,7 +184,7 @@ public final class AESUtils {
      *
      * @param encrypted      需解密字数据【M】
      * @param key            密钥【M】
-     * @param transformation <p>工作模式与填充方式，如："SM4/ECB/NoPadding。可以通过"AESTransformation.ECB().NoPadding()"获取提供。【M】</p>
+     * @param transformation <p>工作模式与填充方式，如："AES/ECB/NoPadding。【M】</p>
      *                       <p>ECB：不需要初始化向量</p>
      *                       <p>CBC、CFB、OFB、CTR、GCM：需要初始化向量</p>
      * @throws Exception
@@ -207,7 +200,7 @@ public final class AESUtils {
      *
      * @param encrypted      需解密字数据【M】
      * @param key            密钥【M】
-     * @param transformation <p>工作模式与填充方式，如："SM4/ECB/NoPadding。可以通过"AESTransformation.ECB().NoPadding()"获取提供。【M】</p>
+     * @param transformation <p>工作模式与填充方式，如："AES/ECB/NoPadding。【M】</p>
      *                       <p>ECB：不需要初始化向量</p>
      *                       <p>CBC、CFB、OFB、CTR、GCM：需要初始化向量</p>
      * @throws Exception
@@ -223,7 +216,7 @@ public final class AESUtils {
      *
      * @param encrypted      需解密字数据【M】
      * @param key            密钥【M】
-     * @param transformation <p>工作模式与填充方式，如："SM4/ECB/NoPadding。可以通过"AESTransformation.ECB().NoPadding()"获取提供。【M】</p>
+     * @param transformation <p>工作模式与填充方式，如："AES/ECB/NoPadding。【M】</p>
      *                       <p>ECB：不需要初始化向量</p>
      *                       <p>CBC、CFB、OFB、CTR、GCM：需要初始化向量</p>
      * @param iv             向量，格式为16字节Byte数组【C】
@@ -239,7 +232,7 @@ public final class AESUtils {
      *
      * @param encrypted      需解密字数据【M】
      * @param key            密钥【M】
-     * @param transformation <p>工作模式与填充方式，如："SM4/ECB/NoPadding。可以通过"AESTransformation.ECB().NoPadding()"获取提供。【M】</p>
+     * @param transformation <p>工作模式与填充方式，如："AES/ECB/NoPadding。【M】</p>
      *                       <p>ECB：不需要初始化向量</p>
      *                       <p>CBC、CFB、OFB、CTR、GCM：需要初始化向量</p>
      * @param iv             向量，格式为16字节Byte数组【C】
@@ -257,26 +250,30 @@ public final class AESUtils {
             cipher = Cipher.getInstance(transformation.getTransformation(), transformation.getProvider());
         }
         if (transformation.isSupportIV()) {
-//            if (AESTransformation.GCM_NO_PADDING.equals(transformation)
-//                    || AESTransformation.GCM_PKCS5_PADDING.equals(transformation)
-//                    || AESTransformation.GCM_PKCS7_PADDING.equals(transformation)) {
-//                if (iv == null) {
-//                    iv = new byte[12];
-////                    SecureRandom random = new SecureRandom();
-////                    random.nextBytes(iv);
-//                }
-//                GCMParameterSpec spec = new GCMParameterSpec(128, iv);
-//                cipher.init(Cipher.DECRYPT_MODE, secretKey, spec);
-//            } else {
-                if (iv == null) {
-                    iv = new byte[16];
-                }
-                cipher.init(Cipher.DECRYPT_MODE, secretKey, new IvParameterSpec(iv));
-//            }
+            if (iv == null) {
+                iv = new byte[16];
+            }
+            cipher.init(Cipher.DECRYPT_MODE, secretKey, new IvParameterSpec(iv));
         } else {
             cipher.init(Cipher.DECRYPT_MODE, secretKey);
         }
         return CodecData.bytes(cipher.doFinal(encrypted));
+    }
+
+
+    /**
+     * 填充数据
+     * @param data 待填充数据
+     * @return 填充后的数据
+     */
+    public static CodecData padding(CodecData data) {
+        byte[] dataArray = data.bytes();
+        if (dataArray.length % 16 == 0) {
+            return data;
+        }
+        byte[] padded = new byte[((dataArray.length / 16) + 1) * 16];
+        System.arraycopy(dataArray, 0, padded, 0, dataArray.length);
+        return CodecData.bytes(padded);
     }
 
 }

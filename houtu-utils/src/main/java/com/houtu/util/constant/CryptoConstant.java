@@ -16,6 +16,8 @@ public interface CryptoConstant {
 	String ALGORITHM_MD5 = "MD5";
 	String ALGORITHM_HMAC_MD5 = "HmacMD5";
 	String ALGORITHM_AES = "AES";
+	String ALGORITHM_DES = "DES";
+	String ALGORITHM_3DES = "DESede";
 	String ALGORITHM_RSA = "RSA";
 	String ALGORITHM_SM4 = "SM4";
 

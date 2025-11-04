@@ -1,7 +1,7 @@
 package com.houtu.util.crypto;
 
-import com.houtu.util.constant.CryptoConstant;
 import com.houtu.util.common.CodecData;
+import com.houtu.util.constant.CryptoConstant;
 import com.houtu.util.crypto.type.SM4Transformation;
 
 import javax.crypto.Cipher;
@@ -15,10 +15,14 @@ import javax.crypto.spec.SecretKeySpec;
  */
 public class SM4Utils {
 
+    /**
+     * 获取密钥（标准SM4只支持128位密钥长度）
+     * @return 密钥
+     * @throws Exception
+     */
     public static CodecData getKey() throws Exception {
         KeyGenerator keyGen = KeyGenerator.getInstance(CryptoConstant.ALGORITHM_SM4, CryptoConstant.PROVIDER_BOUNCY_CASTLE);
-        // SM4默认密钥长度为128位
-        //keyGen.init(128);
+        keyGen.init(128);
         SecretKey secretKey = keyGen.generateKey();
         return CodecData.bytes(secretKey.getEncoded());
     }
@@ -28,7 +32,7 @@ public class SM4Utils {
      *
      * @param data           加密源数据【M】
      * @param key       密钥【M】
-     * @param transformation <p>工作模式与填充方式，如："SM4/ECB/NoPadding。可以通过"SM4Utils.SM4Transformation.ECB().NoPadding()"获取提供。【M】</p>
+     * @param transformation <p>工作模式与填充方式，如："SM4/ECB/NoPadding。【M】</p>
      *                       <p>ECB：不需要初始化向量</p>
      *                       <p>CBC、CFB、OFB、CTR、GCM：需要初始化向量</p>
      * @return 加密数据
@@ -43,7 +47,7 @@ public class SM4Utils {
      *
      * @param data           加密源数据【M】
      * @param key       密钥【M】
-     * @param transformation <p>工作模式与填充方式，如："SM4/ECB/NoPadding。可以通过"SM4Utils.SM4Transformation.ECB().NoPadding()"获取提供。【M】</p>
+     * @param transformation <p>工作模式与填充方式，如："SM4/ECB/NoPadding。【M】</p>
      *                       <p>ECB：不需要初始化向量</p>
      *                       <p>CBC、CFB、OFB、CTR、GCM：需要初始化向量</p>
      * @return 加密数据
@@ -58,7 +62,7 @@ public class SM4Utils {
      *
      * @param data           加密源数据【M】
      * @param key       密钥【M】
-     * @param transformation <p>工作模式与填充方式，如："SM4/ECB/NoPadding。可以通过"SM4Utils.SM4Transformation.ECB().NoPadding()"获取提供。【M】</p>
+     * @param transformation <p>工作模式与填充方式，如："SM4/ECB/NoPadding。【M】</p>
      *                       <p>ECB：不需要初始化向量</p>
      *                       <p>CBC、CFB、OFB、CTR、GCM：需要初始化向量</p>
      * @return 加密数据
@@ -75,7 +79,7 @@ public class SM4Utils {
      * @param source           加密源数据【M】
      * @param key       密钥【M】
      * @param iv             向量，格式为16字节Byte数组【C】
-     * @param transformation <p>工作模式与填充方式，如："SM4/ECB/NoPadding。可以通过"SM4Utils.SM4Transformation.ECB().NoPadding()"获取提供。【M】</p>
+     * @param transformation <p>工作模式与填充方式，如："SM4/ECB/NoPadding。【M】</p>
      *                       <p>ECB：不需要初始化向量</p>
      *                       <p>CBC、CFB、OFB、CTR、GCM：需要初始化向量</p>
      * @return 加密数据
@@ -92,7 +96,7 @@ public class SM4Utils {
      * @param source           加密源数据【M】
      * @param key       密钥【M】
      * @param iv             向量，格式为16字节Byte数组【C】
-     * @param transformation <p>工作模式与填充方式，如："SM4/ECB/NoPadding。可以通过"SM4Utils.SM4Transformation.ECB().NoPadding()"获取提供。【M】</p>
+     * @param transformation <p>工作模式与填充方式，如："SM4/ECB/NoPadding。【M】</p>
      *                       <p>ECB：不需要初始化向量</p>
      *                       <p>CBC、CFB、OFB、CTR、GCM：需要初始化向量</p>
      * @return 加密数据
@@ -114,7 +118,7 @@ public class SM4Utils {
      *
      * @param encrypted     密文数据【M】
      * @param key            密钥【M】
-     * @param transformation <p>工作模式与填充方式，如："SM4/ECB/NoPadding。可以通过"SM4Utils.SM4Transformation.ECB().NoPadding()"获取提供。【M】</p>
+     * @param transformation <p>工作模式与填充方式，如："SM4/ECB/NoPadding。【M】</p>
      *                       <p>ECB：不需要初始化向量</p>
      *                       <p>CBC、CFB、OFB、CTR、GCM：需要初始化向量</p>
      * @return 解密数据
@@ -129,7 +133,7 @@ public class SM4Utils {
      *
      * @param encrypted     密文数据【M】
      * @param key            密钥【M】
-     * @param transformation <p>工作模式与填充方式，如："SM4/ECB/NoPadding。可以通过"SM4Utils.SM4Transformation.ECB().NoPadding()"获取提供。【M】</p>
+     * @param transformation <p>工作模式与填充方式，如："SM4/ECB/NoPadding。【M】</p>
      *                       <p>ECB：不需要初始化向量</p>
      *                       <p>CBC、CFB、OFB、CTR、GCM：需要初始化向量</p>
      * @return 解密数据
@@ -144,7 +148,7 @@ public class SM4Utils {
      *
      * @param encrypted     密文数据【M】
      * @param key            密钥【M】
-     * @param transformation <p>工作模式与填充方式，如："SM4/ECB/NoPadding。可以通过"SM4Utils.SM4Transformation.ECB().NoPadding()"获取提供。【M】</p>
+     * @param transformation <p>工作模式与填充方式，如："SM4/ECB/NoPadding。【M】</p>
      *                       <p>ECB：不需要初始化向量</p>
      *                       <p>CBC、CFB、OFB、CTR、GCM：需要初始化向量</p>
      * @return 解密数据
@@ -161,7 +165,7 @@ public class SM4Utils {
      * @param encrypted      密文数据【M】
      * @param key       密钥【M】
      * @param iv             向量，格式为16字节Byte数组【C】
-     * @param transformation <p>工作模式与填充方式，如："SM4/ECB/NoPadding。可以通过"SM4Utils.SM4Transformation.ECB().NoPadding()"获取提供。【M】</p>
+     * @param transformation <p>工作模式与填充方式，如："SM4/ECB/NoPadding。【M】</p>
      *                       <p>ECB：不需要初始化向量</p>
      *                       <p>CBC、CFB、OFB、CTR、GCM：需要初始化向量</p>
      * @return 解密数据
@@ -178,7 +182,7 @@ public class SM4Utils {
      * @param encrypted      密文数据【M】
      * @param key       密钥【M】
      * @param iv             向量，格式为16字节Byte数组【C】
-     * @param transformation <p>工作模式与填充方式，如："SM4/ECB/NoPadding。可以通过"SM4Utils.SM4Transformation.ECB().NoPadding()"获取提供。【M】</p>
+     * @param transformation <p>工作模式与填充方式，如："SM4/ECB/NoPadding。【M】</p>
      *                       <p>ECB：不需要初始化向量</p>
      *                       <p>CBC、CFB、OFB、CTR、GCM：需要初始化向量</p>
      * @return 解密数据
@@ -193,6 +197,21 @@ public class SM4Utils {
             encryptCipher.init(Cipher.DECRYPT_MODE, secretKeySpec);
         }
         return CodecData.bytes(encryptCipher.doFinal(encrypted));
+    }
+
+    /**
+     * 填充数据
+     * @param data 待填充数据
+     * @return 填充后的数据
+     */
+    public static CodecData padding(CodecData data) {
+        if (data.bytes().length % 16 == 0) {
+            return data;
+        }
+        byte[] dataArray = data.bytes();
+        byte[] padded = new byte[((dataArray.length / 16) + 1) * 16];
+        System.arraycopy(dataArray, 0, padded, 0, dataArray.length);
+        return CodecData.bytes(padded);
     }
 
 }

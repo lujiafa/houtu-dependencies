@@ -10,6 +10,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.IntStream;
 
 /**
+ * @author lujiafa
  * @date 2018年4月17日
  * @Description 64进制规则字符串工具类
  */

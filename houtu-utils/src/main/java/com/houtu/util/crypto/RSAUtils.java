@@ -350,4 +350,21 @@ public final class RSAUtils {
         }
     }
 
+    /**
+     * 填充数据
+     * @param data 待填充数据
+     * @return 填充后的数据
+     */
+    public static CodecData padding(CodecData data, RSAKeySize keySize) {
+        byte[] dataBytes = data.bytes();
+        int keySizeBytes = keySize.getKeySize() / 8;
+        if (dataBytes.length > keySizeBytes) {
+            throw new IllegalArgumentException("数据长度超过密钥长度，建议使用分段加密");
+        }
+        byte[] padded = new byte[keySizeBytes];
+        // 使用0填充到左侧，实现左对齐的自定义填充
+        System.arraycopy(dataBytes, 0, padded, keySizeBytes - dataBytes.length, dataBytes.length);
+        return CodecData.bytes(padded);
+    }
+
 }

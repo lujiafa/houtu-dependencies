@@ -216,6 +216,10 @@ public class SM2Utils {
         return signature.verify(sign);
     }
 
+    /**
+     * 标准SM2: 固定256位密钥长度（32字节），基于椭圆曲线密码学（ECC）的公钥密码算法
+     * @return SM2密钥对
+     */
     public static SM2KeyPair getKeyPair() {
         try {
             KeyPairGenerator keyGen = KeyPairGenerator.getInstance(CryptoConstant.ALGORITHM_SM2, CryptoConstant.PROVIDER_BOUNCY_CASTLE);

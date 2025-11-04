@@ -27,7 +27,7 @@ public enum AESTransformation {
     OFB_PKCS7_PADDING("AES/OFB/PKCS7Padding",true,  CryptoConstant.PROVIDER_BOUNCY_CASTLE),
 
     // CTR模式
-    CTR_NO_PADDING("AES/CTR/NoPadding",true,  CryptoConstant.PROVIDER_BOUNCY_CASTLE), // 需要自定义实现padding，如果数据长度不是块大小的整数倍，填充其到整数倍（SM4_BLOCK_SIZE = 16）
+    CTR_NO_PADDING("AES/CTR/NoPadding",true,  CryptoConstant.PROVIDER_BOUNCY_CASTLE), // 需要自定义实现padding，如果数据长度不是块大小的整数倍，填充其到整数倍（AES_BLOCK_SIZE = 16）
     CTR_PKCS5_PADDING("AES/CTR/PKCS5Padding",true,  CryptoConstant.PROVIDER_BOUNCY_CASTLE),
     CTR_PKCS7_PADDING("AES/CTR/PKCS7Padding",true,  CryptoConstant.PROVIDER_BOUNCY_CASTLE),
 
