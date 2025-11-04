@@ -32,7 +32,7 @@ public final class AESUtils {
     public static CodecData getKey(AESKeySize keySize) {
         try {
             KeyGenerator keyGen = KeyGenerator.getInstance(CryptoConstant.ALGORITHM_AES);
-            keyGen.init(128,  new SecureRandom());
+            keyGen.init(keySize.getKeySize(),  new SecureRandom());
             SecretKey secretKey = keyGen.generateKey();
             return CodecData.bytes(secretKey.getEncoded());
         } catch (Exception e) {
