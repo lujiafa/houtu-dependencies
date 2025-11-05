@@ -39,7 +39,7 @@ public class DESUtils {
      *
      * @param source         需加密字数据【M】
      * @param key            密钥【M】
-     * @param transformation <p>工作模式与填充方式，如："DES/ECB/NoPadding。可以通过"DESTransformation.ECB().NoPadding()"获取提供。【M】</p>
+     * @param transformation <p>工作模式与填充方式，如："DES/ECB/NoPadding。【M】</p>
      *                       <p>ECB：不需要初始化向量</p>
      *                       <p>CBC、CFB、OFB、CTR：需要初始化向量</p>
      * @return byte[] 加密后的数据
@@ -57,7 +57,7 @@ public class DESUtils {
      *
      * @param source         需加密字数据【M】
      * @param key            密钥【M】
-     * @param transformation <p>工作模式与填充方式，如："DES/ECB/NoPadding。可以通过"DESTransformation.ECB().NoPadding()"获取提供。【M】</p>
+     * @param transformation <p>工作模式与填充方式，如："DES/ECB/NoPadding。【M】</p>
      *                       <p>ECB：不需要初始化向量</p>
      *                       <p>CBC、CFB、OFB、CTR：需要初始化向量</p>
      * @return byte[] 加密后的数据
@@ -74,7 +74,7 @@ public class DESUtils {
      *
      * @param source         需加密字数据【M】
      * @param key            密钥【M】
-     * @param transformation <p>工作模式与填充方式，如："DES/ECB/NoPadding。可以通过"DESTransformation.ECB().NoPadding()"获取提供。【M】</p>
+     * @param transformation <p>工作模式与填充方式，如："DES/ECB/NoPadding。【M】</p>
      *                       <p>ECB：不需要初始化向量</p>
      *                       <p>CBC、CFB、OFB、CTR：需要初始化向量</p>
      * @return byte[] 加密后的数据
@@ -90,7 +90,7 @@ public class DESUtils {
      *
      * @param source         需加密字数据【M】
      * @param key            密钥【M】
-     * @param transformation <p>工作模式与填充方式，如："DES/ECB/NoPadding。可以通过"DESTransformation.ECB().NoPadding()"获取提供。【M】</p>
+     * @param transformation <p>工作模式与填充方式，如："DES/ECB/NoPadding。【M】</p>
      *                       <p>ECB：不需要初始化向量</p>
      *                       <p>CBC、CFB、OFB、CTR：需要初始化向量</p>
      * @param iv             向量，格式为8字节Byte数组【C】
@@ -108,7 +108,7 @@ public class DESUtils {
      *
      * @param source         需加密字数据【M】
      * @param key            密钥【M】
-     * @param transformation <p>工作模式与填充方式，如："DES/ECB/NoPadding。可以通过"DESTransformation.ECB().NoPadding()"获取提供。【M】</p>
+     * @param transformation <p>工作模式与填充方式，如："DES/ECB/NoPadding。【M】</p>
      *                       <p>ECB：不需要初始化向量</p>
      *                       <p>CBC、CFB、OFB、CTR：需要初始化向量</p>
      * @param iv             向量，格式为8字节Byte数组【C】
@@ -126,7 +126,7 @@ public class DESUtils {
      *
      * @param source         需加密字数据【M】
      * @param key            密钥【M】
-     * @param transformation <p>工作模式与填充方式，如："DES/ECB/NoPadding。可以通过"DESTransformation.ECB().NoPadding()"获取提供。【M】</p>
+     * @param transformation <p>工作模式与填充方式，如："DES/ECB/NoPadding。【M】</p>
      *                       <p>ECB：不需要初始化向量</p>
      *                       <p>CBC、CFB、OFB、CTR：需要初始化向量</p>
      * @param iv             向量，格式为8字节Byte数组【C】
@@ -161,7 +161,7 @@ public class DESUtils {
      *
      * @param encrypted      需解密字数据【M】
      * @param key            密钥【M】
-     * @param transformation <p>工作模式与填充方式，如："DES/ECB/NoPadding。可以通过"DESTransformation.ECB().NoPadding()"获取提供。【M】</p>
+     * @param transformation <p>工作模式与填充方式，如："DES/ECB/NoPadding。【M】</p>
      *                       <p>ECB：不需要初始化向量</p>
      *                       <p>CBC、CFB、OFB、CTR：需要初始化向量</p>
      * @throws Exception
@@ -177,7 +177,7 @@ public class DESUtils {
      *
      * @param encrypted      需解密字数据【M】
      * @param key            密钥【M】
-     * @param transformation <p>工作模式与填充方式，如："DES/ECB/NoPadding。可以通过"DESTransformation.ECB().NoPadding()"获取提供。【M】</p>
+     * @param transformation <p>工作模式与填充方式，如："DES/ECB/NoPadding。【M】</p>
      *                       <p>ECB：不需要初始化向量</p>
      *                       <p>CBC、CFB、OFB、CTR：需要初始化向量</p>
      * @throws Exception
@@ -193,7 +193,7 @@ public class DESUtils {
      *
      * @param encrypted      需解密字数据【M】
      * @param key            密钥【M】
-     * @param transformation <p>工作模式与填充方式，如："DES/ECB/NoPadding。可以通过"DESTransformation.ECB().NoPadding()"获取提供。【M】</p>
+     * @param transformation <p>工作模式与填充方式，如："DES/ECB/NoPadding。【M】</p>
      *                       <p>ECB：不需要初始化向量</p>
      *                       <p>CBC、CFB、OFB、CTR：需要初始化向量</p>
      * @throws Exception
@@ -209,7 +209,7 @@ public class DESUtils {
      *
      * @param encrypted      需解密字数据【M】
      * @param key            密钥【M】
-     * @param transformation <p>工作模式与填充方式，如："DES/ECB/NoPadding。可以通过"DESTransformation.ECB().NoPadding()"获取提供。【M】</p>
+     * @param transformation <p>工作模式与填充方式，如："DES/ECB/NoPadding。【M】</p>
      *                       <p>ECB：不需要初始化向量</p>
      *                       <p>CBC、CFB、OFB、CTR：需要初始化向量</p>
      * @param iv             向量，格式为8字节Byte数组【C】
@@ -225,7 +225,7 @@ public class DESUtils {
      *
      * @param encrypted      需解密字数据【M】
      * @param key            密钥【M】
-     * @param transformation <p>工作模式与填充方式，如："DES/ECB/NoPadding。可以通过"DESTransformation.ECB().NoPadding()"获取提供。【M】</p>
+     * @param transformation <p>工作模式与填充方式，如："DES/ECB/NoPadding。【M】</p>
      *                       <p>ECB：不需要初始化向量</p>
      *                       <p>CBC、CFB、OFB、CTR：需要初始化向量</p>
      * @param iv             向量，格式为8字节Byte数组【C】
