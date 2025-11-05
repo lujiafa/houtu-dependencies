@@ -153,7 +153,15 @@ public final class AESUtils {
         }
         if (transformation.isSupportIV()) {
             if (iv == null) {
-                iv = new byte[16];
+                if (AESTransformation.GCM_NO_PADDING.equals(transformation)) {
+                    iv = new byte[12]; // GCM推荐使用12字节nonce
+                } else if (AESTransformation.CCM_NO_PADDING.equals(transformation)) {
+                    iv = new byte[12]; // CCM模式长度必须在7-13字节之间
+                } else if (AESTransformation.OCB_NO_PADDING.equals(transformation)) {
+                    iv = new byte[15]; // OCB通常使用15字节nonce
+                } else {
+                    iv = new byte[16]; // 其他模式使用16字节
+                }
             }
             cipher.init(Cipher.ENCRYPT_MODE, secretKey, new IvParameterSpec(iv));
         } else {
@@ -175,7 +183,7 @@ public final class AESUtils {
      */
     public static CodecData decrypt(CodecData encrypted, CodecData key, AESTransformation transformation)
             throws Exception {
-        return decrypt(encrypted.bytes(), key.bytes(), transformation, new byte[16]);
+        return decrypt(encrypted.bytes(), key.bytes(), transformation, null);
     }
 
     /**
@@ -191,7 +199,7 @@ public final class AESUtils {
      */
     public static CodecData decrypt(byte[] encrypted, CodecData key, AESTransformation transformation)
             throws Exception {
-        return decrypt(encrypted, key.bytes(), transformation, new byte[16]);
+        return decrypt(encrypted, key.bytes(), transformation, null);
     }
 
     /**
@@ -207,7 +215,7 @@ public final class AESUtils {
      */
     public static CodecData decrypt(byte[] encrypted, byte[] key, AESTransformation transformation)
             throws Exception {
-        return decrypt(encrypted, key, transformation, new byte[16]);
+        return decrypt(encrypted, key, transformation, null);
     }
 
     /**
@@ -251,7 +259,15 @@ public final class AESUtils {
         }
         if (transformation.isSupportIV()) {
             if (iv == null) {
-                iv = new byte[16];
+                if (AESTransformation.GCM_NO_PADDING.equals(transformation)) {
+                    iv = new byte[12]; // GCM推荐使用12字节nonce
+                } else if (AESTransformation.CCM_NO_PADDING.equals(transformation)) {
+                    iv = new byte[12]; // CCM模式长度必须在7-13字节之间
+                } else if (AESTransformation.OCB_NO_PADDING.equals(transformation)) {
+                    iv = new byte[15]; // OCB通常使用15字节nonce
+                } else {
+                    iv = new byte[16]; // 其他模式使用16字节
+                }
             }
             cipher.init(Cipher.DECRYPT_MODE, secretKey, new IvParameterSpec(iv));
         } else {

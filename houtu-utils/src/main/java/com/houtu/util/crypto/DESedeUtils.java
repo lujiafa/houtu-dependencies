@@ -170,7 +170,7 @@ public class DESedeUtils {
      */
     public static CodecData decrypt(CodecData encrypted, CodecData key, DESedeTransformation transformation)
             throws Exception {
-        return decrypt(encrypted.bytes(), key.bytes(), transformation, new byte[8]);
+        return decrypt(encrypted.bytes(), key.bytes(), transformation, null);
     }
 
     /**
@@ -186,7 +186,7 @@ public class DESedeUtils {
      */
     public static CodecData decrypt(byte[] encrypted, CodecData key, DESedeTransformation transformation)
             throws Exception {
-        return decrypt(encrypted, key.bytes(), transformation, new byte[8]);
+        return decrypt(encrypted, key.bytes(), transformation, null);
     }
 
     /**
@@ -202,7 +202,7 @@ public class DESedeUtils {
      */
     public static CodecData decrypt(byte[] encrypted, byte[] key, DESedeTransformation transformation)
             throws Exception {
-        return decrypt(encrypted, key, transformation, new byte[8]);
+        return decrypt(encrypted, key, transformation, null);
     }
 
     /**
