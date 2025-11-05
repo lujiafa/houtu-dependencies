@@ -31,8 +31,10 @@ public enum AESTransformation {
     CTR_PKCS5_PADDING("AES/CTR/PKCS5Padding",true,  CryptoConstant.PROVIDER_BOUNCY_CASTLE),
     CTR_PKCS7_PADDING("AES/CTR/PKCS7Padding",true,  CryptoConstant.PROVIDER_BOUNCY_CASTLE),
 
-    // GCM模式
-    GCM_NO_PADDING("AES/GCM/NoPadding",true,  CryptoConstant.PROVIDER_BOUNCY_CASTLE) // 需要自定义实现padding，如果数据长度不是块大小的整数倍，填充其到整数倍（AES_BLOCK_SIZE = 16）
+    // AEAD模式
+    GCM_NO_PADDING("AES/GCM/NoPadding",true,  CryptoConstant.PROVIDER_BOUNCY_CASTLE),
+    CCM_NO_PADDING("AES/CCM/NoPadding",true,  CryptoConstant.PROVIDER_BOUNCY_CASTLE),
+    OCB_NO_PADDING("AES/OCB/NoPadding",true,  CryptoConstant.PROVIDER_BOUNCY_CASTLE),
     ;
 
     private String transformation;

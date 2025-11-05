@@ -106,7 +106,18 @@ public class SM4Utils {
         SecretKeySpec secretKeySpec = new SecretKeySpec(key, CryptoConstant.ALGORITHM_SM4);
         Cipher encryptCipher = Cipher.getInstance(transformation.getTransformation(), transformation.getProvider());
         if (transformation.isSupportIV()) {
-            encryptCipher.init(Cipher.ENCRYPT_MODE, secretKeySpec, new IvParameterSpec(iv == null ? new byte[16] : iv));
+            if (iv == null) {
+                if (SM4Transformation.GCM_NO_PADDING.equals(transformation)) {
+                    iv = new byte[12];
+                } else if (SM4Transformation.CCM_NO_PADDING.equals(transformation)) {
+                    iv = new byte[12];
+                } else if (SM4Transformation.OCB_NO_PADDING.equals(transformation)) {
+                    iv = new byte[15];
+                } else {
+                    iv = new byte[16];
+                }
+            }
+            encryptCipher.init(Cipher.ENCRYPT_MODE, secretKeySpec, new IvParameterSpec(iv));
         } else {
             encryptCipher.init(Cipher.ENCRYPT_MODE, secretKeySpec);
         }
@@ -192,7 +203,18 @@ public class SM4Utils {
         SecretKeySpec secretKeySpec = new SecretKeySpec(key, CryptoConstant.ALGORITHM_SM4);
         Cipher encryptCipher = Cipher.getInstance(transformation.getTransformation(), transformation.getProvider());
         if (transformation.isSupportIV()) {
-            encryptCipher.init(Cipher.DECRYPT_MODE, secretKeySpec, new IvParameterSpec(iv == null ? new byte[16] : iv));
+            if (iv == null) {
+                if (SM4Transformation.GCM_NO_PADDING.equals(transformation)) {
+                    iv = new byte[12];
+                } else if (SM4Transformation.CCM_NO_PADDING.equals(transformation)) {
+                    iv = new byte[12];
+                } else if (SM4Transformation.OCB_NO_PADDING.equals(transformation)) {
+                    iv = new byte[15];
+                } else {
+                    iv = new byte[16];
+                }
+            }
+            encryptCipher.init(Cipher.DECRYPT_MODE, secretKeySpec, new IvParameterSpec(iv));
         } else {
             encryptCipher.init(Cipher.DECRYPT_MODE, secretKeySpec);
         }
