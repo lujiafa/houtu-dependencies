@@ -5,107 +5,117 @@ import org.springframework.cloud.client.ServiceInstance;
 import java.util.*;
 
 class LazyWeightedServiceInstanceList extends AbstractList<ServiceInstance> {
-    final ServiceInstance[] expanded;
+
+    /* for testing */ final ServiceInstance[] expanded;
+
     private final Object expandingLock = new Object();
+
     private WeightedServiceInstanceSelector selector;
+
     private volatile int position = 0;
 
     LazyWeightedServiceInstanceList(List<ServiceInstance> instances, int[] weights) {
+        // Calculate the greatest common divisor (GCD) of weights, and the
+        // total number of elements after expansion.
         int greatestCommonDivisor = 0;
         int total = 0;
-        int[] var5 = weights;
-        int var6 = weights.length;
-
-        for(int var7 = 0; var7 < var6; ++var7) {
-            int weight = var5[var7];
+        for (int weight : weights) {
             greatestCommonDivisor = greatestCommonDivisor(greatestCommonDivisor, weight);
             total += weight;
         }
-
-        this.expanded = new ServiceInstance[total / greatestCommonDivisor];
-        this.selector = new WeightedServiceInstanceSelector(instances, weights, greatestCommonDivisor);
+        expanded = new ServiceInstance[total / greatestCommonDivisor];
+        selector = new WeightedServiceInstanceSelector(instances, weights, greatestCommonDivisor);
     }
 
+    @Override
     public ServiceInstance get(int index) {
-        if (index >= this.position) {
-            synchronized(this.expandingLock) {
-                while(this.position <= index && this.position < this.expanded.length) {
-                    this.expanded[this.position] = this.selector.next();
-                    ++this.position;
+        if (index >= position) {
+            synchronized (expandingLock) {
+                for (; position <= index && position < expanded.length; position++) {
+                    expanded[position] = selector.next();
                 }
-
-                if (this.position == this.expanded.length) {
-                    this.selector = null;
+                if (position == expanded.length) {
+                    selector = null; // for gc
                 }
             }
         }
-
-        return this.expanded[index];
+        return expanded[index];
     }
 
+    @Override
     public int size() {
-        return this.expanded.length;
+        return expanded.length;
     }
 
     static int greatestCommonDivisor(int a, int b) {
-        while(b != 0) {
-            int r = a % b;
+        int r;
+        while (b != 0) {
+            r = a % b;
             a = b;
             b = r;
         }
-
         return a;
     }
 
     static class WeightedServiceInstanceSelector {
+
         Queue<Entry> active;
+
         Queue<Entry> expired;
 
         WeightedServiceInstanceSelector(List<ServiceInstance> instances, int[] weights, int greatestCommonDivisor) {
-            this.active = new ArrayDeque(instances.size());
-            this.expired = new ArrayDeque(instances.size());
+            active = new ArrayDeque<>(instances.size());
+            expired = new ArrayDeque<>(instances.size());
+            // Use iterator for some implementation of the List that not supports
+            // RandomAccess, but `weights` is supported, so use a local variable `i`
+            // to get the current position.
             int i = 0;
-
-            for(Iterator var5 = instances.iterator(); var5.hasNext(); ++i) {
-                ServiceInstance instance = (ServiceInstance)var5.next();
-                this.active.offer(new Entry(instance, weights[i] / greatestCommonDivisor));
+            for (ServiceInstance instance : instances) {
+                active.offer(new Entry(instance, weights[i] / greatestCommonDivisor));
+                i++;
             }
-
         }
 
         ServiceInstance next() {
-            if (this.active.isEmpty()) {
-                Queue<Entry> temp = this.active;
-                this.active = this.expired;
-                this.expired = temp;
+            if (active.isEmpty()) {
+                Queue<Entry> temp = active;
+                active = expired;
+                expired = temp;
             }
 
-            Entry entry = (Entry)this.active.poll();
+            Entry entry = active.poll();
             if (entry == null) {
+                // Suppress warnings, never touched!
                 return null;
-            } else {
-                --entry.remainder;
-                if (entry.remainder == 0) {
-                    entry.remainder = entry.weight;
-                    this.expired.offer(entry);
-                } else {
-                    this.active.offer(entry);
-                }
-
-                return entry.instance;
             }
+
+            entry.remainder--;
+            if (entry.remainder == 0) {
+                entry.remainder = entry.weight;
+                expired.offer(entry);
+            }
+            else {
+                active.offer(entry);
+            }
+            return entry.instance;
         }
 
         static class Entry {
+
             final ServiceInstance instance;
+
             final int weight;
+
             int remainder;
 
             Entry(ServiceInstance instance, int weight) {
                 this.instance = instance;
                 this.weight = weight;
-                this.remainder = weight;
+                remainder = weight;
             }
+
         }
+
     }
+
 }
