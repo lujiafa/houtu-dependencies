@@ -1,4 +1,4 @@
-package com.houtu.springcloud.sentinel.handler;
+package com.houtu.springcloud.sentinel.handler.webmvc;
 
 import com.alibaba.csp.sentinel.adapter.spring.webmvc_v6x.callback.BlockExceptionHandler;
 import com.alibaba.csp.sentinel.slots.block.BlockException;
@@ -29,7 +29,7 @@ public class SimpleBlockExceptionHandler implements BlockExceptionHandler {
                 || MediaType.APPLICATION_XHTML_XML.includes(mediaType)) {
             WebUtils.writeXml(response, errorCode);
             return;
-        } else if (MediaType.TEXT_HTML.includes(mediaType) || MediaType.APPLICATION_XHTML_XML.includes(mediaType)) {
+        } else if (MediaType.TEXT_HTML.includes(mediaType)) {
             if (StringUtils.hasLength(blockPage)) {
                 response.sendRedirect(blockPage);
                 return;
