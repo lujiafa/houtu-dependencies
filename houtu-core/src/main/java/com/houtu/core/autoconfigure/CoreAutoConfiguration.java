@@ -57,7 +57,7 @@ public class CoreAutoConfiguration {
     @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
     static class SpringMVCConfiguration {
         @Bean
-        public LocaleBeanPostProcessor localeContextBeanPostProcessor() {
+        public LocaleBeanPostProcessor localeBeanPostProcessor() {
             return new LocaleBeanPostProcessor();
         }
     }
