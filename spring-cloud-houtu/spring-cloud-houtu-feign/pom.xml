@@ -15,12 +15,12 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
-            <scope>provided</scope>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>com.houtu</groupId>
             <artifactId>houtu-web</artifactId>
-            <scope>provided</scope>
+            <optional>true</optional>
         </dependency>
 
 

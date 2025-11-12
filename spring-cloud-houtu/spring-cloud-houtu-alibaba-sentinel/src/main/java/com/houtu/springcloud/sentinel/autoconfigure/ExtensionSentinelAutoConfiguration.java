@@ -35,7 +35,7 @@ public class ExtensionSentinelAutoConfiguration {
     @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
     static class SpringMVCConfiguration {
         @Bean
-        @ConditionalOnClass({SentinelWebMvcConfig.class})
+        @ConditionalOnClass({SentinelWebMvcConfig.class, BlockExceptionHandler.class})
         @ConditionalOnMissingBean
         public BlockExceptionHandler blockExceptionHandler(ObjectProvider<SentinelProperties> sentinelPropertiesObjectProvider) {
             SentinelProperties sentinelProperties = sentinelPropertiesObjectProvider.getIfAvailable();
@@ -50,7 +50,7 @@ public class ExtensionSentinelAutoConfiguration {
     @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.REACTIVE)
     static class SpringWebFluxConfiguration {
         @Bean
-        @ConditionalOnClass({SentinelWebMvcConfig.class})
+        @ConditionalOnClass({SentinelWebMvcConfig.class, BlockRequestHandler.class})
         @ConditionalOnMissingBean
         public BlockRequestHandler blockRequestHandler(ObjectProvider<SentinelProperties> sentinelPropertiesObjectProvider) {
             SentinelProperties sentinelProperties = sentinelPropertiesObjectProvider.getIfAvailable();
