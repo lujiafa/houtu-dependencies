@@ -22,18 +22,18 @@ public final class ServiceInstanceWeightSupport {
     public static int downWeight(ServiceInstance serviceInstance) {
         Map<String, String> metadata = serviceInstance.getMetadata();
         if (metadata == null) {
-//            return SpringCloudWeightFunction.DEFAULT_WEIGHT;
+            return SpringCloudWeightFunction.DEFAULT_WEIGHT;
         }
         ServiceInstanceType serviceInstanceType = ServiceInstanceType.parse(serviceInstance);
         String weightStr = metadata.get(serviceInstanceType.getWeightName());
         BigDecimal weightBigDecimal;
         int weight;
         if (weightStr == null || weightStr.isEmpty()) {
-//            return SpringCloudWeightFunction.DEFAULT_WEIGHT;
+            return SpringCloudWeightFunction.DEFAULT_WEIGHT;
         }
         weightBigDecimal = new BigDecimal(weightStr);
         if (weightBigDecimal.compareTo(BigDecimal.ONE) <= 0) {
-//            return SpringCloudWeightFunction.DEFAULT_WEIGHT;
+            return SpringCloudWeightFunction.DEFAULT_WEIGHT;
         }
         String originalWeightKey = ORIGIN_PREFIX + serviceInstanceType.getWeightName();
         String originalWeightStr = metadata.get(originalWeightKey);
@@ -43,7 +43,7 @@ public final class ServiceInstanceWeightSupport {
         weightBigDecimal = weightBigDecimal.multiply(BigDecimal.valueOf(0.8));
         weight = weightBigDecimal.setScale(0, RoundingMode.FLOOR).intValue();
         if (weight <= 0) {
-//            weight = SpringCloudWeightFunction.DEFAULT_WEIGHT;
+            weight = SpringCloudWeightFunction.DEFAULT_WEIGHT;
         }
         metadata.put(serviceInstanceType.getWeightName(), String.valueOf(weight));
         logger.info("降级服务实例权重({}={}:{}, instanceId={})：{} -> {}", serviceInstance.getServiceId(), serviceInstance.getHost(), serviceInstance.getPort(), serviceInstance.getInstanceId(), weightStr, weight);
@@ -59,25 +59,24 @@ public final class ServiceInstanceWeightSupport {
     public static int restoreWeight(ServiceInstance serviceInstance) {
         Map<String, String> metadata = serviceInstance.getMetadata();
         if (metadata == null) {
-//            return SpringCloudWeightFunction.DEFAULT_WEIGHT;
+            return SpringCloudWeightFunction.DEFAULT_WEIGHT;
         }
         ServiceInstanceType serviceInstanceType = ServiceInstanceType.parse(serviceInstance);
         String originalWeightKey = ORIGIN_PREFIX + serviceInstanceType.getWeightName();
         String originalWeightStr = metadata.get(originalWeightKey);
         if (originalWeightStr == null) {
-//            return SpringCloudWeightFunction.build().apply(serviceInstance);
+            return SpringCloudWeightFunction.build().apply(serviceInstance);
         }
-//        int originalWeight =  (originalWeight = new BigDecimal(originalWeightStr).setScale(0, RoundingMode.CEILING).intValue()) <= 0 ? SpringCloudWeightFunction.DEFAULT_WEIGHT : originalWeight;
-//        String weightStr = metadata.get(serviceInstanceType.getWeightName());
-//        BigDecimal weightBigDecimal = weightStr != null && !weightStr.isEmpty() ? new BigDecimal(weightStr) : BigDecimal.valueOf(SpringCloudWeightFunction.DEFAULT_WEIGHT);
-//        int weight = weightBigDecimal.multiply(BigDecimal.valueOf(1.1)).setScale(0, RoundingMode.CEILING).intValue();
-        int weight = 1;
-//        if (weight > originalWeight) {
-//            weight = originalWeight;
-//            metadata.remove(originalWeightKey);
-//        }
+        int originalWeight =  (originalWeight = new BigDecimal(originalWeightStr).setScale(0, RoundingMode.CEILING).intValue()) <= 0 ? SpringCloudWeightFunction.DEFAULT_WEIGHT : originalWeight;
+        String weightStr = metadata.get(serviceInstanceType.getWeightName());
+        BigDecimal weightBigDecimal = weightStr != null && !weightStr.isEmpty() ? new BigDecimal(weightStr) : BigDecimal.valueOf(SpringCloudWeightFunction.DEFAULT_WEIGHT);
+        int weight = weightBigDecimal.multiply(BigDecimal.valueOf(1.1)).setScale(0, RoundingMode.CEILING).intValue();
+        if (weight > originalWeight) {
+            weight = originalWeight;
+            metadata.remove(originalWeightKey);
+        }
         metadata.put(serviceInstanceType.getWeightName(), String.valueOf(weight));
-//        logger.info("恢复服务实例权重({}={}:{}, instanceId={})：{} -> {}", serviceInstance.getServiceId(), serviceInstance.getHost(), serviceInstance.getPort(), serviceInstance.getInstanceId(), weightStr, weight);
+        logger.info("恢复服务实例权重({}={}:{}, instanceId={})：{} -> {}", serviceInstance.getServiceId(), serviceInstance.getHost(), serviceInstance.getPort(), serviceInstance.getInstanceId(), weightStr, weight);
         return weight;
     }
 }
