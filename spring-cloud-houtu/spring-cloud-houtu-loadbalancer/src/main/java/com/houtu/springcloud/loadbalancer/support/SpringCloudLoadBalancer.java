@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -39,7 +40,7 @@ public class SpringCloudLoadBalancer implements ReactorServiceInstanceLoadBalanc
     private final String serviceId;
     private ObjectProvider<ServiceInstanceListSupplier> serviceInstanceListSupplierProvider;
     private String clusterName;
-    private final AtomicInteger position;
+    private final AtomicLong position;
     private Function<ServiceInstance, String> clusterNameFunction;
 
     public SpringCloudLoadBalancer(ObjectProvider<ServiceInstanceListSupplier> serviceInstanceListSupplierProvider, String serviceId, String clusterName) {
@@ -51,7 +52,7 @@ public class SpringCloudLoadBalancer implements ReactorServiceInstanceLoadBalanc
         this.serviceId = serviceId;
         this.clusterName = clusterName;
         this.clusterNameFunction = clusterNameFunction == null ? serviceInstance -> serviceInstance.getMetadata().get(DEFAULT_METADATA_CLUSTER_NAME) : clusterNameFunction;
-        this.position = new AtomicInteger((new Random()).nextInt(1000));
+        this.position = new AtomicLong((new Random()).nextInt(1000));
     }
 
 
@@ -88,8 +89,8 @@ public class SpringCloudLoadBalancer implements ReactorServiceInstanceLoadBalanc
             if (instancesToChoose.size() == 1) {
                 return new DefaultResponse(instancesToChoose.get(0));
             } else {
-                int pos = this.position.incrementAndGet() & Integer.MAX_VALUE;
-                ServiceInstance instance = instancesToChoose.get(pos % instancesToChoose.size());
+                long pos = this.position.incrementAndGet() & Long.MAX_VALUE;
+                ServiceInstance instance = instancesToChoose.get((int) (pos % instancesToChoose.size()));
                 return new DefaultResponse(instance);
             }
         } catch (Exception e) {
