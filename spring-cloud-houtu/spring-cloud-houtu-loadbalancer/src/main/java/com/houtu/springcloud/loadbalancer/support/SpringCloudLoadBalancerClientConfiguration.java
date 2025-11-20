@@ -88,7 +88,7 @@ public class SpringCloudLoadBalancerClientConfiguration {
                 matchIfMissing = true
         )
         public ServiceInstanceListSupplier discoveryClientServiceInstanceListSupplier(ConfigurableApplicationContext context, SpringCloudLoadBalancerProperties springCloudLoadBalancerProperties) {
-            ServiceInstanceListSupplierBuilder serviceInstanceListSupplierBuilder = ServiceInstanceListSupplier.builder().withBlockingDiscoveryClient();
+            ServiceInstanceListSupplierBuilder serviceInstanceListSupplierBuilder = ServiceInstanceListSupplier.builder().withBlockingDiscoveryClient().withCaching();
             if (springCloudLoadBalancerProperties.isHint()) {
                 serviceInstanceListSupplierBuilder.with(SpringCloudHintDelegateCreator.build());
             }
@@ -106,7 +106,7 @@ public class SpringCloudLoadBalancerClientConfiguration {
                 havingValue = "zone-preference"
         )
         public ServiceInstanceListSupplier zonePreferenceDiscoveryClientServiceInstanceListSupplier(ConfigurableApplicationContext context, SpringCloudLoadBalancerProperties springCloudLoadBalancerProperties) {
-            ServiceInstanceListSupplierBuilder serviceInstanceListSupplierBuilder = ServiceInstanceListSupplier.builder().withBlockingDiscoveryClient().withZonePreference();
+            ServiceInstanceListSupplierBuilder serviceInstanceListSupplierBuilder = ServiceInstanceListSupplier.builder().withBlockingDiscoveryClient().withCaching().withZonePreference();
             if (springCloudLoadBalancerProperties.isHint()) {
                 serviceInstanceListSupplierBuilder.with(SpringCloudHintDelegateCreator.build());
             }
