@@ -4,7 +4,6 @@ import com.houtu.springcloud.loadbalancer.prop.SpringCloudLoadBalancerProperties
 import com.houtu.springcloud.loadbalancer.support.condition.DefaultLoadBalancerCondition;
 import com.houtu.springcloud.loadbalancer.support.condition.EnabledWeightCondition;
 import com.houtu.springcloud.loadbalancer.support.condition.NacosLoadBalancerCondition;
-import com.houtu.springcloud.loadbalancer.support.weight.WeightedServiceInstanceListSupplier;
 import com.houtu.util.constant.CharConstant;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -15,7 +14,6 @@ import org.springframework.cloud.client.ConditionalOnReactiveDiscoveryEnabled;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.cloud.client.discovery.ReactiveDiscoveryClient;
-import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
 import org.springframework.cloud.loadbalancer.core.ReactorLoadBalancer;
 import org.springframework.cloud.loadbalancer.core.ServiceInstanceListSupplier;
 import org.springframework.cloud.loadbalancer.core.ServiceInstanceListSupplierBuilder;
@@ -90,12 +88,12 @@ public class SpringCloudLoadBalancerClientConfiguration {
                 matchIfMissing = true
         )
         public ServiceInstanceListSupplier discoveryClientServiceInstanceListSupplier(ConfigurableApplicationContext context, SpringCloudLoadBalancerProperties springCloudLoadBalancerProperties) {
-            ServiceInstanceListSupplierBuilder serviceInstanceListSupplierBuilder = ServiceInstanceListSupplier.builder().withBlockingDiscoveryClient();
+            ServiceInstanceListSupplierBuilder serviceInstanceListSupplierBuilder = ServiceInstanceListSupplier.builder().withBlockingDiscoveryClient().withCaching();
             if (springCloudLoadBalancerProperties.isHint()) {
                 serviceInstanceListSupplierBuilder.with(SpringCloudHintDelegateCreator.build());
             }
             if (springCloudLoadBalancerProperties.isWeight()) {
-                serviceInstanceListSupplierBuilder.with(withWeightedDelegateCreator());
+                serviceInstanceListSupplierBuilder.with(SpringCloudWeightedDelegateCreator.build());
             }
             return serviceInstanceListSupplierBuilder.build(context);
         }
@@ -108,12 +106,12 @@ public class SpringCloudLoadBalancerClientConfiguration {
                 havingValue = "zone-preference"
         )
         public ServiceInstanceListSupplier zonePreferenceDiscoveryClientServiceInstanceListSupplier(ConfigurableApplicationContext context, SpringCloudLoadBalancerProperties springCloudLoadBalancerProperties) {
-            ServiceInstanceListSupplierBuilder serviceInstanceListSupplierBuilder = ServiceInstanceListSupplier.builder().withBlockingDiscoveryClient().withZonePreference();
+            ServiceInstanceListSupplierBuilder serviceInstanceListSupplierBuilder = ServiceInstanceListSupplier.builder().withBlockingDiscoveryClient().withCaching().withZonePreference();
             if (springCloudLoadBalancerProperties.isHint()) {
                 serviceInstanceListSupplierBuilder.with(SpringCloudHintDelegateCreator.build());
             }
             if (springCloudLoadBalancerProperties.isWeight()) {
-                serviceInstanceListSupplierBuilder.with(withWeightedDelegateCreator());
+                serviceInstanceListSupplierBuilder.with(SpringCloudWeightedDelegateCreator.build());
             }
             return serviceInstanceListSupplierBuilder.build(context);
         }
@@ -133,12 +131,12 @@ public class SpringCloudLoadBalancerClientConfiguration {
                 matchIfMissing = true
         )
         public ServiceInstanceListSupplier discoveryClientServiceInstanceListSupplier(ConfigurableApplicationContext context, SpringCloudLoadBalancerProperties springCloudLoadBalancerProperties) {
-            ServiceInstanceListSupplierBuilder serviceInstanceListSupplierBuilder = ServiceInstanceListSupplier.builder().withDiscoveryClient();
+            ServiceInstanceListSupplierBuilder serviceInstanceListSupplierBuilder = ServiceInstanceListSupplier.builder().withDiscoveryClient().withCaching();
             if (springCloudLoadBalancerProperties.isHint()) {
                 serviceInstanceListSupplierBuilder.with(SpringCloudHintDelegateCreator.build());
             }
             if (springCloudLoadBalancerProperties.isWeight()) {
-                serviceInstanceListSupplierBuilder.with(withWeightedDelegateCreator());
+                serviceInstanceListSupplierBuilder.with(SpringCloudWeightedDelegateCreator.build());
             }
             return serviceInstanceListSupplierBuilder.build(context);
         }
@@ -151,22 +149,15 @@ public class SpringCloudLoadBalancerClientConfiguration {
                 havingValue = "zone-preference"
         )
         public ServiceInstanceListSupplier zonePreferenceDiscoveryClientServiceInstanceListSupplier(ConfigurableApplicationContext context, SpringCloudLoadBalancerProperties springCloudLoadBalancerProperties) {
-            ServiceInstanceListSupplierBuilder serviceInstanceListSupplierBuilder = ServiceInstanceListSupplier.builder().withDiscoveryClient().withZonePreference();
+            ServiceInstanceListSupplierBuilder serviceInstanceListSupplierBuilder = ServiceInstanceListSupplier.builder().withDiscoveryClient().withCaching().withZonePreference();
             if (springCloudLoadBalancerProperties.isHint()) {
                 serviceInstanceListSupplierBuilder.with(SpringCloudHintDelegateCreator.build());
             }
             if (springCloudLoadBalancerProperties.isWeight()) {
-                serviceInstanceListSupplierBuilder.with(withWeightedDelegateCreator());
+                serviceInstanceListSupplierBuilder.with(SpringCloudWeightedDelegateCreator.build());
             }
             return serviceInstanceListSupplierBuilder.build(context);
         }
-    }
-
-    static ServiceInstanceListSupplierBuilder.DelegateCreator withWeightedDelegateCreator() {
-        return (context, delegate) -> {
-            ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerClientFactory = (ReactiveLoadBalancer.Factory)context.getBean(LoadBalancerClientFactory.class);
-            return new WeightedServiceInstanceListSupplier(delegate, SpringCloudWeightFunction.build(), loadBalancerClientFactory);
-        };
     }
 
 }
