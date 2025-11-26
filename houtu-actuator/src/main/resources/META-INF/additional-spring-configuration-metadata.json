@@ -1,0 +1,21 @@
+{
+  "properties": [
+    {
+      "name": "management.metrics.enable.lettuce",
+      "type": "java.lang.Boolean",
+      "description": "Whether to enable metrics for Lettuce.",
+      "defaultValue": true
+    },
+    {
+      "name": "management.metrics.distribution.percentiles-histogram.lettuce",
+      "type": "java.lang.Boolean",
+      "description": "Whether to enable percentiles histogram for Lettuce metrics.",
+      "defaultValue": false
+    },
+    {
+      "name": "management.metrics.distribution.percentiles.http.server.requests",
+      "description": "Whether to enable percentiles for HTTP server requests metrics."
+    }
+  ]
+}
+

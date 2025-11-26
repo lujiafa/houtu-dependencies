@@ -33,7 +33,6 @@ import org.springframework.web.reactive.config.WebFluxConfigurer;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
@@ -55,7 +54,6 @@ public class SpringCloudLoadBalancerAutoConfiguration {
     @Configuration
     @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
     @ConditionalOnClass({Servlet.class, DispatcherServlet.class, WebMvcConfigurer.class})
-    @ConditionalOnMissingBean({WebMvcConfigurationSupport.class})
     @Conditional(EnabledHintCondition.class)
     public static class SpringMVCConfiguration {
 

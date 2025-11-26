@@ -1,6 +1,6 @@
 package com.houtu.web.handler;
 
-import com.houtu.core.exception.ErrorCode;
+import com.houtu.core.exception.BusinessException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -9,5 +9,5 @@ import jakarta.servlet.http.HttpServletResponse;
  */
 public interface HandlerExceptionResolverCustomizer {
 
-    ErrorCode process(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex);
+    BusinessException process(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex);
 }

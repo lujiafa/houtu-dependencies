@@ -83,12 +83,12 @@ public class WebAutoConfiguration {
         return configurer;
     }
 
-    @Bean
-    @Order(Ordered.HIGHEST_PRECEDENCE)
-    @ConditionalOnMissingBean
-    public ResponseDataResponseBodyTransferAdvice responseDataResponseBodyTransferAdvice() {
-        return new ResponseDataResponseBodyTransferAdvice(webProperties);
-    }
+//    @Bean
+//    @Order(Ordered.HIGHEST_PRECEDENCE)
+//    @ConditionalOnMissingBean
+//    public ResponseDataResponseBodyTransferAdvice responseDataResponseBodyTransferAdvice() {
+//        return new ResponseDataResponseBodyTransferAdvice(webProperties);
+//    }
 
     @Bean
     @ConditionalOnMissingBean
