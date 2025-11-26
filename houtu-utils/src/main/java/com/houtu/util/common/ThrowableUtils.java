@@ -1,4 +1,4 @@
-package com.houtu.web.util;
+package com.houtu.util.common;
 
 import java.util.HashSet;
 import java.util.Set;

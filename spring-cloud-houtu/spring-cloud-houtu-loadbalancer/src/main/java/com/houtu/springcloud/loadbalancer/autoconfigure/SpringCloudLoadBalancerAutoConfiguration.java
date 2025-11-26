@@ -9,7 +9,6 @@ import com.houtu.springcloud.loadbalancer.support.hint.HintGatewayWebFilter;
 import com.houtu.springcloud.loadbalancer.support.hint.HintRequestHandlerInterceptor;
 import com.houtu.springcloud.loadbalancer.support.hint.HintWebFilter;
 import feign.Feign;
-import javax.servlet.Servlet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -33,8 +32,9 @@ import org.springframework.web.reactive.config.WebFluxConfigurer;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+import javax.servlet.Servlet;
 
 /**
  * 参考：
@@ -55,7 +55,6 @@ public class SpringCloudLoadBalancerAutoConfiguration {
     @Configuration
     @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
     @ConditionalOnClass({Servlet.class, DispatcherServlet.class, WebMvcConfigurer.class})
-    @ConditionalOnMissingBean({WebMvcConfigurationSupport.class})
     @Conditional(EnabledHintCondition.class)
     public static class SpringMVCConfiguration {
 

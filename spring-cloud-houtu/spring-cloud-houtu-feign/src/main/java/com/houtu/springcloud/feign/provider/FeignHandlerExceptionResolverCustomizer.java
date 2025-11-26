@@ -1,19 +1,19 @@
 package com.houtu.springcloud.feign.provider;
 
 import com.houtu.core.context.SpringApplicationContext;
-import com.houtu.core.exception.ErrorCode;
+import com.houtu.core.exception.BusinessException;
 import com.houtu.springcloud.feign.constant.FeignConstant;
 import com.houtu.springcloud.feign.util.ExceptionHeader;
 import com.houtu.web.handler.HandlerExceptionResolverCustomizer;
 import feign.codec.DecodeException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.Ordered;
 import org.springframework.core.env.Environment;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.Objects;
 
 /**
@@ -27,7 +27,7 @@ public class FeignHandlerExceptionResolverCustomizer implements HandlerException
     private String exceptionHeader;
 
     @Override
-    public ErrorCode process(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
+    public BusinessException process(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
         Throwable e = ex;
         if ((e instanceof DecodeException || (e = e.getCause()) instanceof DecodeException) && e.getCause() instanceof FeignThroughBusinessException) {
             FeignThroughBusinessException throughBusinessException = (FeignThroughBusinessException) e.getCause();
@@ -35,7 +35,7 @@ public class FeignHandlerExceptionResolverCustomizer implements HandlerException
                 logger.debug("Feign透传异常|FeignThroughBusinessException|{}|code={},message={}", ExceptionHeader.decode(throughBusinessException.getServiceName()), throughBusinessException.getErrorCode().getCode(), throughBusinessException.getErrorCode().getMessage());
             }
             response.setHeader(ExceptionHeader.RESPONSE_EXCEPTION_HEADER_NAME, throughBusinessException.getServiceName());
-            return throughBusinessException.getErrorCode();
+            return throughBusinessException;
         }
         if (Objects.nonNull(request.getAttribute(FeignConstant.FEIGN_PROVIDER_AUTO_HANDLER_ATTR_NAME))) {
             response.setHeader(ExceptionHeader.RESPONSE_EXCEPTION_HEADER_NAME, exceptionHeader);

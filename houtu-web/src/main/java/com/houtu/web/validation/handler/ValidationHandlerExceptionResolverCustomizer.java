@@ -1,6 +1,7 @@
 package com.houtu.web.validation.handler;
 
 import com.houtu.core.constant.ErrorCodeConstant;
+import com.houtu.core.exception.BusinessException;
 import com.houtu.core.exception.ErrorCode;
 import com.houtu.util.constant.CharConstant;
 import com.houtu.web.handler.HandlerExceptionResolverCustomizer;
@@ -19,7 +20,7 @@ import java.util.Set;
 public class ValidationHandlerExceptionResolverCustomizer implements HandlerExceptionResolverCustomizer, Ordered {
 
 	@Override
-	public ErrorCode process(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
+	public BusinessException process(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
 		if (ex instanceof ConstraintViolationException) {// 违反约束异常
 			Set<ConstraintViolation<?>> violations = ((ConstraintViolationException) ex).getConstraintViolations();
 			StringBuilder tempStringBuilder = new StringBuilder();
@@ -32,7 +33,7 @@ public class ValidationHandlerExceptionResolverCustomizer implements HandlerExce
 //			if (logger.isDebugEnabled()) {
 //				logger.debug("数据验证失败|ConstraintViolationException|{}", tempStringBuilder);
 //			}
-			return ErrorCode.build(ErrorCodeConstant.PARAMETER_ERROR, request.getLocale(), new Object[]{tempStringBuilder.toString()});
+			return new BusinessException(ErrorCode.build(ErrorCodeConstant.PARAMETER_ERROR, request.getLocale(), new Object[]{tempStringBuilder.toString()}), ex);
 		}
 		return null;
 	}

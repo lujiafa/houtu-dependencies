@@ -3,8 +3,8 @@ package com.houtu.web.handler;
 import com.houtu.core.constant.ErrorCodeConstant;
 import com.houtu.core.exception.BusinessException;
 import com.houtu.core.exception.ErrorCode;
+import com.houtu.util.common.ThrowableUtils;
 import com.houtu.util.constant.CharConstant;
-import com.houtu.web.util.ThrowableUtils;
 import com.houtu.web.view.SmartErrorView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +13,7 @@ import org.springframework.util.Assert;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
+import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -43,11 +44,11 @@ public class UnifiedHandlerExceptionResolver implements HandlerExceptionResolver
                                          HttpServletResponse response,
                                          Object handler,
                                          Exception ex) {
-        ErrorCode errorCode;
-        if ((errorCode = customizers(request, response, handler, ex)) != null
-            || (errorCode = resolveBusinessException(ex)) != null) {
+        BusinessException businessException;
+        if ((businessException = customizers(request, response, handler, ex)) != null
+            || (businessException = resolveBusinessException(ex)) != null) {
             if (logger.isDebugEnabled()) {
-                logger.debug("业务异常|code={}, message={}|{}", errorCode.getCode(), errorCode.getMessage(), ex.getMessage());
+                logger.debug("业务异常|code={}, message={}|{}", businessException.getErrorCode().getCode(), businessException.getErrorCode().getMessage(), ex.getMessage());
             }
         } else if (ex instanceof BindException) { // 数据绑定异常
             BindingResult bindingResult = ((BindException) ex).getBindingResult();
@@ -62,12 +63,13 @@ public class UnifiedHandlerExceptionResolver implements HandlerExceptionResolver
             if (logger.isDebugEnabled()) {
                 logger.debug("数据绑定失败|BindException|{}", tempStringBuilder);
             }
-            errorCode = ErrorCode.build(ErrorCodeConstant.PARAMETER_ERROR, request.getLocale(), new Object[]{tempStringBuilder.toString()});
+            businessException = new BusinessException(ErrorCode.build(ErrorCodeConstant.PARAMETER_ERROR, request.getLocale(), new Object[]{tempStringBuilder.toString()}), ex);
         } else {
             logger.error(ex.getMessage(), ex);
-            errorCode = ErrorCode.build(ErrorCodeConstant.SERVER_BUSY, request.getLocale());
+            businessException = new BusinessException(ErrorCode.build(ErrorCodeConstant.SERVER_BUSY, request.getLocale()), ex);
         }
-        return new ModelAndView(new SmartErrorView(wrapErrorCode(errorCode)));
+        request.setAttribute(DispatcherServlet.EXCEPTION_ATTRIBUTE, businessException);
+        return new ModelAndView(new SmartErrorView(wrapErrorCode(businessException.getErrorCode())));
     }
 
     /**
@@ -78,16 +80,16 @@ public class UnifiedHandlerExceptionResolver implements HandlerExceptionResolver
      * @param ex 异常对象
      * @return 自定义异常码
      */
-    ErrorCode customizers(HttpServletRequest request,
+    BusinessException customizers(HttpServletRequest request,
                                      HttpServletResponse response,
                                      Object handler,
                                      Exception ex) {
         if (customizers.isEmpty())
             return null;
         for (HandlerExceptionResolverCustomizer resolver : customizers) {
-            ErrorCode errorCode = resolver.process(request, response, handler, ex);
-            if (errorCode != null)
-                return errorCode;
+            BusinessException businessException = resolver.process(request, response, handler, ex);
+            if (businessException != null)
+                return businessException;
         }
         return null;
     }
@@ -97,11 +99,8 @@ public class UnifiedHandlerExceptionResolver implements HandlerExceptionResolver
      * @return 被包裹业务异常
      * @description 获取被包裹业务异常
      */
-    ErrorCode resolveBusinessException(Throwable throwable) {
-        BusinessException businessException = ThrowableUtils.getThrowable(throwable, BusinessException.class);
-        if (businessException != null)
-            return businessException.getErrorCode();
-        return null;
+    BusinessException resolveBusinessException(Throwable throwable) {
+        return ThrowableUtils.getThrowable(throwable, BusinessException.class);
     }
 
     protected ErrorCode wrapErrorCode(ErrorCode errorCode) {
