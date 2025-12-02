@@ -1,4 +1,4 @@
-package com.houtu.actuator.handler.webmvc;
+package com.houtu.actuator.metrics.webmvc;
 
 import com.houtu.core.exception.BusinessException;
 import com.houtu.core.web.BaseResponseData;
@@ -58,7 +58,7 @@ public class ResponseBodyAdviceAndWebMvcTagsContributor extends DefaultServerReq
             }
         } else {
             if (context.getCarrier() != null) {
-                Integer code = (Integer) ((HttpServletRequest)context.getCarrier()).getAttribute(ActuatorResponseBodyAdvice.RESPONSE_DATA_CODE);
+                Integer code = (Integer) ((HttpServletRequest)context.getCarrier()).getAttribute(RESPONSE_DATA_CODE);
                 if (code != null) {
                     return KeyValues.concat(KeyValues.of("code", String.valueOf(code)), keyValues);
                 }

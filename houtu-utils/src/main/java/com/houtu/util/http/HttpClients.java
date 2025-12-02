@@ -3,7 +3,6 @@ package com.houtu.util.http;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.houtu.util.common.IntrospectorUtils;
 import com.houtu.util.common.JsonUtils;
-import com.houtu.util.prop.HttpClientProperties;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
@@ -11,52 +10,27 @@ import org.apache.hc.client5.http.entity.UrlEncodedFormEntity;
 import org.apache.hc.client5.http.entity.mime.MultipartEntityBuilder;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
-import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
-import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
 import org.apache.hc.core5.http.*;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.apache.hc.core5.http.message.BasicNameValuePair;
 import org.apache.hc.core5.net.URIBuilder;
-import org.apache.hc.core5.util.Timeout;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 import org.springframework.web.client.HttpClientErrorException;
 
 import java.io.InputStream;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.security.KeyManagementException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class HttpClients {
 
-    final static String CONTENT_TYPE_NAME = "Content-Type";
+    static CloseableHttpClient httpClient;
 
-    static CloseableHttpClient defaultHttpClient = org.apache.hc.client5.http.impl.classic.HttpClients.createDefault();
-
-    public HttpClients(HttpClientProperties httpClientProperties) throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
-        // 创建连接池
-        PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
-        // 设置最大连接数
-        cm.setMaxTotal(httpClientProperties.getPool().getMaxTotal());
-        // 设置每个路由的默认最大连接
-        cm.setDefaultMaxPerRoute(httpClientProperties.getPool().getMaxPerRoute());
-
-        org.apache.hc.client5.http.config.RequestConfig requestConfig = org.apache.hc.client5.http.config.RequestConfig.custom()
-                .setConnectTimeout(Timeout.ofSeconds(httpClientProperties.getRequest().getConnectTimeout()))
-                .setResponseTimeout(Timeout.ofSeconds(httpClientProperties.getRequest().getResponseTimeout()))
-                .build();
-        defaultHttpClient = HttpClientBuilder.create()
-                .setConnectionManager(cm)
-                .setDefaultRequestConfig(requestConfig)
-                .setProxy(StringUtils.hasLength(httpClientProperties.getProxy().getHostname())
-                        && httpClientProperties.getProxy().getPort() > 0 ? new HttpHost(httpClientProperties.getProxy().getHostname(), httpClientProperties.getProxy().getPort()) : null)
-                .build();
+    public HttpClients(CloseableHttpClient httpClient) {
+        HttpClients.httpClient = httpClient;
     }
 
     public static HttpResponseData get(String url) {
@@ -77,7 +51,7 @@ public class HttpClients {
         if (requestConfig.getHeaders() != null) {
             requestConfig.getHeaders().entrySet().forEach(es -> {
                 Object hvalue = es.getValue();
-                if (CONTENT_TYPE_NAME.equalsIgnoreCase(es.getKey()) && hvalue != null) {
+                if (HttpHeaders.CONTENT_TYPE.equalsIgnoreCase(es.getKey()) && hvalue != null) {
                     contentTypeRef.set(ContentType.parse(String.valueOf(es.getValue())));
                 }
             });
@@ -144,7 +118,7 @@ public class HttpClients {
     public static HttpResponseData execute(CloseableHttpClient httpClient, HttpUriRequestBase httpRequest) {
         Assert.notNull(httpRequest, "httpRequest can not be null");
         if (httpClient == null) {
-            httpClient = defaultHttpClient;
+            httpClient = getHttpClient();
         }
         try (CloseableHttpResponse response = httpClient.execute(httpRequest)) {
             return new HttpClients.HttpResponseData(response.getCode(),
@@ -185,6 +159,17 @@ public class HttpClients {
                 .forEach((e) -> {
                     httpRequest.setHeader(e.getKey(), String.valueOf(e.getValue()));
                 });
+    }
+
+    static CloseableHttpClient getHttpClient() {
+        if (httpClient == null) {
+            synchronized (HttpClients.class) {
+                if (httpClient == null) {
+                    httpClient = org.apache.hc.client5.http.impl.classic.HttpClients.createDefault();
+                }
+            }
+        }
+        return httpClient;
     }
 
     public static class RequestConfig {
