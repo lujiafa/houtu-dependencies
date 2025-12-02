@@ -140,7 +140,7 @@ public final class MonitorLog implements SmartLifecycle {
         System.arraycopy(labels, 0, newLabels, 6, labels.length);
         boolean offer = INSTANCE.collectQueue.offer(new MetricSample(metricName, newLabels, value, timestamp, INSTANCE.period));
         if (!offer && LOGGER.isDebugEnabled()) {
-            LOGGER.debug("collect queue is full, metric sample is dropped, metricName={}, value={}", metricName, value);
+            LOGGER.debug("collect queue is full, metrics sample is dropped, metricName={}, value={}", metricName, value);
         }
     }
 

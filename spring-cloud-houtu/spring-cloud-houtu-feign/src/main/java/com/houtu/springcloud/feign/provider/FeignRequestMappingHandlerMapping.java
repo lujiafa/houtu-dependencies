@@ -83,7 +83,7 @@ public class FeignRequestMappingHandlerMapping extends RequestMappingHandlerMapp
 		}
 		Class<?> userType = ClassUtils.getUserClass(actualHandler.getClass());
 		Class<?> interfaceClass = getInterface(userType, true);
-		// TargetSource targetSource = new SingletonTargetSource(handler);
+		// TargetSource targetSource = new SingletonTargetSource(metrics);
 		// Object actualHandler = ProxyFactory.getProxy(interfaceClass, targetSource);
 		// Class<?> handlerType = actualHandler.getClass();
 
@@ -111,7 +111,7 @@ public class FeignRequestMappingHandlerMapping extends RequestMappingHandlerMapp
 						return requestMappingInfo;
 					}
 					catch (Throwable ex) {
-						throw new IllegalStateException("Invalid mapping on handler class [" +
+						throw new IllegalStateException("Invalid mapping on metrics class [" +
 								interfaceClass.getName() + "]: " + method, ex);
 					}
 				});

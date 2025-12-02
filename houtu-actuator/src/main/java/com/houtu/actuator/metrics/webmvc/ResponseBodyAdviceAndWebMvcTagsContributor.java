@@ -1,4 +1,4 @@
-package com.houtu.actuator.handler.webmvc;
+package com.houtu.actuator.metrics.webmvc;
 
 import com.houtu.core.exception.BusinessException;
 import com.houtu.core.web.BaseResponseData;
@@ -56,7 +56,7 @@ public class ResponseBodyAdviceAndWebMvcTagsContributor implements ResponseBodyA
                 return Collections.singletonList(Tag.of("code", String.valueOf(businessException.getErrorCode().getCode())));
             }
         } else {
-            Integer code = (Integer) request.getAttribute(ActuatorResponseBodyAdvice.RESPONSE_DATA_CODE);
+            Integer code = (Integer) request.getAttribute(RESPONSE_DATA_CODE);
             if (code != null) {
                 return Collections.singletonList(Tag.of("code", String.valueOf(code)));
             }

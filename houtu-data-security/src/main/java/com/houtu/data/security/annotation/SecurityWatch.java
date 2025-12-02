@@ -40,13 +40,13 @@ public @interface SecurityWatch {
    String[] decryptMapKeys() default {};
 
    /**
-    * 可自定义实现处理器 com.houtu.data.security.handler.SecurityProcessor
+    * 可自定义实现处理器 com.houtu.data.security.metrics.SecurityProcessor
     * @return 处理器Bean名称
     */
    String processorBeanName() default "";
 
    /**
-    * 可自定义实现处理器 com.houtu.data.security.handler.SecurityProcessor
+    * 可自定义实现处理器 com.houtu.data.security.metrics.SecurityProcessor
     * @return 处理器Class
     */
    Class<? extends SecurityProcessor> processorClass() default SecurityProcessor.class;
