@@ -1,2 +1,2 @@
-com.houtu.actuator.autoconfigure.ActuatorAutoConfiguration
-com.houtu.actuator.autoconfigure.ActuatorLettuceMetricsAutoConfiguration
+com.houtu.actuator.autoconfigure.ActuatorWebMetricsAutoConfiguration
+com.houtu.actuator.autoconfigure.ActuatorRedisMetricsAutoConfiguration
