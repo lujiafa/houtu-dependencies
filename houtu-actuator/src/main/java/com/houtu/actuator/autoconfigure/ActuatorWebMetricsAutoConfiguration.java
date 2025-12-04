@@ -3,6 +3,7 @@ package com.houtu.actuator.autoconfigure;
 import com.houtu.actuator.metrics.client.ActuatorHttpClient5ExecChainHandlerObservation;
 import com.houtu.actuator.metrics.webmvc.ResponseBodyAdviceAndWebMvcTagsContributor;
 import io.micrometer.observation.ObservationRegistry;
+import org.apache.hc.client5.http.classic.HttpClient;
 import org.springframework.boot.actuate.autoconfigure.metrics.CompositeMeterRegistryAutoConfiguration;
 import org.springframework.boot.actuate.autoconfigure.metrics.MetricsAutoConfiguration;
 import org.springframework.boot.actuate.autoconfigure.metrics.export.simple.SimpleMetricsExportAutoConfiguration;
@@ -22,7 +23,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
  * @date 2020年12月17日
  */
 @AutoConfiguration(after = {MetricsAutoConfiguration.class, CompositeMeterRegistryAutoConfiguration.class, SimpleMetricsExportAutoConfiguration.class, RestTemplateAutoConfiguration.class})
-public class ActuatorAutoConfiguration {
+public class ActuatorWebMetricsAutoConfiguration {
 
     @Configuration
     @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
@@ -43,6 +44,7 @@ public class ActuatorAutoConfiguration {
     }
 
     @Configuration
+    @ConditionalOnClass(HttpClient.class)
     @ConditionalOnProperty(prefix = "management.metrics.distribution.percentiles", name = {"http.client.requests"})
     public static class ActuatorHttpClient5Configuration {
 
