@@ -1,2 +1,3 @@
 com.houtu.actuator.autoconfigure.ActuatorWebMetricsAutoConfiguration
+com.houtu.actuator.autoconfigure.ActuatorDataSourcePoolMetricsAutoConfiguration
 com.houtu.actuator.autoconfigure.ActuatorRedisMetricsAutoConfiguration
