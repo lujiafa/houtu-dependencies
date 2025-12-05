@@ -39,8 +39,11 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 @AutoConfiguration
 @EnableConfigurationProperties(HttpClientProperties.class)
@@ -51,7 +54,8 @@ public class UtilsAutoConfiguration {
     public CloseableHttpClient httpClient(HttpClientProperties httpClientProperties,
                                           List<HttpRequestInterceptor> requestInterceptors,
                                           List<HttpResponseInterceptor> responseInterceptors,
-                                          ApplicationContext applicationContext)  {
+                                          List<ExecChainHandler> execChainHandlers,
+                                          ApplicationContext applicationContext) {
         PoolingHttpClientConnectionManagerBuilder connectionManagerBuilder = PoolingHttpClientConnectionManagerBuilder.create()
                 .setMaxConnTotal(httpClientProperties.getPool().getMaxTotal())
                 .setMaxConnPerRoute(httpClientProperties.getPool().getMaxPerRoute())
@@ -84,14 +88,22 @@ public class UtilsAutoConfiguration {
             httpClientBuilder.setUserAgent(httpClientProperties.getRequest().getUserAgent());
         }
         if (requestInterceptors != null && !requestInterceptors.isEmpty()) {
-            requestInterceptors.stream().forEach(i ->  httpClientBuilder.addRequestInterceptorLast(i));
+            requestInterceptors.stream().forEach(i -> httpClientBuilder.addRequestInterceptorLast(i));
         }
         if (responseInterceptors != null && !responseInterceptors.isEmpty()) {
-            responseInterceptors.stream().forEach(i ->  httpClientBuilder.addResponseInterceptorLast(i));
+            responseInterceptors.stream().forEach(i -> httpClientBuilder.addResponseInterceptorLast(i));
         }
-        Map<String, ExecChainHandler> execChainHandlerMap = BeanFactoryUtils.beansOfTypeIncludingAncestors(applicationContext, ExecChainHandler.class);
-        if (execChainHandlerMap != null && !execChainHandlerMap.isEmpty()) {
-            execChainHandlerMap.entrySet().stream().forEach(i ->  httpClientBuilder.addExecInterceptorLast(i.getKey(), i.getValue()));
+        if (execChainHandlers != null && !execChainHandlers.isEmpty()) {
+            Collections.reverse(execChainHandlers);
+            Map<ExecChainHandler, String> execChainHandlerStringMap = BeanFactoryUtils.beansOfTypeIncludingAncestors(applicationContext, ExecChainHandler.class).entrySet().stream().collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
+            AtomicInteger incr = new AtomicInteger(0);
+            execChainHandlers.forEach(e -> {
+                String beanName = execChainHandlerStringMap.get(e);
+                if (!StringUtils.hasText(beanName)) {
+                    beanName = String.format("%s-%d", Thread.currentThread().getName(), incr.getAndIncrement());
+                }
+                httpClientBuilder.addExecInterceptorFirst(beanName, e);
+            });
         }
         return httpClientBuilder.build();
     }
@@ -116,10 +128,12 @@ public class UtilsAutoConfiguration {
         if (Boolean.TRUE.equals(disableSslValidation)) {
             try {
                 SSLContext sslContext = SSLContext.getInstance("SSL");
-                sslContext.init((KeyManager[])null, new TrustManager[]{new X509TrustManager() {
-                    public void checkClientTrusted(X509Certificate[] x509Certificates, String s) throws CertificateException {}
+                sslContext.init((KeyManager[]) null, new TrustManager[]{new X509TrustManager() {
+                    public void checkClientTrusted(X509Certificate[] x509Certificates, String s) throws CertificateException {
+                    }
 
-                    public void checkServerTrusted(X509Certificate[] x509Certificates, String s) throws CertificateException {}
+                    public void checkServerTrusted(X509Certificate[] x509Certificates, String s) throws CertificateException {
+                    }
 
                     public X509Certificate[] getAcceptedIssuers() {
                         return null;
