@@ -1,21 +1,22 @@
 package com.houtu.actuator.autoconfigure;
 
 import com.zaxxer.hikari.HikariDataSource;
+import com.zaxxer.hikari.metrics.micrometer.MicrometerMetricsTrackerFactory;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.BeanFactoryUtils;
-import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
+import org.springframework.beans.factory.SmartInitializingSingleton;
+import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
+import org.springframework.boot.actuate.autoconfigure.metrics.MetricsAutoConfiguration;
+import org.springframework.boot.actuate.autoconfigure.metrics.export.simple.SimpleMetricsExportAutoConfiguration;
 import org.springframework.boot.actuate.autoconfigure.metrics.jdbc.DataSourcePoolMetricsAutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.context.ApplicationContext;
-import org.springframework.core.ResolvableType;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
+import org.springframework.context.annotation.Bean;
 
-import javax.sql.DataSource;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,41 +25,65 @@ import java.util.Map;
  * @date 2022年12月17日
  */
 
-@AutoConfiguration(before = {DataSourcePoolMetricsAutoConfiguration.class})
+@AutoConfiguration(after = {DataSourcePoolMetricsAutoConfiguration.class, MetricsAutoConfiguration.class, DataSourceAutoConfiguration.class, SimpleMetricsExportAutoConfiguration.class})
 @ConditionalOnClass({HikariDataSource.class, MeterRegistry.class})
-@ConditionalOnBean({DataSource.class, MeterRegistry.class})
-public class ActuatorDataSourcePoolMetricsAutoConfiguration implements BeanDefinitionRegistryPostProcessor {
+@ConditionalOnBean({MeterRegistry.class})
+public class ActuatorDataSourcePoolMetricsAutoConfiguration {
 
-    private Map<DataSource, String> dataSourceExistMap = new HashMap<>();
-    private Map<String, Map<String, DataSource>> dataSourceMaps = new HashMap<>();
-
-    public ActuatorDataSourcePoolMetricsAutoConfiguration(ApplicationContext applicationContext, ObjectProvider<Map<String, DataSource>> dataSourceMapProvider) {
-        Map<String, DataSource> dataSourceMap = BeanFactoryUtils.beansOfTypeIncludingAncestors(applicationContext, DataSource.class, false, true);
-        if (dataSourceMap != null && !dataSourceMap.isEmpty()) {
-            dataSourceMap.entrySet().stream().forEach(entry -> {
-                dataSourceExistMap.put(entry.getValue(), entry.getKey());
-            });
-        }
-        Map<String, Map<String, DataSource>> tmpDataSourceMap = (Map<String, Map<String, DataSource>>) BeanFactoryUtils.beansOfTypeIncludingAncestors(applicationContext, ResolvableType.forClassWithGenerics(Map.class, String.class, DataSource.class).resolve());
-        if (tmpDataSourceMap != null && !tmpDataSourceMap.isEmpty()) {
-            dataSourceMaps.putAll(tmpDataSourceMap);
-        }
+    @Bean
+    @ConditionalOnMissingBean
+    public DataSourcePoolMetricsBeanPostProcessor dataSourcePoolMetricsBeanPostProcessor(MeterRegistry meterRegistry) {
+        return new DataSourcePoolMetricsBeanPostProcessor(meterRegistry);
     }
 
+    public static class DataSourcePoolMetricsBeanPostProcessor implements BeanPostProcessor, SmartInitializingSingleton {
 
-    @Override
-    public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) throws BeansException {
-        dataSourceMaps.entrySet().stream().forEach(mapEntry -> {
-            mapEntry.getValue().entrySet().stream().forEach(entry -> {
-                DataSource dataSource = entry.getValue();
-                if (dataSource instanceof HikariDataSource && !dataSourceExistMap.containsKey(dataSource)) {
-                    String dataSourceName = mapEntry.getKey() + "." + entry.getKey();
-                    GenericBeanDefinition beanDefinition = new GenericBeanDefinition();
-                    beanDefinition.setBeanClass(HikariDataSource.class);
-                    beanDefinition.setInstanceSupplier(() -> dataSource);
-                    registry.registerBeanDefinition(dataSourceName, beanDefinition);
+        protected Map<HikariDataSource, String> dataSourceMap = new HashMap<>();
+        protected MeterRegistry meterRegistry;
+
+        public DataSourcePoolMetricsBeanPostProcessor(MeterRegistry meterRegistry) {
+            this.meterRegistry = meterRegistry;
+        }
+
+        @Override
+        public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+            if (bean instanceof HikariDataSource && !dataSourceMap.containsKey(bean)) {
+                dataSourceMap.put((HikariDataSource) bean, beanName);
+                if (((HikariDataSource) bean).getPoolName() == null) {
+                    ((HikariDataSource) bean).setPoolName(beanName);
                 }
-            });
-        });
+            } else if (bean instanceof Map && !((Map<?, ?>) bean).isEmpty()) {
+                ((Map<?, ?>) bean).entrySet().stream().forEach(entry -> {
+                    Object value = entry.getValue();
+                    if (value instanceof HikariDataSource && !dataSourceMap.containsKey(value)) {
+                        HikariDataSource hikariDataSource = (HikariDataSource) value;
+                        String dataSourceName = beanName + "." + entry.getKey();
+                        if (hikariDataSource.getPoolName() == null) {
+                            hikariDataSource.setPoolName(dataSourceName);
+                        }
+                        GenericBeanDefinition beanDefinition = new GenericBeanDefinition();
+                        beanDefinition.setBeanClass(HikariDataSource.class);
+                        beanDefinition.setInstanceSupplier(() -> hikariDataSource);
+                        dataSourceMap.put(hikariDataSource, dataSourceName);
+                    }
+                });
+            }
+            return bean;
+        }
+
+        @Override
+        public void afterSingletonsInstantiated() {
+            if (!dataSourceMap.isEmpty()) {
+                dataSourceMap.entrySet().stream().forEach(entry -> {
+                    HikariDataSource dataSource = entry.getKey();
+                    if (dataSource.getMetricRegistry() == null) {
+                        if (dataSource.getMetricsTrackerFactory() == null) {
+                            dataSource.setMetricsTrackerFactory(new MicrometerMetricsTrackerFactory(meterRegistry));
+                        }
+                    }
+                });
+            }
+            dataSourceMap.clear();
+        }
     }
 }
