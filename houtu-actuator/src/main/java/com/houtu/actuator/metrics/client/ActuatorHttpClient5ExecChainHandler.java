@@ -9,13 +9,14 @@ import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.hc.core5.http.HttpException;
 import org.slf4j.Logger;
 import org.springframework.boot.actuate.metrics.AutoTimer;
+import org.springframework.core.Ordered;
 import org.springframework.web.util.NestedServletException;
 
 import java.io.IOException;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
-public class ActuatorHttpClient5ExecChainHandler implements ExecChainHandler {
+public class ActuatorHttpClient5ExecChainHandler implements ExecChainHandler, Ordered {
 
     private Logger logger = org.slf4j.LoggerFactory.getLogger(ActuatorHttpClient5ExecChainHandler.class);
 
@@ -65,5 +66,10 @@ public class ActuatorHttpClient5ExecChainHandler implements ExecChainHandler {
 
     private Throwable unwrapNestedServletException(Throwable ex) {
         return (ex instanceof NestedServletException) ? ex.getCause() : ex;
+    }
+
+    @Override
+    public int getOrder() {
+        return Ordered.HIGHEST_PRECEDENCE;
     }
 }
