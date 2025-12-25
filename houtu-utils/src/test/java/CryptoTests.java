@@ -6,7 +6,6 @@ import com.houtu.util.crypto.extension.SM2KeyPair;
 import com.houtu.util.crypto.type.*;
 import org.springframework.util.Assert;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 public class CryptoTests {
@@ -139,7 +138,7 @@ public class CryptoTests {
                 byte[] tmp_source = CodecData.utf8(source).bytes();
                 if (transformation == RSATransformationAlgorithm.RSA_NONE_NO_PADDING
                         || transformation == RSATransformationAlgorithm.RSA_ECB_NO_PADDING) {
-                    tmp_source = rsaCustomPadding(source.getBytes(StandardCharsets.UTF_8), rsaKeySize.getKeySize());
+                    tmp_source = RSAUtils.padding(CodecData.utf8(source), rsaKeySize).bytes();
                 }
                 String base64 = RSAUtils.encryptByPrivateKey(CodecData.bytes(tmp_source), CodecData.base64(privateKey), transformation).base64();
                 Assert.isTrue(source.equals(RSAUtils.decryptByPublicKey(CodecData.base64(base64), CodecData.base64(publicKey), transformation).utf8()), transformation.getTransformationAlgorithm() + " assert fail.");
@@ -154,7 +153,7 @@ public class CryptoTests {
                 byte[] tmp_source = CodecData.utf8(source).bytes();
                 if (transformation == RSATransformationAlgorithm.RSA_NONE_NO_PADDING
                         || transformation == RSATransformationAlgorithm.RSA_ECB_NO_PADDING) {
-                    tmp_source = rsaCustomPadding(source.getBytes(StandardCharsets.UTF_8), rsaKeySize.getKeySize());
+                    tmp_source = RSAUtils.padding(CodecData.utf8(source), rsaKeySize).bytes();
                 }
                 String base64 = RSAUtils.encryptByPublicKey(CodecData.bytes(tmp_source), CodecData.base64(publicKey), transformation).base64();
                 Assert.isTrue(source.equals(RSAUtils.decryptByPrivateKey(CodecData.base64(base64), CodecData.base64(privateKey), transformation).utf8()), transformation.getTransformationAlgorithm() + " assert fail.");
@@ -193,18 +192,5 @@ public class CryptoTests {
             Assert.isTrue(SM2Utils.signVerify(CodecData.utf8(source), CodecData.base64(publicKey), CodecData.base64(sign), signAlgorithm), "sign " + signAlgorithm.getAlgorithm() + " assert fail.");
         }
     }
-
-
-    // 手动填充到密钥长度
-    private static byte[] rsaCustomPadding(byte[] data, int keySizeBits) {
-        int keySizeBytes = keySizeBits / 8;
-        if (data.length > keySizeBytes) {
-            throw new IllegalArgumentException("数据长度超过密钥长度");
-        }
-        byte[] padded = new byte[keySizeBytes];
-        System.arraycopy(data, 0, padded, keySizeBytes - data.length, data.length);
-        return padded;
-    }
-
 
 }
