@@ -1,17 +1,18 @@
 package com.houtu.util.crypto;
 
-import com.houtu.util.constant.CryptoConstant;
 import com.houtu.util.common.CodecData;
+import com.houtu.util.constant.CryptoConstant;
 import com.houtu.util.crypto.extension.SM2KeyPair;
 import com.houtu.util.crypto.type.SM2SignAlgorithm;
 import org.bouncycastle.crypto.engines.SM2Engine;
-import org.bouncycastle.crypto.params.*;
 import org.bouncycastle.crypto.params.ECDomainParameters;
 import org.bouncycastle.crypto.params.ECPrivateKeyParameters;
 import org.bouncycastle.crypto.params.ECPublicKeyParameters;
 import org.bouncycastle.crypto.params.ParametersWithRandom;
 import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPrivateKey;
 import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPublicKey;
+import org.bouncycastle.jce.ECNamedCurveTable;
+import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
 import org.bouncycastle.jce.spec.ECParameterSpec;
 
 import java.security.*;
@@ -44,57 +45,81 @@ public class SM2Utils {
     }
 
     public static CodecData encrypt(CodecData source, CodecData publicKey) throws Exception {
-        return encrypt(source.bytes(), getPublicKey(publicKey.bytes()));
+        return encrypt(source, publicKey, null);
+    }
+
+    public static CodecData encrypt(CodecData source, CodecData publicKey, SM2Engine.Mode mode) throws Exception {
+        return encrypt(source.bytes(), getPublicKey(publicKey.bytes()), mode);
     }
 
     public static CodecData encrypt(byte[] source, CodecData publicKey) throws Exception {
-        return encrypt(source, getPublicKey(publicKey.bytes()));
+        return encrypt(source, publicKey, null);
+    }
+
+    public static CodecData encrypt(byte[] source, CodecData publicKey, SM2Engine.Mode mode) throws Exception {
+        return encrypt(source, getPublicKey(publicKey.bytes()), mode);
     }
 
     public static CodecData encrypt(byte[] data, byte[] publicKey) throws Exception {
-        return encrypt(data, getPublicKey(publicKey));
+        return encrypt(data, publicKey, null);
     }
 
-    public static CodecData encrypt(byte[] source, BCECPublicKey publicKey) throws Exception {
+    public static CodecData encrypt(byte[] data, byte[] publicKey, SM2Engine.Mode mode) throws Exception {
+        return encrypt(data, getPublicKey(publicKey), mode);
+    }
+
+    public static CodecData encrypt(byte[] source, BCECPublicKey publicKey, SM2Engine.Mode mode) throws Exception {
         ECParameterSpec ecParameterSpec = publicKey.getParameters();
         ECDomainParameters ecDomainParameters = new ECDomainParameters(ecParameterSpec.getCurve(),
                 ecParameterSpec.getG(), ecParameterSpec.getN());
         ECPublicKeyParameters ecPublicKeyParameters = new ECPublicKeyParameters(publicKey.getQ(), ecDomainParameters);
-        return encrypt(source, ecPublicKeyParameters);
+        return encrypt(source, ecPublicKeyParameters, mode);
 
     }
 
-    public static CodecData encrypt(byte[] source, ECPublicKeyParameters ecPublicKeyParameters) throws Exception {
-        SM2Engine engine = new SM2Engine();
+    public static CodecData encrypt(byte[] source, ECPublicKeyParameters ecPublicKeyParameters, SM2Engine.Mode mode) throws Exception {
+        SM2Engine engine = new SM2Engine(mode == null ? SM2Engine.Mode.C1C2C3 : mode);
         engine.init(true, new ParametersWithRandom(ecPublicKeyParameters, new SecureRandom()));
         return CodecData.bytes(engine.processBlock(source, 0, source.length));
     }
 
     public static CodecData decrypt(CodecData encrypted, CodecData privateKey) throws Exception {
-        return decrypt(encrypted.bytes(), getPrivateKey(privateKey.bytes()));
+        return decrypt(encrypted, privateKey, null);
+    }
+
+    public static CodecData decrypt(CodecData encrypted, CodecData privateKey, SM2Engine.Mode mode) throws Exception {
+        return decrypt(encrypted.bytes(), getPrivateKey(privateKey.bytes()), mode);
     }
 
     public static CodecData decrypt(byte[] encrypted, CodecData privateKey) throws Exception {
-        return decrypt(encrypted, getPrivateKey(privateKey.bytes()));
+        return decrypt(encrypted, privateKey, null);
+    }
+
+    public static CodecData decrypt(byte[] encrypted, CodecData privateKey, SM2Engine.Mode mode) throws Exception {
+        return decrypt(encrypted, getPrivateKey(privateKey.bytes()), mode);
     }
 
     public static CodecData decrypt(byte[] encrypted, byte[] privateKey) throws Exception {
-        BCECPrivateKey bcecPrivateKey = getPrivateKey(privateKey);
-        return decrypt(encrypted, bcecPrivateKey);
+        return decrypt(encrypted, privateKey, null);
     }
 
-    public static CodecData decrypt(byte[] encodeData, BCECPrivateKey privateKey) throws Exception {
+    public static CodecData decrypt(byte[] encrypted, byte[] privateKey, SM2Engine.Mode mode) throws Exception {
+        BCECPrivateKey bcecPrivateKey = getPrivateKey(privateKey);
+        return decrypt(encrypted, bcecPrivateKey, mode);
+    }
+
+    public static CodecData decrypt(byte[] encodeData, BCECPrivateKey privateKey, SM2Engine.Mode mode) throws Exception {
         ECParameterSpec ecParameterSpec = privateKey.getParameters();
         ECDomainParameters ecDomainParameters = new ECDomainParameters(ecParameterSpec.getCurve(),
                 ecParameterSpec.getG(), ecParameterSpec.getN());
         ECPrivateKeyParameters privateKeyParameters = new ECPrivateKeyParameters(privateKey.getD(),
                 ecDomainParameters);
-        return decrypt(encodeData, privateKeyParameters);
+        return decrypt(encodeData, privateKeyParameters, mode);
     }
 
 
-    public static CodecData decrypt(byte[] encodeData, ECPrivateKeyParameters privateKeyParameters) throws Exception {
-        SM2Engine sm2Engine = new SM2Engine();
+    public static CodecData decrypt(byte[] encodeData, ECPrivateKeyParameters privateKeyParameters, SM2Engine.Mode mode) throws Exception {
+        SM2Engine sm2Engine = new SM2Engine(mode == null ? SM2Engine.Mode.C1C2C3 : mode);
         sm2Engine.init(false, privateKeyParameters);
         return CodecData.bytes(sm2Engine.processBlock(encodeData, 0, encodeData.length));
     }
@@ -223,12 +248,15 @@ public class SM2Utils {
     public static SM2KeyPair getKeyPair() {
         try {
             KeyPairGenerator keyGen = KeyPairGenerator.getInstance(CryptoConstant.ALGORITHM_SM2, CryptoConstant.PROVIDER_BOUNCY_CASTLE);
-            keyGen.initialize(256);
+            ECNamedCurveParameterSpec ecSpec = ECNamedCurveTable.getParameterSpec(CryptoConstant.ALGORITHM_SM2_P256_V1);
+            keyGen.initialize(ecSpec, new SecureRandom());
             KeyPair keyPair = keyGen.generateKeyPair();
             BCECPublicKey publicKey = (BCECPublicKey) keyPair.getPublic();
             BCECPrivateKey privateKey = (BCECPrivateKey) keyPair.getPrivate();
             return new SM2KeyPair(publicKey, privateKey, publicKey.getAlgorithm());
         } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        } catch (InvalidAlgorithmParameterException e) {
             throw new RuntimeException(e.getMessage(), e);
         }
     }

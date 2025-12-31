@@ -80,7 +80,7 @@ public class UnifiedHandlerExceptionResolver implements HandlerExceptionResolver
      * @param ex 异常对象
      * @return 自定义异常码
      */
-    BusinessException customizers(HttpServletRequest request,
+    protected BusinessException customizers(HttpServletRequest request,
                                      HttpServletResponse response,
                                      Object handler,
                                      Exception ex) {
@@ -99,7 +99,7 @@ public class UnifiedHandlerExceptionResolver implements HandlerExceptionResolver
      * @return 被包裹业务异常
      * @description 获取被包裹业务异常
      */
-    BusinessException resolveBusinessException(Throwable throwable) {
+    protected BusinessException resolveBusinessException(Throwable throwable) {
         return ThrowableUtils.getThrowable(throwable, BusinessException.class);
     }
 

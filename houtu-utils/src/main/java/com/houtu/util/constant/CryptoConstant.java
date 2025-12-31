@@ -24,6 +24,7 @@ public interface CryptoConstant {
 	String ALGORITHM_EC = "EC";
 
 	String ALGORITHM_SM2 = "SM2";
+	String ALGORITHM_SM2_P256_V1 = "sm2p256v1";
 	String ALGORITHM_HMAC_SM3 = "HmacSM3";
 
 }
