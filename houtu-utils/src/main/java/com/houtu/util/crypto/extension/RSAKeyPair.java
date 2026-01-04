@@ -1,5 +1,6 @@
 package com.houtu.util.crypto.extension;
 
+import com.houtu.util.common.CodecData;
 import com.houtu.util.crypto.Base64Utils;
 import com.houtu.util.crypto.type.RSAKeySize;
 
@@ -13,20 +14,20 @@ import java.security.interfaces.RSAPublicKey;
  */
 public class RSAKeyPair {
 
-    private RSAKeySize keySize;
+    private final RSAKeySize keySize;
 
     /**
      * RSA公钥
      **/
-    private RSAPublicKey publicKey;
+    private final RSAPublicKey publicKey;
     /**
      * RSA私钥
      **/
-    private RSAPrivateKey privateKey;
+    private final RSAPrivateKey privateKey;
     /**
      * 模
      **/
-    private String modulus;
+    private final String modulus;
 
     public RSAKeyPair(RSAKeySize keySize, RSAPublicKey publicKey, RSAPrivateKey privateKey, String modulus) {
         super();
@@ -52,19 +53,11 @@ public class RSAKeyPair {
         return modulus;
     }
 
-    public String getPublicKeyBase64() {
-        return Base64Utils.encode(getPublicKeyBytes());
+    public CodecData getEncodedPrivateKey() {
+        return CodecData.bytes(privateKey.getEncoded());
     }
 
-    public String getPrivateKeyBase64() {
-        return Base64Utils.encode(getPrivateKeyBytes());
-    }
-
-    public byte[] getPublicKeyBytes() {
-        return publicKey.getEncoded();
-    }
-
-    public byte[] getPrivateKeyBytes() {
-        return privateKey.getEncoded();
+    public CodecData getEncodedPublicKey() {
+        return CodecData.bytes(publicKey.getEncoded());
     }
 }

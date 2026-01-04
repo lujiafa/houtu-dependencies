@@ -1,10 +1,15 @@
 package com.houtu.util.crypto.extension;
 
+import com.houtu.util.common.CodecData;
 import com.houtu.util.crypto.Base64Utils;
 import com.houtu.util.crypto.type.ECDSAKeyType;
+import org.bouncycastle.math.ec.ECPoint;
 
+import java.math.BigInteger;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.interfaces.ECPrivateKey;
+import java.security.interfaces.ECPublicKey;
 
 /**
  * @author lujiafa
@@ -13,19 +18,18 @@ import java.security.PublicKey;
  */
 public class ECDSAKeyPair {
 
-    private ECDSAKeyType type;
+    private final ECDSAKeyType type;
 
     /**
      * 公钥
      **/
-    private PublicKey publicKey;
+    private final ECPublicKey publicKey;
     /**
      * 私钥
      **/
-    private PrivateKey privateKey;
+    private final ECPrivateKey privateKey;
 
-    public ECDSAKeyPair(ECDSAKeyType type, PublicKey publicKey, PrivateKey privateKey) {
-        super();
+    public ECDSAKeyPair(ECDSAKeyType type, ECPublicKey publicKey, ECPrivateKey privateKey) {
         this.type = type;
         this.publicKey = publicKey;
         this.privateKey = privateKey;
@@ -35,27 +39,20 @@ public class ECDSAKeyPair {
         return type;
     }
 
-    public PublicKey getPublicKey() {
+    public ECPublicKey getPublicKey() {
         return publicKey;
     }
 
-    public PrivateKey getPrivateKey() {
+    public ECPrivateKey getPrivateKey() {
         return privateKey;
     }
 
-    public String getPublicKeyBase64() {
-        return Base64Utils.encode(getPublicKeyBytes());
+    public CodecData getEncodedPrivateKey() {
+        return CodecData.bytes(privateKey.getEncoded());
     }
 
-    public String getPrivateKeyBase64() {
-        return Base64Utils.encode(getPrivateKeyBytes());
+    public CodecData getEncodedPublicKey() {
+        return CodecData.bytes(publicKey.getEncoded());
     }
 
-    public byte[] getPublicKeyBytes() {
-        return publicKey.getEncoded();
-    }
-
-    public byte[] getPrivateKeyBytes() {
-        return privateKey.getEncoded();
-    }
 }

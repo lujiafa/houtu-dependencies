@@ -339,7 +339,7 @@ public final class RSAUtils {
     public static RSAKeyPair getKeyPair(RSAKeySize keySize) {
         try {
             KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance(keySize.getAlgorithm());
-            keyPairGen.initialize(keySize.getKeySize());
+            keyPairGen.initialize(keySize.getKeySize(), new SecureRandom());
             KeyPair keyPair = keyPairGen.generateKeyPair();
             RSAPublicKey publicKey = (RSAPublicKey) keyPair.getPublic();
             RSAPrivateKey privateKey = (RSAPrivateKey) keyPair.getPrivate();

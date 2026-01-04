@@ -126,8 +126,8 @@ public class CryptoTests {
          */
         for (RSAKeySize rsaKeySize : RSAKeySize.values()) {
             RSAKeyPair keyPair = RSAUtils.getKeyPair(rsaKeySize);
-            String publicKey = keyPair.getPublicKeyBase64();
-            String privateKey = keyPair.getPrivateKeyBase64();
+            CodecData privateKey = keyPair.getEncodedPrivateKey();
+            CodecData publicKey = keyPair.getEncodedPublicKey();
             /* 私钥加密 + 公钥解密 */
             for (RSATransformationAlgorithm transformation : RSATransformationAlgorithm.values()) {
                 if (rsaKeySize == RSAKeySize._1024 &&
@@ -140,8 +140,8 @@ public class CryptoTests {
                         || transformation == RSATransformationAlgorithm.RSA_ECB_NO_PADDING) {
                     tmp_source = RSAUtils.padding(CodecData.utf8(source), rsaKeySize).bytes();
                 }
-                String base64 = RSAUtils.encryptByPrivateKey(CodecData.bytes(tmp_source), CodecData.base64(privateKey), transformation).base64();
-                Assert.isTrue(source.equals(RSAUtils.decryptByPublicKey(CodecData.base64(base64), CodecData.base64(publicKey), transformation).utf8()), transformation.getTransformationAlgorithm() + " assert fail.");
+                String base64 = RSAUtils.encryptByPrivateKey(CodecData.bytes(tmp_source), privateKey, transformation).base64();
+                Assert.isTrue(source.equals(RSAUtils.decryptByPublicKey(CodecData.base64(base64), publicKey, transformation).utf8()), transformation.getTransformationAlgorithm() + " assert fail.");
             }
             /* 公钥加密 + 私钥解密 */
             for (RSATransformationAlgorithm transformation : RSATransformationAlgorithm.values()) {
@@ -155,12 +155,12 @@ public class CryptoTests {
                         || transformation == RSATransformationAlgorithm.RSA_ECB_NO_PADDING) {
                     tmp_source = RSAUtils.padding(CodecData.utf8(source), rsaKeySize).bytes();
                 }
-                String base64 = RSAUtils.encryptByPublicKey(CodecData.bytes(tmp_source), CodecData.base64(publicKey), transformation).base64();
-                Assert.isTrue(source.equals(RSAUtils.decryptByPrivateKey(CodecData.base64(base64), CodecData.base64(privateKey), transformation).utf8()), transformation.getTransformationAlgorithm() + " assert fail.");
+                String base64 = RSAUtils.encryptByPublicKey(CodecData.bytes(tmp_source), publicKey, transformation).base64();
+                Assert.isTrue(source.equals(RSAUtils.decryptByPrivateKey(CodecData.base64(base64), privateKey, transformation).utf8()), transformation.getTransformationAlgorithm() + " assert fail.");
             }
             for (RSASignAlgorithm signAlgorithm : RSASignAlgorithm.values()) {
-                String sign = RSAUtils.sign(CodecData.utf8(source), CodecData.base64(privateKey), signAlgorithm).base64();
-                Assert.isTrue(RSAUtils.signVerify(CodecData.utf8(source), CodecData.base64(publicKey), CodecData.base64(sign), signAlgorithm), "sign " + signAlgorithm.getSignAlgorithm() + " assert fail.");
+                String sign = RSAUtils.sign(CodecData.utf8(source), privateKey, signAlgorithm).base64();
+                Assert.isTrue(RSAUtils.signVerify(CodecData.utf8(source), publicKey, CodecData.base64(sign), signAlgorithm), "sign " + signAlgorithm.getSignAlgorithm() + " assert fail.");
             }
         }
 
@@ -169,11 +169,11 @@ public class CryptoTests {
          */
         for (ECDSAKeyType type : ECDSAKeyType.values()) {
             ECDSAKeyPair keyPair = ECDSAUtils.getKeyPair(type);
-            String privateKey = keyPair.getPrivateKeyBase64();
-            String publicKey = keyPair.getPublicKeyBase64();
+            CodecData privateKey = keyPair.getEncodedPrivateKey();
+            CodecData publicKey = keyPair.getEncodedPublicKey();
             for (ECDSASignAlgorithm signAlgorithm : ECDSASignAlgorithm.values()) {
-                String sign = ECDSAUtils.sign(CodecData.utf8(source), CodecData.base64(privateKey), signAlgorithm).base64();
-                Assert.isTrue(ECDSAUtils.verify(CodecData.utf8(source), CodecData.base64(publicKey), CodecData.base64(sign), signAlgorithm), "sign " + signAlgorithm.getAlgorithm() + " assert fail.");
+                String sign = ECDSAUtils.sign(CodecData.utf8(source), privateKey, signAlgorithm).base64();
+                Assert.isTrue(ECDSAUtils.verify(CodecData.utf8(source), publicKey, CodecData.base64(sign), signAlgorithm), "sign " + signAlgorithm.getAlgorithm() + " assert fail.");
             }
         }
 
@@ -181,15 +181,15 @@ public class CryptoTests {
          * SM2
          */
         SM2KeyPair keyPair = SM2Utils.getKeyPair();
-        String privateKey = keyPair.getPrivateKeyBase64();
-        String publicKey = keyPair.getPublicKeyBase64();
+        CodecData privateKey = keyPair.getEncodedPrivateKey();
+        CodecData publicKey = keyPair.getEncodedPublicKey();
         // SM2 加解密
-        String encrypted = SM2Utils.encrypt(CodecData.utf8(source), CodecData.base64(publicKey)).base64();
-        Assert.isTrue(source.equals(SM2Utils.decrypt(CodecData.base64(encrypted), CodecData.base64(privateKey)).utf8()), "sm2 assert fail.");
+        String encrypted = SM2Utils.encrypt(CodecData.utf8(source), publicKey).base64();
+        Assert.isTrue(source.equals(SM2Utils.decrypt(CodecData.base64(encrypted), privateKey).utf8()), "sm2 assert fail.");
         // SM2 签名
         for (SM2SignAlgorithm signAlgorithm : SM2SignAlgorithm.values()) {
-            String sign = SM2Utils.sign(CodecData.utf8(source), CodecData.base64(privateKey), signAlgorithm).base64();
-            Assert.isTrue(SM2Utils.signVerify(CodecData.utf8(source), CodecData.base64(publicKey), CodecData.base64(sign), signAlgorithm), "sign " + signAlgorithm.getAlgorithm() + " assert fail.");
+            String sign = SM2Utils.sign(CodecData.utf8(source), privateKey, signAlgorithm).base64();
+            Assert.isTrue(SM2Utils.signVerify(CodecData.utf8(source), publicKey, CodecData.base64(sign), signAlgorithm), "sign " + signAlgorithm.getAlgorithm() + " assert fail.");
         }
     }
 

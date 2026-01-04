@@ -11,8 +11,8 @@ public enum RSASignAlgorithm {
     SHA384_WITH_RSA(CryptoConstant.ALGORITHM_RSA, "SHA384withRSA"),
     SHA512_WITH_RSA(CryptoConstant.ALGORITHM_RSA, "SHA512withRSA");
 
-    private String algorithm;
-    private String signAlgorithm;
+    private final String algorithm;
+    private final String signAlgorithm;
 
     RSASignAlgorithm(String algorithm, String signAlgorithm) {
         this.algorithm = algorithm;
