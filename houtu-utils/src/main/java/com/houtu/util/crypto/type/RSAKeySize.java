@@ -32,8 +32,8 @@ public enum RSAKeySize {
      **/
     _4096( "RSA", 4096);
 
-    private String algorithm;
-    private int keySize;
+    private final String algorithm;
+    private final int keySize;
 
     RSAKeySize(String algorithm, int keySize) {
         this.algorithm = algorithm;

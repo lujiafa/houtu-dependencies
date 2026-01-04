@@ -7,6 +7,8 @@ import com.houtu.util.crypto.type.ECDSAKeyType;
 import com.houtu.util.crypto.type.ECDSASignAlgorithm;
 
 import java.security.*;
+import java.security.interfaces.ECPrivateKey;
+import java.security.interfaces.ECPublicKey;
 import java.security.spec.ECGenParameterSpec;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
@@ -202,9 +204,9 @@ public class ECDSAUtils {
             keyPairGenerator = KeyPairGenerator.getInstance(CryptoConstant.ALGORITHM_EC);
         }
         ECGenParameterSpec ecSpec = new ECGenParameterSpec(type.getType());
-        keyPairGenerator.initialize(ecSpec);
+        keyPairGenerator.initialize(ecSpec, new SecureRandom());
         KeyPair keyPair = keyPairGenerator.generateKeyPair();
-        return new ECDSAKeyPair(type, keyPair.getPublic(), keyPair.getPrivate());
+        return new ECDSAKeyPair(type, (ECPublicKey) keyPair.getPublic(), (ECPrivateKey) keyPair.getPrivate());
     }
 
 }
