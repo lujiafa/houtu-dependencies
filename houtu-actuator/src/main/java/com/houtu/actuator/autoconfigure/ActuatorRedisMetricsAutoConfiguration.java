@@ -50,7 +50,7 @@ public class ActuatorRedisMetricsAutoConfiguration {
             Boolean lettuceEnabled = distribution.getPercentilesHistogram().get(REDIS_LETTUCE);
             double[] percentiles = distribution.getPercentiles().get(REDIS_LETTUCE);
             MicrometerOptions.Builder builder = MicrometerOptions.builder()
-                    .histogram(lettuceEnabled.TRUE.equals(lettuceEnabled))
+                    .histogram(Boolean.TRUE.equals(lettuceEnabled))
                     .targetPercentiles(percentiles == null ? new double[0] : percentiles);
             return builder.build();
         }
