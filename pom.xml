@@ -31,7 +31,6 @@
         <module>houtu-web-security</module>
         <module>houtu-web-swagger</module>
         <module>houtu-actuator</module>
-        <module>houtu-monitor</module>
         <module>spring-cloud-houtu</module>
         <module>houtu-data-security</module>
     </modules>
@@ -65,11 +64,6 @@
             <dependency>
                 <groupId>com.houtu</groupId>
                 <artifactId>houtu-actuator</artifactId>
-                <version>${com.houtu.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.houtu</groupId>
-                <artifactId>houtu-monitor</artifactId>
                 <version>${com.houtu.version}</version>
             </dependency>
             <dependency>
