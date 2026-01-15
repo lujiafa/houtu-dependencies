@@ -10,7 +10,7 @@ import java.util.Locale;
 
 /**
  * @ClassName ErrorCode
- * @date 2016年9月11日
+ * @date 2018年9月11日
  * @Description 错误码、错误消息载体封装
  */
 public class ErrorCode implements Serializable {
