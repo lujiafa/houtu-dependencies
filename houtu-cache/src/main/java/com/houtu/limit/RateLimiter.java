@@ -13,6 +13,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 /**
@@ -32,6 +33,30 @@ public class RateLimiter {
         return new RollingSlidingWindowBuilder(redisTemplate);
     }
 
+    /**
+     * 获取通行许可
+     *   1.如果当前有令牌：立即返回
+     *   2.如果没有：阻塞等待，直到有令牌
+     */
+    public void acquire() {
+        long sleepTime = 1; // 初始等待时间
+        while (!tryAcquire()) {
+            try {
+                TimeUnit.MILLISECONDS.sleep(sleepTime);
+                sleepTime = Math.min(sleepTime << 1, 10);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new RuntimeException(e.getMessage(), e);
+            }
+        }
+    }
+
+    /**
+     * 非阻塞尝试获取
+     *   1.如果当前有令牌：立即返回true
+     *   2.如果没有：立即返回false
+     * @return  boolean 是否获取成功
+     */
     public boolean tryAcquire() {
         return tryAcquireSupplier.get();
     }
