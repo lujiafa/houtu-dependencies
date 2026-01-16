@@ -10,6 +10,15 @@ package com.houtu.core.concurrent;
 public interface AcrossThreadProcessor<T> {
 
     /**
+     * 检查资源或服务是否可用
+     *
+     * @return true 表示资源或服务当前可用，false 表示不可用
+     */
+    default boolean available() {
+        return true;
+    }
+
+    /**
      * 从父线程中获取数据
      * 注：在父线程中执行
      */

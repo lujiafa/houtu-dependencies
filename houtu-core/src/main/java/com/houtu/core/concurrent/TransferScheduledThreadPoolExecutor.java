@@ -33,11 +33,12 @@ public class TransferScheduledThreadPoolExecutor extends ScheduledThreadPoolExec
     @Override
     protected void beforeExecute(Thread t, Runnable r) {
         super.beforeExecute(t, r);
-        if (TRANSFER_LIST.size() > 0) {
-            TransferThreadPoolExecutor.DelegatingRunnable runnable = (TransferThreadPoolExecutor.DelegatingRunnable) r;
+        List<AcrossThreadProcessor> acrossThreadProcessors = AcrossThreadProcessorSupport.getAcrossThreadProcessors();
+        if (!acrossThreadProcessors.isEmpty()) {
+            DelegatingRunnable runnable = (DelegatingRunnable) r;
             Map<Object, Object> transferMap = runnable.getAcrossMap();
             try {
-                TRANSFER_LIST.forEach(processor -> {
+                acrossThreadProcessors.forEach(processor -> {
                     processor.childExecuteBefore(runnable.getParent(), transferMap.get(processor));
                 });
             } catch (Throwable e) {
@@ -50,11 +51,12 @@ public class TransferScheduledThreadPoolExecutor extends ScheduledThreadPoolExec
     @Override
     protected void afterExecute(Runnable r, Throwable t) {
         super.afterExecute(r, t);
-        if (TRANSFER_LIST.size() > 0) {
-            TransferThreadPoolExecutor.DelegatingRunnable runnable = (TransferThreadPoolExecutor.DelegatingRunnable) r;
+        List<AcrossThreadProcessor> acrossThreadProcessors = AcrossThreadProcessorSupport.getAcrossThreadProcessors();
+        if (!acrossThreadProcessors.isEmpty()) {
+            DelegatingRunnable runnable = (DelegatingRunnable) r;
             Map<Object, Object> transferMap = runnable.getAcrossMap();
             try {
-                TRANSFER_LIST.forEach(transfer -> {
+                acrossThreadProcessors.forEach(transfer -> {
                     transfer.childExecuteAfter(runnable.getParent(), transferMap.get(transfer));
                 });
             } finally {
@@ -65,23 +67,16 @@ public class TransferScheduledThreadPoolExecutor extends ScheduledThreadPoolExec
 
     @Override
     public void execute(Runnable command) {
-        if (TRANSFER_LIST.size() > 0) {
+        List<AcrossThreadProcessor> acrossThreadProcessors = AcrossThreadProcessorSupport.getAcrossThreadProcessors();
+        if (!acrossThreadProcessors.isEmpty()) {
             Map<Object, Object> acrossMap = new HashMap<>();
-            TRANSFER_LIST.forEach(t -> {
+            acrossThreadProcessors.forEach(t -> {
                 acrossMap.put(t, t.parentGet());
             });
-            super.execute(new TransferThreadPoolExecutor.DelegatingRunnable(command, acrossMap));
+            super.execute(new DelegatingRunnable(command, acrossMap));
             return;
         }
         super.execute(command);
     }
 
-    static final List<AcrossThreadProcessor> TRANSFER_LIST = new ArrayList<>();
-    static {
-        ServiceLoader<AcrossThreadProcessor> serviceLoader = ServiceLoader.load(AcrossThreadProcessor.class);
-        Iterator<AcrossThreadProcessor> iterator = serviceLoader.iterator();
-        while (iterator.hasNext()) {
-            TRANSFER_LIST.add(iterator.next());
-        }
-    }
 }
