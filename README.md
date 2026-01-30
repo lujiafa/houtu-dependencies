@@ -28,7 +28,7 @@ version)</b>和<b>次版本号(Minor version)</b>对应，修订版本号之间�
 
 | houtu |  jdk   | springboot |    spring cloud     |   spring cloud alibaba    |
 |:-----:|:------:|:----------:|:-------------------:|:-------------------------:|
-| 3.5.0 | jdk17  |   3.5.9    | 2025.0.0~`2025.1.0` | 2023.0.1.2 - `2025.0.0.0` |
+| 3.5.0 | jdk17  |   3.5.10   | 2025.0.0~`2025.1.0` | 2023.0.1.2 - `2025.0.0.0` |
 | 3.4.0 | jdk17  |   3.4.11   |      2024.0.2       | 2023.0.1.2 - `2023.0.3.4` |
 | 3.3.0 | jdk17  |   3.3.13   |      2023.0.6       | 2023.0.1.2 - `2023.0.3.4` |
 | 3.2.0 | jdk17  |   3.2.12   |      2023.0.6       | 2023.0.1.2 - `2023.0.3.4` |
@@ -46,16 +46,19 @@ version)</b>和<b>次版本号(Minor version)</b>对应，修订版本号之间�
 - **houtu-core**: 核心基础模块，定义基础支持类和桥接SpringBoot容器；
 - **houtu-utils**: 工具模块，提供大量工具类（包括但不限于市面上主流的加解密、签名、16/10/2进制转换等等工具）；
 - **houtu-cache**:
-  提供Cache能力增强，包括但不限于增加Jedis/Lettuce/Redisson等Bean初始化扩展工具类（解决SpringBoot仅支持单RedisTemplate实例化问题）、注解锁`@com.houtu.lock.annotation.Lock`
+  提供Cache能力增强，包括但不限于增加Jedis/Lettuce/Redisson等Bean初始化扩展工具类（解决SpringBoot仅支持单RedisTemplate实例化问题）、注解锁
+  `@com.houtu.lock.annotation.Lock`
   （解决模块锁、事务锁、...）等等；
 - **houtu-access-log**: 提供访问日志增强，可以让日志分析更加轻松，同时支持`注解日志`和`全量请求拦截日志`
-  ，日志格式：`httpMethod|path|requestIp|user-agent|queryString|[body]|methodName|arg1, arg2, ...|responseArg|exception|耗时`；
+  ，日志格式：
+  `httpMethod|path|requestIp|user-agent|queryString|[body]|methodName|arg1, arg2, ...|responseArg|exception|耗时`；
 - **houtu-data-security**: 提供持久化层数据注解`@SecurityWatch`结合`@SecurityParam`与`SecurityObject`
   实现简单参数与嵌套参数自动加解密能力，适用于敏感数据（如：用户身份证、手机号码、银行卡号码等等）存储；
 - **houtu-monitor**:
   可选使用，主要提供部分自定义监控支持。为什么SpringBoot提供了Actuator能力还要自主实现呢？因为Actuator在请求等多指标监控时，对实时和内存要求较高，如将监控数据日志化+MQ+Prometheus可更好更完整的监控业务数据；
 - **houtu-web**:
-  提供Web能力增强，包括但不限于自定义参数解析、响应解析、统一异常处理等等，如：Controller中会自动将参数封装到`BaseForm/BaseDTO子类`
+  提供Web能力增强，包括但不限于自定义参数解析、响应解析、统一异常处理等等，如：Controller中会自动将参数封装到
+  `BaseForm/BaseDTO子类`
   或`HashMap类型`参数对象中（不限请求方式），响应类型为`ResponseData/EmbedResponseData`
   时无需@ResponseBody注解但提供相同响应能力，统一异常处理会自动拦截业务异常`BusinessException`
   和其他各类异常响应`{"code":xx,"message":"xx"}`。
