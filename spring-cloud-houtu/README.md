@@ -2,9 +2,9 @@
 作为服务发现扩展，提供对服务在线状态与健康状态增强，其Maven引入配置如下：
 ```pom
 <dependency>
-    <groupId>com.houtu</groupId>
+    <groupId>io.github.lujiafa</groupId>
     <artifactId>spring-cloud-houtu-discovery</artifactId>
-    <version>2.7.0-SNAPSHOT</version>
+    <version>2.7.0</version>
 </dependency>
 ```
 ### 1.1 服务状态上下文
@@ -17,9 +17,9 @@
 其Maven引入配置如下：
 ```xml
 <dependency>
-    <groupId>com.houtu</groupId>
+    <groupId>io.github.lujiafa</groupId>
     <artifactId>spring-cloud-houtu-loadbalancer</artifactId>
-    <version>2.7.0-SNAPSHOT</version>
+    <version>2.7.0</version>
 </dependency>
 ```
 ### 2.1 Hint概要
@@ -185,9 +185,9 @@ spring:
 其Maven引入配置如下：
 ```pom
 <dependency>
-    <groupId>com.houtu</groupId>
+    <groupId>io.github.lujiafa</groupId>
     <artifactId>spring-cloud-houtu-feign</artifactId>
-    <version>2.7.0-SNAPSHOT</version>
+    <version>2.7.0</version>
 </dependency>
 ```
 
@@ -207,9 +207,9 @@ spring:
 其Maven引入配置如下：
 ```pom
 <dependency>
-    <groupId>com.houtu</groupId>
+    <groupId>io.github.lujiafa</groupId>
     <artifactId>spring-cloud-houtu-alibaba-sentinel</artifactId>
-    <version>2.7.0-SNAPSHOT</version>
+    <version>2.7.0</version>
 </dependency>
 ```
 

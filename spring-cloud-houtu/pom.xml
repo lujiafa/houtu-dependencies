@@ -4,12 +4,13 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>houtu-dependencies</artifactId>
-        <groupId>com.houtu</groupId>
-        <version>2.7.0-SNAPSHOT</version>
+        <groupId>io.github.lujiafa</groupId>
+        <version>2.7.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>spring-cloud-houtu</artifactId>
+    <name>spring-cloud-houtu</name>
     <packaging>pom</packaging>
 
     <properties>
@@ -51,22 +52,22 @@
             </dependency>
 
             <dependency>
-                <groupId>com.houtu</groupId>
+                <groupId>io.github.lujiafa</groupId>
                 <artifactId>spring-cloud-houtu-loadbalancer</artifactId>
                 <version>${com.houtu.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.houtu</groupId>
+                <groupId>io.github.lujiafa</groupId>
                 <artifactId>spring-cloud-houtu-feign</artifactId>
                 <version>${com.houtu.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.houtu</groupId>
+                <groupId>io.github.lujiafa</groupId>
                 <artifactId>spring-cloud-houtu-discovery</artifactId>
                 <version>${com.houtu.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.houtu</groupId>
+                <groupId>io.github.lujiafa</groupId>
                 <artifactId>spring-cloud-houtu-alibaba-sentinel</artifactId>
                 <version>${com.houtu.version}</version>
             </dependency>

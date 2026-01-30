@@ -4,10 +4,38 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.houtu</groupId>
+    <groupId>io.github.lujiafa</groupId>
     <artifactId>houtu-dependencies</artifactId>
-    <version>2.7.0-SNAPSHOT</version>
+    <version>2.7.0</version>
     <packaging>pom</packaging>
+
+    <name>Houtu Dependencies</name>
+    <description>A collection of dependencies for Houtu framework.</description>
+    <url>https://github.com/lujiafa/houtu-dependencies</url>
+
+    <licenses>
+        <license>
+            <name>The Apache License, Version 2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <id>jon</id>
+            <name>Jon Lu</name>
+            <email>lujiafayx@gmail.com</email>
+            <roles>
+                <role>Project lead</role>
+            </roles>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:git://github.com/lujiafa/houtu-dependencies.git</connection>
+        <developerConnection>scm:git:ssh://github.com/lujiafa/houtu-dependencies.git</developerConnection>
+        <url>https://github.com/lujiafa/houtu-dependencies/tree/main</url>
+    </scm>
 
     <properties>
         <java.version>1.8</java.version>
@@ -18,7 +46,7 @@
         <cache2k.version>2.6.1.Final</cache2k.version>
         <io.jsonwebtoken.version>0.12.7</io.jsonwebtoken.version>
         <redisson.version>3.51.0</redisson.version>
-        <com.houtu.version>2.7.0-SNAPSHOT</com.houtu.version>
+        <com.houtu.version>2.7.0</com.houtu.version>
     </properties>
 
     <modules>
@@ -46,47 +74,47 @@
             </dependency>
 
             <dependency>
-                <groupId>com.houtu</groupId>
+                <groupId>io.github.lujiafa</groupId>
                 <artifactId>houtu-utils</artifactId>
                 <version>${com.houtu.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.houtu</groupId>
+                <groupId>io.github.lujiafa</groupId>
                 <artifactId>houtu-core</artifactId>
                 <version>${com.houtu.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.houtu</groupId>
+                <groupId>io.github.lujiafa</groupId>
                 <artifactId>houtu-cache</artifactId>
                 <version>${com.houtu.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.houtu</groupId>
+                <groupId>io.github.lujiafa</groupId>
                 <artifactId>houtu-actuator</artifactId>
                 <version>${com.houtu.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.houtu</groupId>
+                <groupId>io.github.lujiafa</groupId>
                 <artifactId>houtu-access-log</artifactId>
                 <version>${com.houtu.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.houtu</groupId>
+                <groupId>io.github.lujiafa</groupId>
                 <artifactId>houtu-data-security</artifactId>
                 <version>${com.houtu.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.houtu</groupId>
+                <groupId>io.github.lujiafa</groupId>
                 <artifactId>houtu-web</artifactId>
                 <version>${com.houtu.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.houtu</groupId>
+                <groupId>io.github.lujiafa</groupId>
                 <artifactId>houtu-web-security</artifactId>
                 <version>${com.houtu.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.houtu</groupId>
+                <groupId>io.github.lujiafa</groupId>
                 <artifactId>houtu-web-swagger</artifactId>
                 <version>${com.houtu.version}</version>
             </dependency>
@@ -136,34 +164,76 @@
     </dependencyManagement>
 
     <build>
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-maven-plugin</artifactId>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-compiler-plugin</artifactId>
-                    <configuration>
-                        <source>${java.version}</source>
-                        <target>${java.version}</target>
-                        <encoding>${project.build.sourceEncoding}</encoding>
-                    </configuration>
-                </plugin>
-            </plugins>
-        </pluginManagement>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+                    <encoding>${project.build.sourceEncoding}</encoding>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>3.3.1</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.11.2</version>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <source>${java.version}</source>
+                    <encoding>${project.build.sourceEncoding}</encoding>
+                    <charset>${project.build.sourceEncoding}</charset>
+                    <doclint>none</doclint>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <version>3.2.8</version>
+                <executions>
+                    <execution>
+                        <id>lujiafayx@gmail.com</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.sonatype.central</groupId>
+                <artifactId>central-publishing-maven-plugin</artifactId>
+                <version>0.9.0</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <publishingServerId>central</publishingServerId>
+                </configuration>
+            </plugin>
+        </plugins>
     </build>
-
-    <developers>
-        <developer>
-            <id>jon</id>
-            <name>Jon Lu</name>
-            <email>lujiafayx@163.com</email>
-            <roles>
-                <role>Project lead</role>
-            </roles>
-        </developer>
-    </developers>
 
 </project>

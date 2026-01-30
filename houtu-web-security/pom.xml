@@ -4,12 +4,13 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>houtu-dependencies</artifactId>
-        <groupId>com.houtu</groupId>
-        <version>2.7.0-SNAPSHOT</version>
+        <groupId>io.github.lujiafa</groupId>
+        <version>2.7.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>houtu-web-security</artifactId>
+    <name>houtu-web-security</name>
 
     <dependencies>
         <dependency>
@@ -36,11 +37,11 @@
         </dependency>
 
         <dependency>
-            <groupId>com.houtu</groupId>
+            <groupId>io.github.lujiafa</groupId>
             <artifactId>houtu-cache</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.houtu</groupId>
+            <groupId>io.github.lujiafa</groupId>
             <artifactId>houtu-web</artifactId>
         </dependency>
     </dependencies>

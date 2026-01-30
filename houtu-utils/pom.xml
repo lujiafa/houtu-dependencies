@@ -4,12 +4,13 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>houtu-dependencies</artifactId>
-        <groupId>com.houtu</groupId>
-        <version>2.7.0-SNAPSHOT</version>
+        <groupId>io.github.lujiafa</groupId>
+        <version>2.7.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>houtu-utils</artifactId>
+    <name>houtu-utils</name>
 
     <properties>
         <javax.mail.version>1.6.2</javax.mail.version>
