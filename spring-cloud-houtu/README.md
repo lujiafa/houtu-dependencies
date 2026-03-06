@@ -4,7 +4,7 @@
 <dependency>
     <groupId>io.github.lujiafa</groupId>
     <artifactId>spring-cloud-houtu-discovery</artifactId>
-    <version>2.7.0</version>
+    <version>2.7.1</version>
 </dependency>
 ```
 ### 1.1 服务状态上下文
@@ -19,7 +19,7 @@
 <dependency>
     <groupId>io.github.lujiafa</groupId>
     <artifactId>spring-cloud-houtu-loadbalancer</artifactId>
-    <version>2.7.0</version>
+    <version>2.7.1</version>
 </dependency>
 ```
 ### 2.1 Hint概要
@@ -187,7 +187,7 @@ spring:
 <dependency>
     <groupId>io.github.lujiafa</groupId>
     <artifactId>spring-cloud-houtu-feign</artifactId>
-    <version>2.7.0</version>
+    <version>2.7.1</version>
 </dependency>
 ```
 
@@ -209,7 +209,7 @@ spring:
 <dependency>
     <groupId>io.github.lujiafa</groupId>
     <artifactId>spring-cloud-houtu-alibaba-sentinel</artifactId>
-    <version>2.7.0</version>
+    <version>2.7.1</version>
 </dependency>
 ```
 
