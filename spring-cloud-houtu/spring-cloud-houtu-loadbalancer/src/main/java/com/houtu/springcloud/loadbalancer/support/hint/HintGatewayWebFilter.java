@@ -7,7 +7,7 @@ import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Mono;
 
-public class HintGatewayWebFilter implements WebFilter {
+public class HintGatewayWebFilter extends HintWebFilter implements WebFilter {
 
     private SpringCloudLoadBalancerProperties springCloudLoadBalancerProperties;
 
@@ -21,10 +21,8 @@ public class HintGatewayWebFilter implements WebFilter {
             ServerWebExchange removeRequestHintExchange = exchange.mutate()
                     .request(request -> request.headers(headers -> headers.remove(LoadBalancerConstant.REQUEST_CONTEXT_HINT_NAME)))
                     .build();
-            return chain.filter(removeRequestHintExchange).then(Mono.fromRunnable(() -> {
-                HintContext.remove();
-            }));
+            return chain.filter(removeRequestHintExchange).then(Mono.fromRunnable(HintContext::remove));
         }
-        return chain.filter(exchange);
+        return super.filter(exchange, chain);
     }
 }

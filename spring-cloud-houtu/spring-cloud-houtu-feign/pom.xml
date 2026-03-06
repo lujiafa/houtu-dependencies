@@ -3,13 +3,14 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <groupId>com.houtu</groupId>
+        <groupId>io.github.lujiafa</groupId>
         <artifactId>spring-cloud-houtu</artifactId>
         <version>3.5.1-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>spring-cloud-houtu-feign</artifactId>
+    <name>spring-cloud-houtu-feign</name>
 
     <dependencies>
         <dependency>
@@ -18,23 +19,23 @@
             <optional>true</optional>
         </dependency>
         <dependency>
-            <groupId>com.houtu</groupId>
+            <groupId>io.github.lujiafa</groupId>
             <artifactId>houtu-web</artifactId>
             <optional>true</optional>
         </dependency>
 
 
         <dependency>
-            <groupId>com.houtu</groupId>
+            <groupId>io.github.lujiafa</groupId>
             <artifactId>houtu-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.houtu</groupId>
+            <groupId>io.github.lujiafa</groupId>
             <artifactId>houtu-utils</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>com.houtu</groupId>
+            <groupId>io.github.lujiafa</groupId>
             <artifactId>spring-cloud-houtu-loadbalancer</artifactId>
         </dependency>
         <dependency>

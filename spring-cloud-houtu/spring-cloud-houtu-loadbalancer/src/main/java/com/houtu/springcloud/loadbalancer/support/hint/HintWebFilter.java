@@ -11,9 +11,10 @@ public class HintWebFilter implements WebFilter {
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
         ServerHttpRequest request = exchange.getRequest();
-        HintContext.setX(request.getHeaders().getFirst(LoadBalancerConstant.REQUEST_CONTEXT_HINT_NAME));
-        return chain.filter(exchange).then(Mono.fromRunnable(() -> {
-            HintContext.remove();
-        }));
+        String hint = request.getHeaders().getFirst(LoadBalancerConstant.REQUEST_CONTEXT_HINT_NAME);
+        if (hint != null) {
+            HintContext.setX(hint);
+        }
+        return chain.filter(exchange).then(Mono.fromRunnable(HintContext::remove));
     }
 }

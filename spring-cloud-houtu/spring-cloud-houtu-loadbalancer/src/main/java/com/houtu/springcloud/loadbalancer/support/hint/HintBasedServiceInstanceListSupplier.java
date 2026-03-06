@@ -26,6 +26,13 @@ public class HintBasedServiceInstanceListSupplier extends org.springframework.cl
     }
 
     @Override
+    public Flux<List<ServiceInstance>> get() {
+        return super.get().map((instances) -> {
+            return this.filteredByHint(instances, this.getHint(null));
+        });
+    }
+
+    @Override
     public Flux<List<ServiceInstance>> get(Request request) {
         return this.delegate.get(request).map((instances) -> {
             return this.filteredByHint(instances, this.getHint(request.getContext()));

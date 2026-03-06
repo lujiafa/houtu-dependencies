@@ -10,7 +10,7 @@ public class HintRequestHandlerInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        HintContext.set(request.getHeader(LoadBalancerConstant.REQUEST_CONTEXT_HINT_NAME));
+        HintContext.setX(request.getHeader(LoadBalancerConstant.REQUEST_CONTEXT_HINT_NAME));
         return true;
     }
 
