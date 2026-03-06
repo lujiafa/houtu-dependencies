@@ -1,2 +1,2 @@
-com.houtu.cache.autoconfigure.CacheAutoConfiguration
-com.houtu.lock.autoconfigure.LockAutoConfiguration
+io.github.lujiafa.houtu.cache.autoconfigure.CacheAutoConfiguration
+io.github.lujiafa.houtu.lock.autoconfigure.LockAutoConfiguration

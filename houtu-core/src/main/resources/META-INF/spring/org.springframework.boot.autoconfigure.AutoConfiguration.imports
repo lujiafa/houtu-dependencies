@@ -1,2 +1,2 @@
-com.houtu.core.autoconfigure.CoreAutoConfiguration
-com.houtu.core.autoconfigure.CoreTaskExecutionAutoConfiguration
+io.github.lujiafa.houtu.core.autoconfigure.CoreAutoConfiguration
+io.github.lujiafa.houtu.core.autoconfigure.CoreTaskExecutionAutoConfiguration

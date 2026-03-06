@@ -47,7 +47,7 @@
         <cache2k.version>2.6.1.Final</cache2k.version>
         <io.jsonwebtoken.version>0.12.7</io.jsonwebtoken.version>
         <redisson.version>3.51.0</redisson.version>
-        <com.houtu.version>3.5.1-SNAPSHOT</com.houtu.version>
+        <io.github.lujiafa.houtu.version>3.5.1-SNAPSHOT</io.github.lujiafa.houtu.version>
     </properties>
 
     <modules>
@@ -77,47 +77,47 @@
             <dependency>
                 <groupId>io.github.lujiafa</groupId>
                 <artifactId>houtu-utils</artifactId>
-                <version>${com.houtu.version}</version>
+                <version>${io.github.lujiafa.houtu.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.github.lujiafa</groupId>
                 <artifactId>houtu-core</artifactId>
-                <version>${com.houtu.version}</version>
+                <version>${io.github.lujiafa.houtu.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.github.lujiafa</groupId>
                 <artifactId>houtu-cache</artifactId>
-                <version>${com.houtu.version}</version>
+                <version>${io.github.lujiafa.houtu.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.github.lujiafa</groupId>
                 <artifactId>houtu-actuator</artifactId>
-                <version>${com.houtu.version}</version>
+                <version>${io.github.lujiafa.houtu.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.github.lujiafa</groupId>
                 <artifactId>houtu-access-log</artifactId>
-                <version>${com.houtu.version}</version>
+                <version>${io.github.lujiafa.houtu.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.github.lujiafa</groupId>
                 <artifactId>houtu-data-security</artifactId>
-                <version>${com.houtu.version}</version>
+                <version>${io.github.lujiafa.houtu.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.github.lujiafa</groupId>
                 <artifactId>houtu-web</artifactId>
-                <version>${com.houtu.version}</version>
+                <version>${io.github.lujiafa.houtu.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.github.lujiafa</groupId>
                 <artifactId>houtu-web-security</artifactId>
-                <version>${com.houtu.version}</version>
+                <version>${io.github.lujiafa.houtu.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.github.lujiafa</groupId>
                 <artifactId>houtu-web-swagger</artifactId>
-                <version>${com.houtu.version}</version>
+                <version>${io.github.lujiafa.houtu.version}</version>
             </dependency>
 
 
