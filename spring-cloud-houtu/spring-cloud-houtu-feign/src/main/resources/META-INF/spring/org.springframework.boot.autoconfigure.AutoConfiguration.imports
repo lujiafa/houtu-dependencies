@@ -1,2 +1,2 @@
-com.houtu.springcloud.feign.autoconfigure.FeignConsumerAutoConfiguration
-com.houtu.springcloud.feign.autoconfigure.FeignProviderAutoConfiguration
+io.github.lujiafa.houtu.springcloud.feign.autoconfigure.FeignConsumerAutoConfiguration
+io.github.lujiafa.houtu.springcloud.feign.autoconfigure.FeignProviderAutoConfiguration

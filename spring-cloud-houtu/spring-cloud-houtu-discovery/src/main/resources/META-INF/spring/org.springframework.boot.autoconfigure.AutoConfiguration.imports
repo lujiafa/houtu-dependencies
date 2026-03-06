@@ -1,1 +1,1 @@
-com.houtu.springcloud.discovery.autoconfigure.DiscoveryAutoConfiguration
+io.github.lujiafa.houtu.springcloud.discovery.autoconfigure.DiscoveryAutoConfiguration

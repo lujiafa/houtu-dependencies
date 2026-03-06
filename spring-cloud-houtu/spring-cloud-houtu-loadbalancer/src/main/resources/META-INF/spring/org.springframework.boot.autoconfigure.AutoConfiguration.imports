@@ -1,1 +1,1 @@
-com.houtu.springcloud.loadbalancer.autoconfigure.SpringCloudLoadBalancerAutoConfiguration
+io.github.lujiafa.houtu.springcloud.loadbalancer.autoconfigure.SpringCloudLoadBalancerAutoConfiguration

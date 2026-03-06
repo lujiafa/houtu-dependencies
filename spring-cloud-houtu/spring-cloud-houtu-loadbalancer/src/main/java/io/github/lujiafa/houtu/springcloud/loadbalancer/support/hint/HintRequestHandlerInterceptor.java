@@ -1,0 +1,26 @@
+package io.github.lujiafa.houtu.springcloud.loadbalancer.support.hint;
+
+import io.github.lujiafa.houtu.springcloud.loadbalancer.constant.LoadBalancerConstant;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import org.springframework.web.servlet.HandlerInterceptor;
+import org.springframework.web.servlet.ModelAndView;
+
+public class HintRequestHandlerInterceptor implements HandlerInterceptor {
+
+    @Override
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+        HintContext.set(request.getHeader(LoadBalancerConstant.REQUEST_CONTEXT_HINT_NAME));
+        return true;
+    }
+
+    @Override
+    public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
+        HintContext.remove();
+    }
+
+    @Override
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
+        HintContext.remove();
+    }
+}

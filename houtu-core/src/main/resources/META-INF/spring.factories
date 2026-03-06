@@ -3,7 +3,7 @@
 # ?????https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-2.7-Release-Notes
 
 org.springframework.boot.env.EnvironmentPostProcessor=\
-com.houtu.core.env.DecryptEnvPostProcessor
+io.github.lujiafa.houtu.core.env.DecryptEnvPostProcessor
 
 org.springframework.boot.SpringApplicationRunListener=\
-com.houtu.core.env.DecryptEnvPostProcessor
+io.github.lujiafa.houtu.core.env.DecryptEnvPostProcessor

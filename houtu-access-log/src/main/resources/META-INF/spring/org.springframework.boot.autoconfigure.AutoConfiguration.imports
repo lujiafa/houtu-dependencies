@@ -1,1 +1,1 @@
-com.houtu.accesslog.autoconfigure.AccessLogAutoConfiguration
+io.github.lujiafa.houtu.accesslog.autoconfigure.AccessLogAutoConfiguration

@@ -1,2 +1,2 @@
-com.houtu.websecurity.autoconfigure.WebSessionAutoConfiguration
-com.houtu.websecurity.autoconfigure.WebSecurityAutoConfiguration
+io.github.lujiafa.houtu.websecurity.autoconfigure.WebSessionAutoConfiguration
+io.github.lujiafa.houtu.websecurity.autoconfigure.WebSecurityAutoConfiguration

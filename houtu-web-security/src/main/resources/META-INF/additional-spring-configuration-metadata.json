@@ -14,7 +14,7 @@
     },
     {
       "name": "houtu.web.session.type",
-      "type": "com.houtu.websecurity.session.type.SessionRepositoryType",
+      "type": "io.github.lujiafa.houtu.websecurity.session.type.SessionRepositoryType",
       "description": "Session Persistence and Persistence Type.",
       "defaultValue": "CACHE"
     },
@@ -64,7 +64,7 @@
     },
     {
       "name": "houtu.web.session.jwt-signature-algorithm",
-      "type": "com.houtu.websecurity.session.type.JWTSignatureAlgorithm",
+      "type": "io.github.lujiafa.houtu.websecurity.session.type.JWTSignatureAlgorithm",
       "description": "JWT signature algorithm.",
       "defaultValue": "HS256"
     },

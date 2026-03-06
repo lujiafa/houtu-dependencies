@@ -54,22 +54,22 @@
             <dependency>
                 <groupId>io.github.lujiafa</groupId>
                 <artifactId>spring-cloud-houtu-loadbalancer</artifactId>
-                <version>${com.houtu.version}</version>
+                <version>${io.github.lujiafa.houtu.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.github.lujiafa</groupId>
                 <artifactId>spring-cloud-houtu-feign</artifactId>
-                <version>${com.houtu.version}</version>
+                <version>${io.github.lujiafa.houtu.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.github.lujiafa</groupId>
                 <artifactId>spring-cloud-houtu-discovery</artifactId>
-                <version>${com.houtu.version}</version>
+                <version>${io.github.lujiafa.houtu.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.github.lujiafa</groupId>
                 <artifactId>spring-cloud-houtu-alibaba-sentinel</artifactId>
-                <version>${com.houtu.version}</version>
+                <version>${io.github.lujiafa.houtu.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

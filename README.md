@@ -28,6 +28,7 @@ version)</b>和<b>次版本号(Minor version)</b>对应，修订版本号之间�
 
 | houtu |  jdk   | springboot | spring cloud | spring cloud alibaba |
 |:-----:|:------:|:----------:|:------------:|:--------------------:|
+| 2.7.1 | jdk1.8 |   2.7.18   |   2021.0.9   |      2021.0.6.2      |
 | 2.7.0 | jdk1.8 |   2.7.18   |   2021.0.9   |      2021.0.6.2      |
 
 ## 🚀 模块描述
@@ -35,7 +36,7 @@ version)</b>和<b>次版本号(Minor version)</b>对应，修订版本号之间�
 - **houtu-core**: 核心基础模块，定义基础支持类和桥接SpringBoot容器；
 - **houtu-utils**: 工具模块，提供大量工具类（包括但不限于市面上主流的加解密、签名、16/10/2进制转换等等工具）；
 - **houtu-cache**:
-  提供Cache能力增强，包括但不限于增加Jedis/Lettuce/Redisson等Bean初始化扩展工具类（解决SpringBoot仅支持单RedisTemplate实例化问题）、注解锁`@com.houtu.lock.annotation.Lock`
+  提供Cache能力增强，包括但不限于增加Jedis/Lettuce/Redisson等Bean初始化扩展工具类（解决SpringBoot仅支持单RedisTemplate实例化问题）、注解锁`@**io.github.lujiafa.houtu.lock.annotation.Lock**`
   （解决模块锁、事务锁、...）等等；
 - **houtu-access-log**: 提供访问日志增强，可以让日志分析更加轻松，同时支持`注解日志`和`全量请求拦截日志`
   ，日志格式：`httpMethod|path|requestIp|user-agent|queryString|[body]|methodName|arg1, arg2, ...|responseArg|exception|耗时`；
@@ -64,7 +65,7 @@ version)</b>和<b>次版本号(Minor version)</b>对应，修订版本号之间�
 | 模块                              | 配置项                                                    | 配置描述                                                                                       | 默认值                 | 是否必须 |
 |---------------------------------|--------------------------------------------------------|--------------------------------------------------------------------------------------------|---------------------|------|
 | houtu-core                      | houtu.core.decrypt.encrypt-keys                        | 已加密的配置项，会通过`decrypt-processor-class`对应类进行解密操作                                              | -                   | 否    |
-| houtu-core                      | houtu.core.decrypt.decrypt-processor-class             | 自定义配置解密处理器类（Class<? extends com.houtu.core.env.DecryptProcessor>）                          | -                   | 否    |
+| houtu-core                      | houtu.core.decrypt.decrypt-processor-class             | 自定义配置解密处理器类（Class<? extends io.github.lujiafa.houtu.core.env.DecryptProcessor>）      | -                   | 否    |
 | houtu-utils                     | houtu.util.httpclient.pool.max-total                   | 连接池最大连接数                                                                                   | 80                  | 否    |
 | houtu-utils                     | houtu.util.httpclient.pool.max-per-route               | 每个路由的默认最大连接                                                                                | 10                  | 否    |
 | houtu-utils                     | houtu.util.httpclient.request.connect-timeout          | 连接超时时间（秒）                                                                                  | 5                   | 否    |

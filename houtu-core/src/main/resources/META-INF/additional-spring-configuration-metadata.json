@@ -7,8 +7,8 @@
 		},
 		{
 			"name": "houtu.core.decrypt.decrypt-processor-class",
-			"type": "java.lang.Class<? extends com.houtu.core.env.DecryptProcessor>",
-			"description": "Custom configuration decryption processor class (Class<? extends com.houtu.core.env.DecryptProcessor>).",
+			"type": "java.lang.Class<? extends io.github.lujiafa.houtu.core.env.DecryptProcessor>",
+			"description": "Custom configuration decryption processor class (Class<? extends io.github.lujiafa.core.env.DecryptProcessor>).",
 		}
 	]
 }

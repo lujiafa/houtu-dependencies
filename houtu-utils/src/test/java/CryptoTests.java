@@ -1,9 +1,9 @@
-import com.houtu.util.common.CodecData;
-import com.houtu.util.crypto.*;
-import com.houtu.util.crypto.extension.ECDSAKeyPair;
-import com.houtu.util.crypto.extension.RSAKeyPair;
-import com.houtu.util.crypto.extension.SM2KeyPair;
-import com.houtu.util.crypto.type.*;
+import io.github.lujiafa.houtu.util.common.CodecData;
+import io.github.lujiafa.houtu.util.crypto.*;
+import io.github.lujiafa.houtu.util.crypto.extension.ECDSAKeyPair;
+import io.github.lujiafa.houtu.util.crypto.extension.RSAKeyPair;
+import io.github.lujiafa.houtu.util.crypto.extension.SM2KeyPair;
+import io.github.lujiafa.houtu.util.crypto.type.*;
 import org.springframework.util.Assert;
 
 import java.util.Objects;

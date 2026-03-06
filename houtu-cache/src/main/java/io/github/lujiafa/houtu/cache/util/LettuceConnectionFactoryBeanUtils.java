@@ -1,0 +1,86 @@
+package io.github.lujiafa.houtu.cache.util;
+
+import io.lettuce.core.ReadFrom;
+import io.lettuce.core.api.StatefulConnection;
+import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
+import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.connection.lettuce.LettuceClientConfiguration;
+import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
+import org.springframework.data.redis.connection.lettuce.LettucePoolingClientConfiguration;
+import org.springframework.util.ClassUtils;
+import org.springframework.util.StringUtils;
+
+import java.net.URI;
+
+public final class LettuceConnectionFactoryBeanUtils {
+
+    /**
+     * 获取RedisConnectionFactory，主要适用于实例化对象到Spring容器中。
+     * 参考：org.springframework.boot.autoconfigure.data.redis.RedisConnectionConfiguration、org.springframework.boot.autoconfigure.data.redis.JedisConnectionConfiguration
+     * @param redisProperties redis配置
+     * @return RedisConnectionFactory
+     */
+    public static RedisConnectionFactory getRedisConnectionFactory(RedisProperties redisProperties) {
+        LettuceClientConfiguration clientConfiguration = getLettuceClientConfiguration(redisProperties);
+        LettuceConnectionFactory connectionFactory;
+        if (redisProperties.getSentinel() != null) {
+            connectionFactory = new LettuceConnectionFactory(RedisConfigUtils.getSentinelConfig(redisProperties), clientConfiguration);
+        } else if (redisProperties.getCluster() != null) {
+            connectionFactory = new LettuceConnectionFactory(RedisConfigUtils.getClusterConfiguration(redisProperties), clientConfiguration);
+        } else {
+            connectionFactory = new LettuceConnectionFactory(RedisConfigUtils.getStandaloneConfig(redisProperties), clientConfiguration);
+        }
+        return connectionFactory;
+    }
+
+    private static LettuceClientConfiguration getLettuceClientConfiguration(RedisProperties redisProperties) {
+        // 参考 LettuceConnectionConfiguration
+        LettuceClientConfiguration.LettuceClientConfigurationBuilder builder;
+        boolean poolEnabled = redisProperties.getLettuce().getPool().getEnabled() != null ? redisProperties.getLettuce().getPool().getEnabled() : ClassUtils.isPresent("org.apache.commons.pool2.ObjectPool",
+                redisProperties.getClass().getClassLoader());
+        if (poolEnabled) {
+            GenericObjectPoolConfig<StatefulConnection<?, ?>> config = new GenericObjectPoolConfig<>();
+            RedisProperties.Pool pool = redisProperties.getLettuce().getPool();
+            config.setMaxTotal(pool.getMaxActive());
+            config.setMaxIdle(pool.getMaxIdle());
+            config.setMinIdle(pool.getMinIdle());
+            if (pool.getTimeBetweenEvictionRuns() != null) {
+                config.setTimeBetweenEvictionRuns(pool.getTimeBetweenEvictionRuns());
+            }
+            if (pool.getMaxWait() != null) {
+                config.setMaxWait(pool.getMaxWait());
+            }
+            builder = LettucePoolingClientConfiguration.builder().poolConfig(config);
+        } else {
+            builder = LettuceClientConfiguration.builder();
+        }
+        if (redisProperties.isSsl()) {
+            builder.useSsl();
+        }
+        if (StringUtils.hasLength(redisProperties.getUrl())) {
+            try {
+                URI uri = new URI(redisProperties.getUrl());
+                if ("rediss".equals(uri.getScheme())) {
+                    builder.useSsl();
+                }
+            } catch (Exception e) {
+                throw new IllegalStateException("Cannot get Redis URL from '" + redisProperties.getUrl() + "'", e);
+            }
+        }
+        if (redisProperties.getTimeout() != null) {
+            builder.commandTimeout(redisProperties.getTimeout());
+        }
+        if (redisProperties.getLettuce() != null) {
+            RedisProperties.Lettuce lettuce = redisProperties.getLettuce();
+            if (lettuce.getShutdownTimeout() != null && !lettuce.getShutdownTimeout().isZero()) {
+                builder.shutdownTimeout(lettuce.getShutdownTimeout());
+            }
+        }
+        if (StringUtils.hasText(redisProperties.getClientName())) {
+            builder.clientName(redisProperties.getClientName());
+        }
+        return builder.build();
+    }
+
+}
