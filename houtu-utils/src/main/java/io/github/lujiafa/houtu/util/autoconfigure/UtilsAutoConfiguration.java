@@ -27,6 +27,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Scope;
 import org.springframework.util.StringUtils;
 
@@ -49,8 +50,10 @@ import java.util.stream.Collectors;
 @EnableConfigurationProperties(HttpClientProperties.class)
 public class UtilsAutoConfiguration {
 
+    @Primary
     @Bean(destroyMethod = "close")
     @ConditionalOnClass(HttpClient.class)
+    @ConditionalOnMissingBean(value = CloseableHttpClient.class, name = "httpClient")
     public CloseableHttpClient httpClient(HttpClientProperties httpClientProperties,
                                           List<HttpRequestInterceptor> requestInterceptors,
                                           List<HttpResponseInterceptor> responseInterceptors,
