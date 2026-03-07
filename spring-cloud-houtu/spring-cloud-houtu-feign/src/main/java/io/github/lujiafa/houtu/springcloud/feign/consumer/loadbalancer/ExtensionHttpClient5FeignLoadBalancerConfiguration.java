@@ -58,7 +58,7 @@ public class ExtensionHttpClient5FeignLoadBalancerConfiguration {
     public static class ExtensionHttpClient5FeignConfiguration extends HttpClient5FeignConfiguration {
 
         @Bean
-        @ConditionalOnMissingBean(name = "httpClient5")
+        @ConditionalOnMissingBean(value = CloseableHttpClient.class, name = "httpClient5")
         @Override
         public CloseableHttpClient httpClient5(HttpClientConnectionManager hc5ConnectionManager, FeignHttpClientProperties httpClientProperties) {
             return super.httpClient5(hc5ConnectionManager, httpClientProperties);

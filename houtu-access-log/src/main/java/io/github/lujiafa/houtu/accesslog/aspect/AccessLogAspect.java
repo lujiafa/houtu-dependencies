@@ -1,9 +1,9 @@
 package io.github.lujiafa.houtu.accesslog.aspect;
 
 import io.github.lujiafa.houtu.accesslog.annotation.AccessLog;
-import io.github.lujiafa.houtu.accesslog.handler.WebCombineParametersWrapper;
 import io.github.lujiafa.houtu.accesslog.handler.LogFilterHandler;
 import io.github.lujiafa.houtu.accesslog.handler.SimpleLogFilterHandler;
+import io.github.lujiafa.houtu.accesslog.handler.WebCombineParametersWrapper;
 import io.github.lujiafa.houtu.core.context.SpringApplicationContext;
 import io.github.lujiafa.houtu.util.common.AnnotationUtils;
 import io.github.lujiafa.houtu.util.common.JsonUtils;
@@ -21,7 +21,6 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.http.HttpHeaders;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -30,7 +29,7 @@ import java.util.Map;
 
 @Aspect
 public class AccessLogAspect implements InitializingBean {
-
+	
 	private final static Logger logger = LoggerFactory.getLogger("accessLog");
 
 	private WebCombineParametersWrapper webCombineParametersWrapper;
@@ -40,7 +39,7 @@ public class AccessLogAspect implements InitializingBean {
 
 
 	/**
-	 * 输出日志：httpMethod|path|requestIp|user-agent|queryString|[body]|methodName|arg1, arg2, ...|responseArg|exception|耗时
+	 * 输出日志：httpMethod|path|requestIp|[user-agent]|queryString|[body]|methodName|arg1, arg2, ...|responseArg|exception|耗时
 	 * @param pjp 切点
 	 * @return Object
 	 * @throws Throwable
@@ -62,9 +61,9 @@ public class AccessLogAspect implements InitializingBean {
 		String httpMethod = request.getMethod();
 		String path = request.getServletPath();
 		String requestIp = getRequestIp(request);
-		String userAgent = getRequestUserAgent(request);
-		String queryString = getQueryParamString(request, logFilterHandler);
-		String body = accessLog.body() ? getRequestBodyParams(request, response, logFilterHandler) : CharConstant.HYPHEN;
+		String userAgent = getRequestHeaders(request, accessLog);
+		String queryString = getQueryParamStringLog(request, logFilterHandler);
+		String body = accessLog.requestBody() ? getRequestBodyParamsLog(request, response, logFilterHandler) : CharConstant.HYPHEN;
 		builder.append(httpMethod)
 			.append(CharConstant.VERTICAL_BAR).append(path)
 			.append(CharConstant.VERTICAL_BAR).append(requestIp)
@@ -72,14 +71,14 @@ public class AccessLogAspect implements InitializingBean {
 			.append(CharConstant.VERTICAL_BAR).append(queryString)
 			.append(CharConstant.VERTICAL_BAR).append(body);
     	builder.append(CharConstant.VERTICAL_BAR).append(getMethodInfo(pjp));
-    	builder.append(CharConstant.VERTICAL_BAR).append(getArgs(args, logFilterHandler));
+    	builder.append(CharConstant.VERTICAL_BAR).append(getArgsLog(args, logFilterHandler));
     	try {
     		Object resultObject = pjp.proceed(args);
     		builder.append(CharConstant.VERTICAL_BAR);
     		if (Void.TYPE.equals(method.getReturnType())) {
     			builder.append(Void.TYPE.getName());
     		} else {
-    			builder.append(JsonUtils.toString(resultObject));
+    			builder.append(getResultLog(resultObject, logFilterHandler));
     		}
     		builder.append(CharConstant.VERTICAL_BAR);
     		return resultObject;
@@ -111,17 +110,24 @@ public class AccessLogAspect implements InitializingBean {
 
     
     /**
-     * @Title getRequestUserAgent
-     * @Description 获取用户代理信息
+     * @Title getRequestHeaders
+     * @Description 获取请求头信息
      * @param request 请求对象
-     * @return String 用户代理信息
+     * @return String 用户请求头信息
      */
-    private String getRequestUserAgent(HttpServletRequest request) {
-    	String userAgent = request.getHeader(HttpHeaders.USER_AGENT);
-    	if (userAgent != null) {
-    		return userAgent.replaceAll(CharConstant.VERTICAL_BAR_REGEX, "%7c");
-    	}
-    	return CharConstant.EMPTY;
+    private String getRequestHeaders(HttpServletRequest request, AccessLog accessLog) {
+		String[] headerNames = accessLog.requestHeaders();
+		if (headerNames.length > 0) {
+			StringBuilder builder = new StringBuilder();
+			for (String headerName : headerNames) {
+				if (builder.length() > 0) {
+					builder.append(CharConstant.SEMICOLON);
+				}
+				builder.append(request.getHeader(headerName));
+			}
+			return builder.toString();
+		}
+		return CharConstant.HYPHEN;
     }
     
     /**
@@ -130,7 +136,10 @@ public class AccessLogAspect implements InitializingBean {
      * @param request 请求对象
      * @return String 参数json字符串
      */
-    private String getQueryParamString(HttpServletRequest request, LogFilterHandler logHandler) {
+    private String getQueryParamStringLog(HttpServletRequest request, LogFilterHandler logFilterHandler) {
+		if (logFilterHandler != null) {
+			return logFilterHandler.filterQueryParamString(request.getQueryString());
+		}
 		return request.getQueryString();
     }
     
@@ -141,14 +150,14 @@ public class AccessLogAspect implements InitializingBean {
      * @param logFilterHandler 参数过滤处理器 
      * @return String body解析后参数集合字符串
      */
-    private String getRequestBodyParams(HttpServletRequest request, HttpServletResponse response, LogFilterHandler logFilterHandler) {
+    private String getRequestBodyParamsLog(HttpServletRequest request, HttpServletResponse response, LogFilterHandler logFilterHandler) {
     	try {
 			if (webCombineParametersWrapper != null) {
-				Map combineModelMap = webCombineParametersWrapper.getBodyParameterMap(request, response);
+				Map bodyParameterMap = webCombineParametersWrapper.getBodyParameterMap(request, response);
 				if (logFilterHandler != null) {
-					logFilterHandler.filter(combineModelMap);
+					bodyParameterMap = logFilterHandler.filterBody(bodyParameterMap);
 				}
-				return JsonUtils.toString(combineModelMap);
+				return JsonUtils.toString(bodyParameterMap);
 			}
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
@@ -159,11 +168,11 @@ public class AccessLogAspect implements InitializingBean {
     /**
      * @Title getArgs
      * @Description 获取参数列表信息
-     * @param args
-     * @param logFilterHandler
+     * @param args 参数列表
+     * @param logFilterHandler 参数过滤处理器
      * @return String
      */
-    private String getArgs(Object[] args, LogFilterHandler logFilterHandler) {
+    private String getArgsLog(Object[] args, LogFilterHandler logFilterHandler) {
     	if (args == null || args.length == 0) {
     		return CharConstant.EMPTY;
     	}
@@ -192,7 +201,18 @@ public class AccessLogAspect implements InitializingBean {
 		}
     	return stringBuilder.toString();
     }
-    
+
+	private String getResultLog(Object resultObject, LogFilterHandler logFilterHandler) {
+		if (resultObject != null) {
+			Object result = logFilterHandler != null ? logFilterHandler.filterResult(resultObject) : resultObject;
+			if (result instanceof CharSequence) {
+				return result.toString();
+			}
+			return JsonUtils.toString(result);
+		}
+		return "null";
+	}
+
     /**
      * @Title getMethodInfo
      * @Description 方法信息
