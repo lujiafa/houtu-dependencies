@@ -13,7 +13,7 @@ A service discovery extension that enhances service online status and health sta
 Provides the `ServiceContext` extension for runtime self-checking of whether a service is online (registered in the registry). This is suitable for internal self-running scenarios such as MQ consumption and scheduled task execution — when the service is explicitly offline, business processing is no longer executed.
 
 ### 1.2 Health Check Extension
-Adds service online status detection to health checks. When a service is offline, both `/actuator/health` and `/service/health` endpoints return a 503 status code, which is useful in scenarios that require status detection.
+Adds service online status detection to health checks. When a service is offline, the `/actuator/health` endpoint returns a 503 status code, which is useful in scenarios that require status detection.
 
 ## 2. spring-cloud-houtu-loadbalancer
 Maven dependency:
@@ -205,7 +205,7 @@ spring:
 ```
 
 ## 4. spring-cloud-houtu-alibaba-sentinel
-Integrates Alibaba Sentinel with Nacos config center as a persistence center for circuit breaking, rate limiting, and other configurations.
+Provides WritableDataSource delegation and persistence support for Alibaba Sentinel rules including circuit breaking (DegradeRule), rate limiting (FlowRule), authority control (AuthorityRule), and system protection (SystemRule), with built-in Web (SpringMVC/WebFlux) BlockException handlers. Combined with the Spring Cloud Alibaba Sentinel Nacos DataSource, rules can be persisted to the Nacos config center.
 Maven dependency:
 ```pom
 <dependency>
