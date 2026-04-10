@@ -182,6 +182,8 @@ public ResponseData<Order> createOrder(OrderForm form) {
 
 ### Spring Cloud Enhancements
 
+> For detailed documentation, see [spring-cloud-houtu/README.md](./spring-cloud-houtu/README.md)
+
 | Module | Description |
 |--------|-------------|
 | **spring-cloud-houtu-loadbalancer** | Smart routing — full-link canary (hint), weighted routing, automatic failover on instance errors |
