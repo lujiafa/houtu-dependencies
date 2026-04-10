@@ -13,7 +13,7 @@
 提供状态上下文`ServiceContext`扩展，支持运行时自检测服务状态是否在线（在注册中心），适用于MQ消费、定时任务执行等等内部自运行场景，当明确服务下线时，不再执行业务处理。
 
 ### 1.2 健康检查拓展
-在健康检查中增加服务状态在线检测，当服务离线时通过`/actuator/health`或`/service/health`检测时状态码都为503，在某些需要检测的场景较为有用。
+在健康检查中增加服务状态在线检测，当服务离线时通过`/actuator/health`检测时状态码为503，在某些需要检测的场景较为有用。
 
 ## 二、spring-cloud-houtu-loadbalancer
 其Maven引入配置如下：
@@ -205,7 +205,7 @@ spring:
 ```
 
 ## 四、spring-cloud-houtu-alibaba-sentinel
-组合alibaba sentinel + nacos 配置中心作为熔断、限流等等配置持久化中心。
+基于 Alibaba Sentinel 提供熔断降级（DegradeRule）、流量控制（FlowRule）、权限控制（AuthorityRule）、系统保护（SystemRule）等规则的 WritableDataSource 委托持久化支持，并内置 Web（SpringMVC/WebFlux）BlockException 处理器。配合 Spring Cloud Alibaba Sentinel Nacos DataSource 可实现规则持久化到 Nacos 配置中心。
 其Maven引入配置如下：
 ```pom
 <dependency>
