@@ -182,6 +182,8 @@ public ResponseData<Order> createOrder(OrderForm form) {
 
 ### Spring Cloud 增强
 
+> 详细文档请参阅 [spring-cloud-houtu/README-CN.md](./spring-cloud-houtu/README-CN.md)
+
 | 模块 | 说明 |
 |------|------|
 | **spring-cloud-houtu-loadbalancer** | 智能路由 — 全链路灰度（hint）、权重路由、实例异常自动降级飘移 |
