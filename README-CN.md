@@ -77,7 +77,7 @@
         <dependency>
             <groupId>io.github.lujiafa</groupId>
             <artifactId>houtu-dependencies</artifactId>
-            <version>2.7.1</version>
+            <version>2.7.0</version>
             <type>pom</type>
             <scope>import</scope>
         </dependency>
@@ -296,8 +296,7 @@ public ResponseData<Order> createOrder(OrderForm form) {
 
 | Houtu | JDK | Spring Boot | Spring Cloud | Spring Cloud Alibaba |
 |:-----:|:---:|:-----------:|:------------:|:--------------------:|
-| **2.7.1** | 1.8 | 2.7.18 | 2021.0.9 | 2021.0.6.2 |
-| 2.7.0 | 1.8 | 2.7.18 | 2021.0.9 | 2021.0.6.2 |
+| **2.7.0** | 1.8 | 2.7.18 | 2021.0.9 | 2021.0.6.2 |
 
 ---
 
