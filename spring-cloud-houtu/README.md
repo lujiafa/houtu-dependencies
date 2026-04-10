@@ -1,5 +1,7 @@
-## 一、spring-cloud-houtu-discovery
-作为服务发现扩展，提供对服务在线状态与健康状态增强，其Maven引入配置如下：
+English | [中文](./README-CN.md)
+
+## 1. spring-cloud-houtu-discovery
+A service discovery extension that enhances service online status and health status. Maven dependency:
 ```pom
 <dependency>
     <groupId>io.github.lujiafa</groupId>
@@ -7,14 +9,14 @@
     <version>2.7.1</version>
 </dependency>
 ```
-### 1.1 服务状态上下文
-提供状态上下文`ServiceContext`扩展，支持运行时自检测服务状态是否在线（在注册中心），适用于MQ消费、定时任务执行等等内部自运行场景，当明确服务下线时，不再执行业务处理。
+### 1.1 Service Status Context
+Provides the `ServiceContext` extension for runtime self-checking of whether a service is online (registered in the registry). This is suitable for internal self-running scenarios such as MQ consumption and scheduled task execution — when the service is explicitly offline, business processing is no longer executed.
 
-### 1.2 健康检查拓展
-在健康检查中增加服务状态在线检测，当服务离线时通过`/actuator/health`或`/service/health`检测时状态码都为503，在某些需要检测的场景较为有用。
+### 1.2 Health Check Extension
+Adds service online status detection to health checks. When a service is offline, both `/actuator/health` and `/service/health` endpoints return a 503 status code, which is useful in scenarios that require status detection.
 
-## 二、spring-cloud-houtu-loadbalancer
-其Maven引入配置如下：
+## 2. spring-cloud-houtu-loadbalancer
+Maven dependency:
 ```xml
 <dependency>
     <groupId>io.github.lujiafa</groupId>
@@ -22,109 +24,109 @@
     <version>2.7.1</version>
 </dependency>
 ```
-### 2.1 Hint概要
-##### 2.1.1 消费端LoadBalancerProperties加载优先流程
-运行时通过`serviceId`获取`LoadBalancerProperties`, 优先级（从高到低）如下：
+### 2.1 Hint Overview
+##### 2.1.1 Consumer-side LoadBalancerProperties Loading Priority
+At runtime, `LoadBalancerProperties` are retrieved via `serviceId`. Priority (from high to low):
 ```mermaid
 flowchart TD
 F1["spring.cloud.loadbalancer.clients.[serviceId].[LoadBalancerProperties]"]
 F2["spring.cloud.loadbalancer.[LoadBalancerProperties]"]
-F1 -->|优先于| F2
+F1 -->|takes precedence over| F2
 ```
 
-##### 2.1.2 消费端Loadbalancer路由hint匹配机制
-通过服务发现获取服务Node列表，然后`metadata`中获取`hint`进行，当匹配到节点数大于0时则从匹配Node中路由，否则使用默认全量Node进行路由。
-请求方`hint`获取优先级（从高到低）如下：
+##### 2.1.2 Consumer-side Loadbalancer Hint Routing Mechanism
+The service node list is obtained via service discovery, then `hint` is retrieved from `metadata` for matching. When the number of matched nodes is greater than 0, routing is done from the matched nodes; otherwise, routing uses the full node list by default.
+Request-side `hint` retrieval priority (from high to low):
 ```mermaid
 flowchart TD
-H1["请求头中通过LoadBalancerProperties.hintHeaderName获取"]
+H1["From request headers via LoadBalancerProperties.hintHeaderName"]
 H2["HintContext.get()"]
 H3["LoadBalancerProperties.hint.[serviceId]"]
 H4["LoadBalancerProperties.hint.default"]
-H5["HintContext.getXHint()（全链路hint）"]
+H5["HintContext.getXHint() (full-link hint)"]
 
-H1 -->|优先于| H2
-H2 -->|优先于| H3
-H3 -->|优先于| H4
-H4 -->|优先于| H5
+H1 -->|takes precedence over| H2
+H2 -->|takes precedence over| H3
+H3 -->|takes precedence over| H4
+H4 -->|takes precedence over| H5
 ```
-##### 2.1.3 服务端注册hint配置与修改
-服务注册时可以通过注册配置中`metadata`设置`hint`，也可以通过注册中心修改服务注册信息中的`metadata`。
+##### 2.1.3 Server-side Hint Registration and Modification
+When registering a service, `hint` can be set via `metadata` in the registration configuration, or modified through the registry center's service registration metadata.
 
-##### 2.1.4 Loadbalancer中Node列表通过hint匹配流程
+##### 2.1.4 Node List Hint Matching Flow in Loadbalancer
 ```mermaid
 flowchart TD
-Start[开始] --> Step1
-Step1[通过服务发现获取所有 Node] --> Step2
+Start[Start] --> Step1
+Step1[Get all Nodes via service discovery] --> Step2
 
-Step2[请求 LoadBalancer 时通过请求 hint 匹配所有发现的 Node] --> Step3
-Step3[获得匹配结果] --> CheckMatchResult
+Step2[Match all discovered Nodes by request hint when requesting LoadBalancer] --> Step3
+Step3[Get match results] --> CheckMatchResult
 
-CheckMatchResult{"匹配结果数 > 0?"} -->|是| Step4
-CheckMatchResult -->|否| Step5
-Step4[通过匹配 Node 列表进行路由] --> Step6
-Step5[默认使用全部 Node 进行路由] --> Step6
-Step6[返回 Node 列表] --> End
-End[结束]
+CheckMatchResult{"Match count > 0?"} -->|Yes| Step4
+CheckMatchResult -->|No| Step5
+Step4[Route using matched Node list] --> Step6
+Step5[Route using all Nodes by default] --> Step6
+Step6[Return Node list] --> End
+End[End]
 ```
 
-##### 2.1.5 全链路Hint
+##### 2.1.5 Full-link Hint
 ```mermaid
 flowchart TD
-CLIENT[客户端]
-REQUEST["请求，可选请求头携带参数 x-hint"]
-subgraph SpringCloudGateway [网关服务]
+CLIENT[Client]
+REQUEST["Request, optionally carrying x-hint header"]
+subgraph SpringCloudGateway [Gateway Service]
     H1
-    H2["无 x-hint"]
-    H3["有 x-hint"]
-    H4["谓词处理器"]
+    H2["No x-hint"]
+    H3["Has x-hint"]
+    H4["Predicate Handler"]
     H5
-    H6["请求下游服务"]
-    subgraph GatewayNextRequest["RPC服务调用"]
+    H6["Request downstream service"]
+    subgraph GatewayNextRequest["RPC Service Call"]
         E1["LoadBalancer"]
-        E2["消费端Loadbalancer路由hint匹配机制 -> load balance"]
+        E2["Consumer-side hint routing mechanism -> load balance"]
         E3
-        E4["在请求头添加 x-hint"]
-        E5["常规请求"]
+        E4["Add x-hint to request header"]
+        E5["Regular request"]
 
         E1 --> E2
         E2 --> E3
-        E3{"是否存在x-hint"} -->|是| E4
-        E3 -->|否| E5
+        E3{"Does x-hint exist?"} -->|Yes| E4
+        E3 -->|No| E5
     end
     
-    H1{"是否启用过滤客户端 x-hint"} -->|是| H2
-    H1 -->|否| H3
+    H1{"Filter client x-hint enabled?"} -->|Yes| H2
+    H1 -->|No| H3
     H2 --> H4
     H3 --> H4
     H4 --> H5
-    H5{"是否在请求头添加 hint 或 x-hint，或通过HintContext.set..(String)设置？"} -->|是，存在则覆盖| GatewayNextRequest
-    H5 -->|否| GatewayNextRequest
+    H5{"hint or x-hint added to request header, or set via HintContext.set..(String)?"} -->|Yes, overwrite if exists| GatewayNextRequest
+    H5 -->|No| GatewayNextRequest
 end
 
-subgraph MicroService [微服务]
-    M1["业务处理"]
+subgraph MicroService [Microservice]
+    M1["Business processing"]
     M2
-    M3["业务处理与响应"]
-    M4["可选设置HintContext.set..(String)"]
-    M5["支持@Async等异步线程传递"]
-    subgraph NextRequest["RPC服务调用"]
+    M3["Business processing and response"]
+    M4["Optionally set HintContext.set..(String)"]
+    M5["Supports @Async and other async thread propagation"]
+    subgraph NextRequest["RPC Service Call"]
         F1["LoadBalancer"]
-        F2["消费端Loadbalancer路由hint匹配机制 -> load balance"]
+        F2["Consumer-side hint routing mechanism -> load balance"]
         F3
-        F4["在请求头添加 x-hint"]
-        F5["常规请求"]
+        F4["Add x-hint to request header"]
+        F5["Regular request"]
         F1 --> F2
         F2 --> F3
-        F3{"是否存在x-hint"} -->|是| F4
-        F3 -->|否| F5
+        F3{"Does x-hint exist?"} -->|Yes| F4
+        F3 -->|No| F5
     end
     M1 --> M2
-    M2{"是否存在下一层微服务调用？"} -->|是| M4
-    M2 -->|否| M3
+    M2{"Next-layer microservice call?"} -->|Yes| M4
+    M2 -->|No| M3
     M4 --> M5
     M5 --> NextRequest
-    NextRequest -->|调用下一个微服务| M1
+    NextRequest -->|Call next microservice| M1
 end
 
 CLIENT --> REQUEST
@@ -133,37 +135,37 @@ REQUEST --> SpringCloudGateway
 SpringCloudGateway --> MicroService
 ```
 
-### 2.2 权重路由与降级飘移
-支持配置权重`weight`(1-100)控制路由节点的权重，权重值越大，优先级越高。
-当消费端服务调用服务端某节点发生异常后，会对该节点进行降权降级，从而实现异常飘移。
+### 2.2 Weighted Routing and Failover Drift
+Supports configuring `weight` (1-100) to control routing node weights — the higher the weight, the higher the priority.
+When a consumer-side service call encounters an exception on a specific node, the node's weight is reduced for demotion, achieving exception-driven failover drift.
 ```mermaid
 flowchart TD
-START[业务处理]
-subgraph NextRequest["RPC服务调用"]
+START[Business Processing]
+subgraph NextRequest["RPC Service Call"]
     F1["LoadBalancer"]
-    F2["根据weight路由"]
-    F3["RPC请求"]
+    F2["Route by weight"]
+    F3["RPC Request"]
     F4
-    F5["对Node weight进行降权，每次降低为原来的80%，最低为1"]
+    F5["Reduce Node weight, each time to 80% of current, minimum 1"]
     F6
-    F7["加权，直至恢复原有权重"]
-    END[响应]
+    F7["Increase weight until original weight is restored"]
+    END[Response]
     F1 --> F2
     F2 --> F3
     F3 --> F4
-    F4{"是否调用异常"} -->|是| F5
-    F4 -->|否| F6
+    F4{"Call exception?"} -->|Yes| F5
+    F4 -->|No| F6
     F5 --> END
-    F6{"当前使用Node是否被降权过（即weight低于原始值）？"} --> F7
+    F6{"Has current Node been demoted (weight below original)?"} --> F7
     F6 --> END
     F7 --> END
 end
 START --> NextRequest
 ```
 
-### 2.3 配合Retry增强
-在对业务稳定要求较高环境，可以结合熔断、重试、服务实例降级飘移等方式，提升服务可用性。
-实例重试配置如下：
+### 2.3 Enhanced with Retry
+In environments with high business stability requirements, you can combine circuit breaking, retry, and service instance failover drift to improve service availability.
+Example retry configuration:
 ```yaml
 spring:
   cloud:
@@ -179,10 +181,10 @@ spring:
 ```
 
 
-## 三、spring-cloud-houtu-feign
-作为微服务服务端时，通过`@FeignClient`注解接口，增加`@AutoFeign`注解，该接口实现Bean会根据方法@RequestMapping、@GetMapping、@PostMapping、@PutMapping、@DeleteMapping等等自动发布，无需在单独写Controller类。
+## 3. spring-cloud-houtu-feign
+When serving as a microservice server, by adding the `@AutoFeign` annotation to a `@FeignClient`-annotated interface, the interface implementation bean will be automatically published based on method annotations such as @RequestMapping, @GetMapping, @PostMapping, @PutMapping, @DeleteMapping, etc. — no need to write separate Controller classes.
 
-其Maven引入配置如下：
+Maven dependency:
 ```pom
 <dependency>
     <groupId>io.github.lujiafa</groupId>
@@ -191,7 +193,7 @@ spring:
 </dependency>
 ```
 
-其他增强或配置可以根据业务自行调整，如配置连接超时时间：
+Other enhancements or configurations can be adjusted according to business needs, such as configuring connection timeout:
 ```yaml
 spring:
   cloud:
@@ -202,9 +204,9 @@ spring:
             connect-timeout: 1000
 ```
 
-## 四、spring-cloud-houtu-alibaba-sentinel
-组合alibaba sentinel + nacos 配置中心作为熔断、限流等等配置持久化中心。
-其Maven引入配置如下：
+## 4. spring-cloud-houtu-alibaba-sentinel
+Integrates Alibaba Sentinel with Nacos config center as a persistence center for circuit breaking, rate limiting, and other configurations.
+Maven dependency:
 ```pom
 <dependency>
     <groupId>io.github.lujiafa</groupId>
@@ -213,22 +215,22 @@ spring:
 </dependency>
 ```
 
-### 4.1 示例配置中心限流配置
-配置dataId为`xx-flow-rule.json`，内容如下：
+### 4.1 Example Rate Limiting Configuration in Config Center
+Configure a dataId as `xx-flow-rule.json` with the following content:
 ```json
 [
   {
-    "resource": "/user/findByUserName",    // 资源名
-    "limitApp": "default",                // 来源应用（default表示不区分）
-    "grade": 1,                           // 阈值类型（1=QPS）
-    "count": 10,                          // 单机阈值（10 QPS）
-    "strategy": 0,                        // 流控模式（0=直接）
-    "controlBehavior": 0,                 // 流控效果（0=快速失败）
-    "clusterMode": false                  // 是否集群
+    "resource": "/user/findByUserName",    // Resource name
+    "limitApp": "default",                // Source app (default means no distinction)
+    "grade": 1,                           // Threshold type (1=QPS)
+    "count": 10,                          // Single-machine threshold (10 QPS)
+    "strategy": 0,                        // Flow control mode (0=direct)
+    "controlBehavior": 0,                 // Flow control effect (0=fast fail)
+    "clusterMode": false                  // Cluster mode
   }
 ]
 ```
-### 4.2 示例服务配置引入
+### 4.2 Example Service Configuration
 ```yaml
 spring:
   cloud:
@@ -238,7 +240,7 @@ spring:
       datasource:
         nacos:
           server-addr: ${spring.cloud.nacos.server-addr}
-        # 作为配置Map的Key，用于协助生成Bean。参考SentinelDataSourceHandler
+        # Key for the config Map, used to assist Bean generation. See SentinelDataSourceHandler
         flow:
           nacos:
             data-id: ${spring.application.name}-flow-rule.json
