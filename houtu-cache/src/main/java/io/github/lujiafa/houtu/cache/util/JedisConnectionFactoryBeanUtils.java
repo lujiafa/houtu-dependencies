@@ -65,7 +65,7 @@ public final class JedisConnectionFactoryBeanUtils {
             map.from(sslOptions.getEnabledProtocols()).to(sslParameters::setProtocols);
             sslBuilder.sslParameters(sslParameters);
         }
-        boolean poolEnabled = redisProperties.getJedis().getPool().getEnabled() != null ? redisProperties.getLettuce().getPool().getEnabled() : ClassUtils.isPresent("org.apache.commons.pool2.ObjectPool",
+        boolean poolEnabled = redisProperties.getJedis().getPool().getEnabled() != null ? redisProperties.getJedis().getPool().getEnabled() : ClassUtils.isPresent("org.apache.commons.pool2.ObjectPool",
                 redisProperties.getClass().getClassLoader());
         if (poolEnabled) {
             RedisProperties.Pool pool = redisProperties.getJedis().getPool();

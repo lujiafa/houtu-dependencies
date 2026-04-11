@@ -147,8 +147,10 @@ public class JWTSessionRepository implements SessionRepository {
                     break;
                 case RS256, RS384, RS512:
                     this.signKey = RSAUtils.getPrivateKey(CodecData.base64(sessionProperties.getJwtSignatureKey()).bytes());
+                    break;
                 case ES256, ES384, ES512:
                     this.signKey = ECDSAUtils.getPrivateKey(CodecData.base64(sessionProperties.getJwtSignatureKey()).bytes());
+                    break;
                 default:
                     throw new RuntimeException("not support algorithm");
             }
@@ -166,8 +168,10 @@ public class JWTSessionRepository implements SessionRepository {
                     break;
                 case RS256, RS384, RS512:
                     this.signVerifyKey = RSAUtils.getPublicKey(CodecData.base64(sessionProperties.getJwtSignatureVerifyKey()).bytes());
+                    break;
                 case ES256, ES384, ES512:
                     this.signVerifyKey = ECDSAUtils.getPublicKey(CodecData.base64(sessionProperties.getJwtSignatureVerifyKey()).bytes());
+                    break;
                 default:
                     throw new RuntimeException("not support algorithm");
             }

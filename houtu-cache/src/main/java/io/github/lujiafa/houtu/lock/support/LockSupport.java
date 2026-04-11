@@ -74,7 +74,7 @@ public class LockSupport {
 	 * 		}
 	 */
 	public static BLock getLock(String lockKey, long leaseTime) {
-		Assert.hasText(lockKey, "paramater lockKey cannot be empty.");
+		Assert.hasText(lockKey, "parameter lockKey cannot be empty.");
 		RLock rlock = getRedissonClient().getFairLock(getRelLockKey(lockKey));
 		return new BLock(rlock, leaseTime);
 	}

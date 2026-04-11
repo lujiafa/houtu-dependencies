@@ -58,8 +58,10 @@ public class FeignDelegateDecoder implements Decoder {
         if (exceptionValues != null
                 && response.status() == HttpStatus.OK.value()
                 && !exceptionValues.isEmpty()) {
-            if (BaseResponseData.class.isAssignableFrom(type.getClass())
-                    || Map.class.isAssignableFrom(type.getClass())) {
+            Class<?> rawType = type instanceof Class ? (Class<?>) type
+                    : type instanceof ParameterizedType ? (Class<?>) ((ParameterizedType) type).getRawType() : null;
+            if (rawType != null && (BaseResponseData.class.isAssignableFrom(rawType)
+                    || Map.class.isAssignableFrom(rawType))) {
                 return;
             }
             String exServiceHeader = exceptionValues.iterator().next();

@@ -13,7 +13,7 @@
     <name>houtu-utils</name>
 
     <properties>
-        <javax.mail.version>1.6.2</javax.mail.version>
+        <angus-mail.version>2.0.5</angus-mail.version>
         <bouncycastle.version>1.82</bouncycastle.version>
     </properties>
 
@@ -46,11 +46,11 @@
             <artifactId>httpclient5</artifactId>
         </dependency>
 
-        <!-- 邮件处理工具包 -->
+        <!-- 邮件处理工具包 (Jakarta Mail) -->
         <dependency>
-            <groupId>com.sun.mail</groupId>
-            <artifactId>javax.mail</artifactId>
-            <version>${javax.mail.version}</version>
+            <groupId>org.eclipse.angus</groupId>
+            <artifactId>angus-mail</artifactId>
+            <version>${angus-mail.version}</version>
         </dependency>
 
         <dependency>

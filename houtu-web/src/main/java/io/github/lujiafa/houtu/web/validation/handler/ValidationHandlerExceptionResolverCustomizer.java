@@ -25,7 +25,7 @@ public class ValidationHandlerExceptionResolverCustomizer implements HandlerExce
 			Set<ConstraintViolation<?>> violations = ((ConstraintViolationException) ex).getConstraintViolations();
 			StringBuilder tempStringBuilder = new StringBuilder();
 			for (ConstraintViolation<?> item : violations) {
-				if (tempStringBuilder.length() == 0) {
+				if (tempStringBuilder.length() > 0) {
 					tempStringBuilder.append(CharConstant.SEMICOLON);
 				}
 				tempStringBuilder.append(item.getMessage());
