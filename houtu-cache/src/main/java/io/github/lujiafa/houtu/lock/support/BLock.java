@@ -25,14 +25,14 @@ public class BLock implements Lock, AutoCloseable {
 	private TimeUnit unit = TimeUnit.SECONDS;
 	
 	public BLock(RLock rlock, long leaseTime) {
-		Assert.notNull(rlock, "paramater rlock cannot be null.");
+		Assert.notNull(rlock, "parameter rlock cannot be null.");
 		this.rlock = rlock;
 		this.leaseTime = leaseTime;
 	}
 	
 	public BLock(RLock rlock, long leaseTime, TimeUnit unit) {
-		Assert.notNull(rlock, "paramater rlock cannot be null.");
-		Assert.notNull(unit, "paramater unit cannot be null.");
+		Assert.notNull(rlock, "parameter rlock cannot be null.");
+		Assert.notNull(unit, "parameter unit cannot be null.");
 		this.rlock = rlock;
 		this.leaseTime = leaseTime;
 		this.unit = unit;

@@ -62,7 +62,7 @@ public class HttpClients {
             } else if (requestConfig.getMultipart() != null) {
                 contentTypeRef.set(ContentType.MULTIPART_FORM_DATA);
             } else {
-                contentTypeRef.set(ContentType.APPLICATION_FORM_URLENCODED.withCharset(StandardCharsets.UTF_8).withCharset(StandardCharsets.UTF_8));
+                contentTypeRef.set(ContentType.APPLICATION_FORM_URLENCODED.withCharset(StandardCharsets.UTF_8));
             }
         }
         ContentType contentType = contentTypeRef.get();
@@ -376,7 +376,6 @@ public class HttpClients {
         public <T> T convert(TypeReference<T> typeReference) {
             if (statusCode == HttpStatus.SC_OK) {
                 Class<?> rawType = JsonUtils.getRawType(typeReference);
-                System.out.println(rawType);
                 if (CharSequence.class.isAssignableFrom(rawType)) {
                     return (T) content;
                 }

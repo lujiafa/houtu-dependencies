@@ -56,7 +56,7 @@ public class NacosServiceContext extends AbstractServiceContext {
 			NacosDiscoveryProperties nacosDiscoveryProperties = ((NacosRegistration) registration).getNacosDiscoveryProperties();
 			List<Instance> instanceList = nacosServiceManager.getNamingService().getAllInstances(registration.getServiceId(), nacosDiscoveryProperties.getGroup(), false);
 			instanceList = instanceList != null ? instanceList.stream().filter(i -> registration.getHost().equals(i.getIp()) && registration.getPort() == i.getPort()).collect(Collectors.toList()) : null;
-			if (instanceList == null && instanceList.size() == 0) {
+			if (instanceList == null || instanceList.size() == 0) {
 				throw new NacosException(99, "There is no current instance found in the service instance list obtained or down.");
 			}
 			Instance instance = instanceList.get(0);

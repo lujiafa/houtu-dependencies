@@ -31,7 +31,9 @@ public class RedisLockAspect implements Ordered {
 			if (waitTime == -1) {
 				block.lock();
 			} else {
-				block.tryLock(waitTime, lock.unit());
+				if (!block.tryLock(waitTime, lock.unit())) {
+					throw new RuntimeException("Failed to acquire lock: " + lockKey);
+				}
 			}
 			return joinPoint.proceed();
 		}

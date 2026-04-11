@@ -63,7 +63,7 @@ public abstract class SupportDefaultErrorPageTemplate {
 	}
 	
 	public static String getPage(String message, String redirectUrl) {
-		Assert.hasText(message, "parameter message nust not empty.");
+		Assert.hasText(message, "parameter message must not empty.");
 		return new StringBuilder()
 				.append(TEMPLATE)
 				.append((redirectUrl != null && redirectUrl.trim().length() > 0) ? redirectUrl.trim() : "")

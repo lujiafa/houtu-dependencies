@@ -281,7 +281,7 @@ public class SecurityWatchAspect implements Ordered {
                             if (encryptMapKeysSet.contains(key)) {
                                 String newValue = m.get(_value);
                                 if (newValue == null) {
-                                    m.put(key, _value);
+                                    map.put(key, _value);
                                 } else {
                                     map.put(key, newValue);
                                 }

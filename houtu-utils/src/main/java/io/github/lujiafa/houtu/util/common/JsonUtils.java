@@ -30,7 +30,7 @@ public class JsonUtils {
 	public JsonUtils(ObjectProvider<ObjectMapper> objectMapperObjectProvider) {
 		ObjectMapper availableObjectMapper = objectMapperObjectProvider.getIfAvailable();
 		if (availableObjectMapper != null) {
-			JsonUtils.objectMapper = objectMapper;
+			JsonUtils.objectMapper = availableObjectMapper;
 		}
 		// mapper在反序列化时，忽略类对象中没有的属性
 		objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
