@@ -32,7 +32,7 @@ public interface ErrorCodeConstant {
 
     Integer DATA_LOADING_FAILED = 40;
     Integer DATA_NOT_EXIST = 41;
-    Integer DATA_ALREADY_EXIST = 41;
+    Integer DATA_ALREADY_EXIST = 42;
 
     String UNKNOWN_ERROR_MESSAGE = "error";
 
