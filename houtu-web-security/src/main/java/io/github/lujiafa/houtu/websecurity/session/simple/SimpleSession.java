@@ -98,7 +98,7 @@ public class SimpleSession implements Session {
 	@Override
 	public void addRole(String role) {
 		if (role != null) {
-			permissions.add(role);
+			roles.add(role);
 		}
 	}
 
@@ -113,7 +113,7 @@ public class SimpleSession implements Session {
 
 	@Override
 	public Set<String> getRoles() {
-		return permissions;
+		return roles;
 	}
 
 	public void setRoles(Set<String> roles) {

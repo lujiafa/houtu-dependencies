@@ -19,7 +19,7 @@ import org.springframework.util.Assert;
 @Aspect
 public class RedisLockAspect implements Ordered {
 
-	@Pointcut("@annotation(io.github.lujiafa.lock.annotation.Lock)")
+	@Pointcut("@annotation(io.github.lujiafa.houtu.lock.annotation.Lock)")
 	public void pointcut() {}
 
 	@Around(value = "pointcut() && @annotation(lock)")
@@ -31,7 +31,9 @@ public class RedisLockAspect implements Ordered {
 			if (waitTime == -1) {
 				block.lock();
 			} else {
-				block.tryLock(waitTime, lock.unit());
+				if (!block.tryLock(waitTime, lock.unit())) {
+					throw new RuntimeException("Failed to acquire lock: " + lockKey);
+				}
 			}
 			return joinPoint.proceed();
 		}

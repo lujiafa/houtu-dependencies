@@ -69,7 +69,7 @@ public class RedisSessionRepository extends SessionPersistentRepository {
             return uniqueCompositeMutexMap.entrySet()
                     .parallelStream().map(e -> String.format("%s:mutex:%s:%s", cachePrefix, e.getKey(), e.getValue())).collect(Collectors.toList())
                     .parallelStream()
-                    .allMatch(k -> session.getId().equals(this.redisTemplate.expire(k, this.sessionProperties.getExpire().getSeconds(), TimeUnit.SECONDS)));
+                    .allMatch(k -> this.redisTemplate.expire(k, this.sessionProperties.getExpire().getSeconds(), TimeUnit.SECONDS));
         }
         return false;
     }
