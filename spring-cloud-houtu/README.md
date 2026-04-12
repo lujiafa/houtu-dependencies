@@ -6,7 +6,7 @@ A service discovery extension that enhances service online status and health sta
 <dependency>
     <groupId>io.github.lujiafa</groupId>
     <artifactId>spring-cloud-houtu-discovery</artifactId>
-    <version>3.5.1</version>
+    <version>3.5.2</version>
 </dependency>
 ```
 ### 1.1 Service Status Context
@@ -21,7 +21,7 @@ Maven dependency:
 <dependency>
     <groupId>io.github.lujiafa</groupId>
     <artifactId>spring-cloud-houtu-loadbalancer</artifactId>
-    <version>3.5.1</version>
+    <version>3.5.2</version>
 </dependency>
 ```
 ### 2.1 Hint Overview
@@ -189,7 +189,7 @@ Maven dependency:
 <dependency>
     <groupId>io.github.lujiafa</groupId>
     <artifactId>spring-cloud-houtu-feign</artifactId>
-    <version>3.5.1</version>
+    <version>3.5.2</version>
 </dependency>
 ```
 
@@ -211,7 +211,7 @@ Maven dependency:
 <dependency>
     <groupId>io.github.lujiafa</groupId>
     <artifactId>spring-cloud-houtu-alibaba-sentinel</artifactId>
-    <version>3.5.1</version>
+    <version>3.5.2</version>
 </dependency>
 ```
 

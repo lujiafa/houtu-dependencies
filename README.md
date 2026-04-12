@@ -77,7 +77,7 @@ Manage all versions uniformly via `dependencyManagement` in your project's `pom.
         <dependency>
             <groupId>io.github.lujiafa</groupId>
             <artifactId>houtu-dependencies</artifactId>
-            <version>3.5.1</version>
+            <version>3.5.2</version>
             <type>pom</type>
             <scope>import</scope>
         </dependency>
@@ -298,7 +298,8 @@ The major and minor version numbers of the project align with Spring Boot, makin
 
 | Houtu | JDK | Spring Boot | Spring Cloud | Spring Cloud Alibaba |
 |:-----:|:---:|:-----------:|:------------:|:--------------------:|
-| **3.5.1** | 17 | 3.5.11 | 2025.0.1 | 2025.0.0.0 |
+| **3.5.2** | 17 | 3.5.11 | 2025.0.1 | 2025.0.0.0 |
+| 3.5.1 | 17 | 3.5.11 | 2025.0.1 | 2025.0.0.0 |
 | 3.5.0 | 17 | 3.5.11 | 2025.0.0 ~ 2025.0.1 | 2023.0.1.2 ~ 2025.0.0.0 |
 | 3.4.0 | 17 | 3.4.13 | 2024.0.2 | 2023.0.1.2 ~ 2023.0.3.4 |
 | 3.3.0 | 17 | 3.3.13 | 2023.0.6 | 2023.0.1.2 ~ 2023.0.3.4 |

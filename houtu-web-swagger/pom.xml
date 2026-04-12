@@ -5,7 +5,7 @@
     <parent>
         <groupId>io.github.lujiafa</groupId>
         <artifactId>houtu-dependencies</artifactId>
-        <version>3.5.1</version>
+        <version>3.5.2</version>
     </parent>
 
     <artifactId>houtu-web-swagger</artifactId>
