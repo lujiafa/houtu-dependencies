@@ -198,8 +198,6 @@ public ResponseData<Order> createOrder(OrderForm form) {
 | Annotation | Module | Purpose |
 |------------|--------|---------|
 | `@Lock` | houtu-cache | Distributed lock; supports custom prefix, key expressions, wait/timeout |
-| `@ReqMonitor` | houtu-cache | Request-level performance monitoring |
-| `@RpcMonitor` | houtu-cache | RPC call performance monitoring |
 | `@CheckSession` | houtu-web-security | Validates user session validity |
 | `@CheckSign` | houtu-web-security | Request parameter signature verification |
 | `@CheckRepeatRequest` | houtu-web-security | Replay attack protection |

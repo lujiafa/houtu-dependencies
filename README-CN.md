@@ -198,8 +198,6 @@ public ResponseData<Order> createOrder(OrderForm form) {
 | 注解 | 所属模块 | 用途 |
 |------|---------|------|
 | `@Lock` | houtu-cache | 分布式锁，支持自定义前缀、key 表达式、等待/超时时间 |
-| `@ReqMonitor` | houtu-cache | 请求级性能监控 |
-| `@RpcMonitor` | houtu-cache | RPC 调用性能监控 |
 | `@CheckSession` | houtu-web-security | 校验用户会话有效性 |
 | `@CheckSign` | houtu-web-security | 请求参数签名验证 |
 | `@CheckRepeatRequest` | houtu-web-security | 防重放攻击 |
