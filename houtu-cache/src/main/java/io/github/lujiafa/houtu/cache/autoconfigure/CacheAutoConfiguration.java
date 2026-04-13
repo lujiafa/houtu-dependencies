@@ -12,6 +12,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.core.env.Environment;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.data.redis.core.RedisOperations;
@@ -30,6 +32,8 @@ public class CacheAutoConfiguration {
     @Configuration
     @ConditionalOnClass(org.redisson.api.RedissonClient.class)
     static class RedissonClientConfiguration {
+        private static final Logger logger = LoggerFactory.getLogger(RedissonClientConfiguration.class);
+
         @Bean(destroyMethod = "shutdown")
         @ConditionalOnMissingBean
         public static org.redisson.api.RedissonClient redissonClient(Environment environment, RedisProperties redisProperties) {
@@ -37,7 +41,9 @@ public class CacheAutoConfiguration {
             if (StringUtils.hasLength(config)) {
                 try {
                     return RedissonConnectionFactoryBeanUtils.redisson(config);
-                } catch (Exception e) {}
+                } catch (Exception e) {
+                    logger.warn("Failed to create RedissonClient from config string, falling back", e);
+                }
             }
             String filePath = environment.getProperty("spring.redis.redisson.file");
             if (StringUtils.hasLength(filePath)) {
@@ -47,7 +53,9 @@ public class CacheAutoConfiguration {
                     if (resource.exists()) {
                         return RedissonConnectionFactoryBeanUtils.redisson(resource.getFile());
                     }
-                } catch (Exception e) {}
+                } catch (Exception e) {
+                    logger.warn("Failed to create RedissonClient from file '{}', falling back", filePath, e);
+                }
             }
             return RedissonConnectionFactoryBeanUtils.redisson(redisProperties);
         }
