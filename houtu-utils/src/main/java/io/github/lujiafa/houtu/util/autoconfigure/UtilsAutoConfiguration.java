@@ -29,6 +29,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Scope;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 
 import javax.net.ssl.KeyManager;
@@ -49,6 +51,8 @@ import java.util.stream.Collectors;
 @AutoConfiguration
 @EnableConfigurationProperties(HttpClientProperties.class)
 public class UtilsAutoConfiguration {
+
+    private static final Logger logger = LoggerFactory.getLogger(UtilsAutoConfiguration.class);
 
     @Primary
     @Bean(destroyMethod = "close")
@@ -143,10 +147,8 @@ public class UtilsAutoConfiguration {
                     }
                 }}, new SecureRandom());
                 sslConnectionSocketFactoryBuilder.setSslContext(sslContext);
-            } catch (NoSuchAlgorithmException e) {
-                e.printStackTrace();
-            } catch (KeyManagementException e) {
-                e.printStackTrace();
+            } catch (NoSuchAlgorithmException | KeyManagementException e) {
+                logger.error("Failed to initialize SSL context", e);
             }
         } else {
             sslConnectionSocketFactoryBuilder.setSslContext(SSLContexts.createSystemDefault());
