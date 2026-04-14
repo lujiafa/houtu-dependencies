@@ -77,7 +77,7 @@ Manage all versions uniformly via `dependencyManagement` in your project's `pom.
         <dependency>
             <groupId>io.github.lujiafa</groupId>
             <artifactId>houtu-dependencies</artifactId>
-            <version>2.7.2</version>
+            <version>2.7.3</version>
             <type>pom</type>
             <scope>import</scope>
         </dependency>
@@ -198,8 +198,6 @@ public ResponseData<Order> createOrder(OrderForm form) {
 | Annotation | Module | Purpose |
 |------------|--------|---------|
 | `@Lock` | houtu-cache | Distributed lock; supports custom prefix, key expressions, wait/timeout |
-| `@ReqMonitor` | houtu-cache | Request-level performance monitoring |
-| `@RpcMonitor` | houtu-cache | RPC call performance monitoring |
 | `@CheckSession` | houtu-web-security | Validates user session validity |
 | `@CheckSign` | houtu-web-security | Request parameter signature verification |
 | `@CheckRepeatRequest` | houtu-web-security | Replay attack protection |
@@ -298,7 +296,8 @@ The major and minor version numbers of the project align with Spring Boot, makin
 
 | Houtu | JDK | Spring Boot | Spring Cloud | Spring Cloud Alibaba |
 |:-----:|:---:|:-----------:|:------------:|:--------------------:|
-| **2.7.2** | 1.8 | 2.7.18 | 2021.0.9 | 2021.0.6.2 |
+| **2.7.3** | 1.8 | 2.7.18 | 2021.0.9 | 2021.0.6.2 |
+| 2.7.2 | 1.8 | 2.7.18 | 2021.0.9 | 2021.0.6.2 |
 | 2.7.1 | 1.8 | 2.7.18 | 2021.0.9 | 2021.0.6.2 |
 | 2.7.0 | 1.8 | 2.7.18 | 2021.0.9 | 2021.0.6.2 |
 

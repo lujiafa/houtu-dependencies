@@ -11,6 +11,8 @@ import java.util.Map;
 public final class ServiceInstanceWeightSupport {
 
     static final String ORIGIN_PREFIX = "origin.";
+    private static final BigDecimal DOWNGRADE_FACTOR = BigDecimal.valueOf(0.8);
+    private static final BigDecimal UPGRADE_FACTOR = BigDecimal.valueOf(1.1);
 
     static Logger logger = org.slf4j.LoggerFactory.getLogger(ServiceInstanceWeightSupport.class);
 
@@ -40,7 +42,7 @@ public final class ServiceInstanceWeightSupport {
         if (originalWeightStr == null) {
             metadata.put(originalWeightKey, weightStr);
         }
-        weightBigDecimal = weightBigDecimal.multiply(BigDecimal.valueOf(0.8));
+        weightBigDecimal = weightBigDecimal.multiply(DOWNGRADE_FACTOR);
         weight = weightBigDecimal.setScale(0, RoundingMode.FLOOR).intValue();
         if (weight <= 0) {
             weight = SpringCloudWeightFunction.DEFAULT_WEIGHT;
@@ -70,7 +72,7 @@ public final class ServiceInstanceWeightSupport {
         int originalWeight =  (originalWeight = new BigDecimal(originalWeightStr).setScale(0, RoundingMode.CEILING).intValue()) <= 0 ? SpringCloudWeightFunction.DEFAULT_WEIGHT : originalWeight;
         String weightStr = metadata.get(serviceInstanceType.getWeightName());
         BigDecimal weightBigDecimal = weightStr != null && !weightStr.isEmpty() ? new BigDecimal(weightStr) : BigDecimal.valueOf(SpringCloudWeightFunction.DEFAULT_WEIGHT);
-        int weight = weightBigDecimal.multiply(BigDecimal.valueOf(1.1)).setScale(0, RoundingMode.CEILING).intValue();
+        int weight = weightBigDecimal.multiply(UPGRADE_FACTOR).setScale(0, RoundingMode.CEILING).intValue();
         if (weight > originalWeight) {
             weight = originalWeight;
             metadata.remove(originalWeightKey);

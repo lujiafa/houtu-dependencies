@@ -91,7 +91,7 @@ public class SecurityWatchAspect implements Ordered {
         if (!getters.isEmpty()) {
             Map<String, String> encryptedProcessMap = new ConcurrentHashMap<>(getters.size());
             List<String> origins = getters.stream().map(g -> g.get()).collect(Collectors.toList());
-            origins.parallelStream().forEach(o -> {
+            origins.stream().forEach(o -> {
                 if (encryptedProcessMap.get(o) == null) {
                     encryptedProcessMap.put(o, securityProcessor.encrypt(securityContext.getMethod(), o));
                 }
@@ -103,7 +103,7 @@ public class SecurityWatchAspect implements Ordered {
                     encryptedMap.put(o, encrypted);
                 }
             });
-            setters.parallelStream().forEach(s -> s.set(encryptedMap));
+            setters.stream().forEach(s -> s.set(encryptedMap));
             encryptedMap.entrySet().forEach(e -> recoveryMap.put(e.getValue(), e.getKey()));
         }
         securityContext.setRecoveryMap(recoveryMap);
@@ -112,14 +112,14 @@ public class SecurityWatchAspect implements Ordered {
     void recoveryParams(SecurityContext securityContext) {
         List<SecuritySetter> setters = new ArrayList<>();
         buildSecurityParams(securityContext.getArgs(), securityContext.getParameterAnnotations(), null, setters, securityContext.getRecoveryAndDecryptProcessedSet(), null);
-        setters.parallelStream().forEach(s -> s.set(securityContext.getRecoveryMap()));
+        setters.stream().forEach(s -> s.set(securityContext.getRecoveryMap()));
     }
 
     void buildSecurityParams(Object[] args, Annotation[][] parameterAnnotations, List<Supplier<String>> getters, List<SecuritySetter> setters, Set<Object> processedSet, String[] mapKeys) {
         for (int i = 0; i < args.length; i++) {
             Object arg = args[i];
             if (arg == null
-                    || (!Arrays.stream(parameterAnnotations[i]).parallel().anyMatch(annotation -> annotation instanceof SecurityParam) && !(arg instanceof SecurityObject)))
+                    || (!Arrays.stream(parameterAnnotations[i]).anyMatch(annotation -> annotation instanceof SecurityParam) && !(arg instanceof SecurityObject)))
                 continue;
             if (arg instanceof String) {
                 if (getters != null) {
@@ -153,7 +153,7 @@ public class SecurityWatchAspect implements Ordered {
             IdentityHashMap<String, String> recoveryMap = securityContext.getRecoveryMap();
             Map<String, String> decryptProcessMap = recoveryMap == null ? new ConcurrentHashMap<>(getters.size()) : new ConcurrentHashMap<>(recoveryMap);
             List<String> encrypts = getters.stream().map(g -> g.get()).collect(Collectors.toList());
-            encrypts.parallelStream().forEach(o -> {
+            encrypts.stream().forEach(o -> {
                 if (decryptProcessMap.get(o) == null) {
                     decryptProcessMap.put(o, securityProcessor.decrypt(securityContext.getMethod(), o));
                 }
@@ -164,7 +164,7 @@ public class SecurityWatchAspect implements Ordered {
                     decryptionMap.put(o, decryptProcessMap.get(o));
                 }
             });
-            setters.parallelStream().forEach(s -> s.set(decryptionMap));
+            setters.stream().forEach(s -> s.set(decryptionMap));
         }
         return result;
     }
@@ -173,9 +173,9 @@ public class SecurityWatchAspect implements Ordered {
         if (object == null || processedSet.contains(object)) return;
         if (object instanceof SecurityObject) {
             List<Field> fieldList = Arrays.stream(object.getClass().getDeclaredFields()).filter(field ->
-                            field.isAnnotationPresent(SecurityParam.class)
+                            (field.isAnnotationPresent(SecurityParam.class)
                                     && !Modifier.isStatic(field.getModifiers())
-                                    && !Modifier.isFinal(field.getModifiers())
+                                    && !Modifier.isFinal(field.getModifiers()))
                                     || SecurityObject.class.isAssignableFrom(field.getType()))
                     .collect(Collectors.toList());
             if (fieldList.size() == 0) return;

@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.lujiafa.houtu.util.common.JsonUtils;
 import io.github.lujiafa.houtu.util.http.HttpClients;
 import io.github.lujiafa.houtu.util.prop.HttpClientProperties;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hc.client5.http.classic.ExecChainHandler;
 import org.apache.hc.client5.http.classic.HttpClient;
 import org.apache.hc.client5.http.config.RequestConfig;
@@ -50,6 +52,8 @@ import java.util.stream.Collectors;
 @EnableConfigurationProperties(HttpClientProperties.class)
 public class UtilsAutoConfiguration {
 
+    private static final Logger logger = LoggerFactory.getLogger(UtilsAutoConfiguration.class);
+
     @Primary
     @Bean(destroyMethod = "close")
     @ConditionalOnClass(HttpClient.class)
@@ -91,10 +95,10 @@ public class UtilsAutoConfiguration {
             httpClientBuilder.setUserAgent(httpClientProperties.getRequest().getUserAgent());
         }
         if (requestInterceptors != null && !requestInterceptors.isEmpty()) {
-            requestInterceptors.stream().forEach(i -> httpClientBuilder.addRequestInterceptorLast(i));
+            requestInterceptors.forEach(i -> httpClientBuilder.addRequestInterceptorLast(i));
         }
         if (responseInterceptors != null && !responseInterceptors.isEmpty()) {
-            responseInterceptors.stream().forEach(i -> httpClientBuilder.addResponseInterceptorLast(i));
+            responseInterceptors.forEach(i -> httpClientBuilder.addResponseInterceptorLast(i));
         }
         if (execChainHandlers != null && !execChainHandlers.isEmpty()) {
             Collections.reverse(execChainHandlers);
@@ -139,14 +143,12 @@ public class UtilsAutoConfiguration {
                     }
 
                     public X509Certificate[] getAcceptedIssuers() {
-                        return null;
+                        return new X509Certificate[0];
                     }
                 }}, new SecureRandom());
                 sslConnectionSocketFactoryBuilder.setSslContext(sslContext);
-            } catch (NoSuchAlgorithmException e) {
-                e.printStackTrace();
-            } catch (KeyManagementException e) {
-                e.printStackTrace();
+            } catch (NoSuchAlgorithmException | KeyManagementException e) {
+                logger.error("Failed to initialize SSL context", e);
             }
         } else {
             sslConnectionSocketFactoryBuilder.setSslContext(SSLContexts.createSystemDefault());

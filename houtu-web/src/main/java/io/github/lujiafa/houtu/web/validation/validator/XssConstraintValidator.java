@@ -4,7 +4,8 @@ import io.github.lujiafa.houtu.web.validation.constroins.NotXss;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
-import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -14,20 +15,19 @@ import java.util.regex.Pattern;
  * @author jonlu
  */
 public class XssConstraintValidator implements ConstraintValidator<NotXss, String> {
-	
-	private static List<Pattern> plist = new ArrayList<Pattern>();
-	
-	static {
-		plist.add(Pattern.compile("<script.*>", Pattern.CASE_INSENSITIVE));
-		plist.add(Pattern.compile("javascript:", Pattern.CASE_INSENSITIVE));
-		plist.add(Pattern.compile("vbscript:", Pattern.CASE_INSENSITIVE));
-		plist.add(Pattern.compile("eval\\((.*)\\)", Pattern.CASE_INSENSITIVE));
-		plist.add(Pattern.compile("onload(.*)=", Pattern.CASE_INSENSITIVE));
-	}
+
+	private static final List<Pattern> plist = Collections.unmodifiableList(Arrays.asList(
+		Pattern.compile("<script.*>", Pattern.CASE_INSENSITIVE),
+		Pattern.compile("javascript:", Pattern.CASE_INSENSITIVE),
+		Pattern.compile("vbscript:", Pattern.CASE_INSENSITIVE),
+		Pattern.compile("eval\\((.*)\\)", Pattern.CASE_INSENSITIVE),
+		Pattern.compile("onload(.*)=", Pattern.CASE_INSENSITIVE)
+	));
 
 	@Override
 	public boolean isValid(String value, ConstraintValidatorContext context) {
-		return !plist.parallelStream().anyMatch(p -> p.matcher(value).find());
+		if (value == null) return true;
+		return !plist.stream().anyMatch(p -> p.matcher(value).find());
 	}
-	
+
 }

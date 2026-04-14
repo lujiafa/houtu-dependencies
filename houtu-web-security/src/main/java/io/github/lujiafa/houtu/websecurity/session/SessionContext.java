@@ -24,7 +24,7 @@ public class SessionContext {
 	// session的上下文存储
 	final static ThreadLocal<Session> sessionContextHolder = new ThreadLocal<Session>();
 
-	static SessionContext INSTANCE;
+	static volatile SessionContext INSTANCE;
 
 	private SessionProperties sessionProperties;
 	private SessionRepository sessionRepository;
@@ -35,9 +35,14 @@ public class SessionContext {
 		Assert.notNull(sessionRepository, "parameter sessionRepository cannot be null.");
 		Assert.notNull(sessionProperties, "parameter sessionProperties cannot be null.");
 		if (INSTANCE == null) {
-			INSTANCE = new SessionContext();
-			INSTANCE.sessionRepository = sessionRepository;
-			INSTANCE.sessionProperties = sessionProperties;
+			synchronized (SessionContext.class) {
+				if (INSTANCE == null) {
+					SessionContext ctx = new SessionContext();
+					ctx.sessionRepository = sessionRepository;
+					ctx.sessionProperties = sessionProperties;
+					INSTANCE = ctx;
+				}
+			}
 		}
 		return INSTANCE;
 	}

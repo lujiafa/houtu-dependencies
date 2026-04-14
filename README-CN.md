@@ -77,7 +77,7 @@
         <dependency>
             <groupId>io.github.lujiafa</groupId>
             <artifactId>houtu-dependencies</artifactId>
-            <version>2.7.2</version>
+            <version>2.7.3</version>
             <type>pom</type>
             <scope>import</scope>
         </dependency>
@@ -198,8 +198,6 @@ public ResponseData<Order> createOrder(OrderForm form) {
 | 注解 | 所属模块 | 用途 |
 |------|---------|------|
 | `@Lock` | houtu-cache | 分布式锁，支持自定义前缀、key 表达式、等待/超时时间 |
-| `@ReqMonitor` | houtu-cache | 请求级性能监控 |
-| `@RpcMonitor` | houtu-cache | RPC 调用性能监控 |
 | `@CheckSession` | houtu-web-security | 校验用户会话有效性 |
 | `@CheckSign` | houtu-web-security | 请求参数签名验证 |
 | `@CheckRepeatRequest` | houtu-web-security | 防重放攻击 |
@@ -298,7 +296,8 @@ public ResponseData<Order> createOrder(OrderForm form) {
 
 | Houtu | JDK | Spring Boot | Spring Cloud | Spring Cloud Alibaba |
 |:-----:|:---:|:-----------:|:------------:|:--------------------:|
-| **2.7.2** | 1.8 | 2.7.18 | 2021.0.9 | 2021.0.6.2 |
+| **2.7.3** | 1.8 | 2.7.18 | 2021.0.9 | 2021.0.6.2 |
+| 2.7.2 | 1.8 | 2.7.18 | 2021.0.9 | 2021.0.6.2 |
 | 2.7.1 | 1.8 | 2.7.18 | 2021.0.9 | 2021.0.6.2 |
 | 2.7.0 | 1.8 | 2.7.18 | 2021.0.9 | 2021.0.6.2 |
 

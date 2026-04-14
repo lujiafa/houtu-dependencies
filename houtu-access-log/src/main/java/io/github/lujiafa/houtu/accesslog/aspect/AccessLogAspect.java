@@ -256,7 +256,7 @@ public class AccessLogAspect implements InitializingBean {
 			return null;
 		}
 		try {
-			return clazz.newInstance();
+			return clazz.getDeclaredConstructor().newInstance();
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 		}

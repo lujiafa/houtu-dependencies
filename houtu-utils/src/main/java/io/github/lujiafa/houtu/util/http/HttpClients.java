@@ -27,7 +27,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class HttpClients {
 
-    static CloseableHttpClient httpClient;
+    static volatile CloseableHttpClient httpClient;
 
     public HttpClients(CloseableHttpClient httpClient) {
         HttpClients.httpClient = httpClient;

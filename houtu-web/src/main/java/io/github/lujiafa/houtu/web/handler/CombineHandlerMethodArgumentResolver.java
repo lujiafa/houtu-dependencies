@@ -181,7 +181,7 @@ public class CombineHandlerMethodArgumentResolver extends AbstractMessageConvert
         if (HttpMethod.GET.matches(request.getMethod()))
             return false;
         MediaType mediaType = WebUtils.getRequestMediaType(request);
-        return !formMediaTypes.parallelStream().anyMatch(supportedMediaType -> supportedMediaType.includes(mediaType));
+        return !formMediaTypes.stream().anyMatch(supportedMediaType -> supportedMediaType.includes(mediaType));
     }
 
     @Override

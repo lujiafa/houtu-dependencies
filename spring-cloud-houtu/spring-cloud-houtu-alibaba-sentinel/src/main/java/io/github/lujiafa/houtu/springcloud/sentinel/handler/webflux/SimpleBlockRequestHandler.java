@@ -50,7 +50,7 @@ public class SimpleBlockRequestHandler implements BlockRequestHandler {
         }
         ErrorCode errorCode = ErrorCode.build(ErrorCodeConstant.SERVER_BUSY, new Object[]{throwable.getMessage() == null ? "block" : throwable.getMessage()});
         return ServerResponse.status(HttpStatus.TOO_MANY_REQUESTS)
-                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .contentType(MediaType.APPLICATION_JSON)
                 .body(fromObject(errorCode));
     }
 

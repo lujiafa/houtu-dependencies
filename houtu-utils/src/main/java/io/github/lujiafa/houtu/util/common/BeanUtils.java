@@ -162,7 +162,7 @@ public class BeanUtils extends org.springframework.beans.BeanUtils {
     public static void copyProperties(Object source, Object target, boolean nonNullProperties) {
         if (nonNullProperties && source != null) {
             Field[] fields = source.getClass().getDeclaredFields();
-            String[] ignoreProperties = Arrays.stream(fields).parallel().filter(f -> {
+            String[] ignoreProperties = Arrays.stream(fields).filter(f -> {
                 try {
                     if (!f.isAccessible()) {
                         f.setAccessible(true);
