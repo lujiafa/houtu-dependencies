@@ -37,13 +37,13 @@ public class NacosServiceContext extends AbstractServiceContext {
 					return;
 				}
 				NamingEvent namingEvent = (NamingEvent) e;
-				ServiceStatus status = namingEvent.getInstances().parallelStream()
+				ServiceStatus status = namingEvent.getInstances().stream()
 						.anyMatch(i -> registration.getHost().equals(i.getIp()) && registration.getPort() == i.getPort() && i.isEnabled())
 						? ServiceStatus.UP : ServiceStatus.DOWN;
 				updateServiceState(status);
 			});
 		} catch (Exception e) {
-			throw new RuntimeException(e.getMessage(), e);
+			throw new RuntimeException("Failed to subscribe to service: " + registration.getServiceId(), e);
 		}
 	}
 
@@ -64,7 +64,7 @@ public class NacosServiceContext extends AbstractServiceContext {
 			nacosServiceManager.getNamingMaintainService(nacosDiscoveryProperties.getNacosProperties())
 					.updateInstance(registration.getServiceId(), nacosDiscoveryProperties.getGroup(), instance);
 		} catch (NacosException e) {
-			throw new RuntimeException(e);
+			throw new RuntimeException("Failed to update service metadata: " + registration.getServiceId(), e);
 		}
 	}
 

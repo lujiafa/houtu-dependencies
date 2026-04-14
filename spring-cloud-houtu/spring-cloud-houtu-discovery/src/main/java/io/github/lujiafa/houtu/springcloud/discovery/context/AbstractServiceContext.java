@@ -4,6 +4,7 @@ import io.github.lujiafa.houtu.springcloud.discovery.type.ServiceStatus;
 import org.apache.commons.lang3.RandomUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.cloud.client.serviceregistry.Registration;
 import org.springframework.cloud.client.serviceregistry.ServiceRegistry;
@@ -14,7 +15,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.locks.ReentrantLock;
 
-public abstract class AbstractServiceContext extends TimerTask implements ServiceContext, InitializingBean {
+public abstract class AbstractServiceContext extends TimerTask implements ServiceContext, InitializingBean, DisposableBean {
 
     private final static Logger logger = LoggerFactory.getLogger(AbstractServiceContext.class);
 
@@ -68,6 +69,11 @@ public abstract class AbstractServiceContext extends TimerTask implements Servic
     @Override
     public void afterPropertiesSet() {
         timer.schedule(this, RandomUtils.nextInt(0, 1000), 1000);
+    }
+
+    @Override
+    public void destroy() throws Exception {
+        timer.cancel();
     }
 
 }

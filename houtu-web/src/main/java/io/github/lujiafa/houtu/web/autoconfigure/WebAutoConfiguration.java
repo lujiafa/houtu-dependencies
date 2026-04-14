@@ -2,7 +2,6 @@ package io.github.lujiafa.houtu.web.autoconfigure;
 
 import io.github.lujiafa.houtu.web.config.WebMvcConfigurer;
 import io.github.lujiafa.houtu.web.handler.*;
-import io.github.lujiafa.houtu.web.handler.*;
 import io.github.lujiafa.houtu.web.prop.WebProperties;
 import io.github.lujiafa.houtu.web.util.WebCombineParametersSupport;
 import org.springframework.beans.factory.ObjectProvider;
@@ -104,7 +103,7 @@ public class WebAutoConfiguration {
      * @return List<HttpMessageConverter<?>>
      */
     private List<HttpMessageConverter<?>> getMessageConverters(List<HttpMessageConverter<?>> messageConverters) {
-        messageConverters = messageConverters == null ? new ArrayList() : messageConverters;
+        messageConverters = messageConverters == null ? new ArrayList<>() : messageConverters;
         if (messageConverters.isEmpty()) {
             messageConverters.add(new ByteArrayHttpMessageConverter());
             messageConverters.add(new StringHttpMessageConverter());
@@ -120,9 +119,9 @@ public class WebAutoConfiguration {
      * @return List<Object>
      */
     private List<Object> getRequestBodyAdvice(ApplicationContext applicationContext) {
-        List<Object> requestBodyAdvices = new ArrayList();
+        List<Object> requestBodyAdvices = new ArrayList<>();
         List<ControllerAdviceBean> adviceBeans = ControllerAdviceBean.findAnnotatedBeans(applicationContext);
-        List<Object> responseBodyAdviceBeans = new ArrayList();
+        List<Object> responseBodyAdviceBeans = new ArrayList<>();
         for (ControllerAdviceBean adviceBean : adviceBeans) {
             Class<?> beanType = adviceBean.getBeanType();
             if (RequestBodyAdvice.class.isAssignableFrom(beanType)) {
@@ -141,9 +140,9 @@ public class WebAutoConfiguration {
      * @return List<Object>
      */
     private List<Object> getResponseBodyAdvice(ApplicationContext applicationContext) {
-        List<Object> responseBodyAdvices = new ArrayList();
+        List<Object> responseBodyAdvices = new ArrayList<>();
         List<ControllerAdviceBean> adviceBeans = ControllerAdviceBean.findAnnotatedBeans(applicationContext);
-        List<Object> responseBodyAdviceBeans = new ArrayList();
+        List<Object> responseBodyAdviceBeans = new ArrayList<>();
         for (ControllerAdviceBean adviceBean : adviceBeans) {
             Class<?> beanType = adviceBean.getBeanType();
             if (RequestBodyAdvice.class.isAssignableFrom(beanType) || ResponseBodyAdvice.class.isAssignableFrom(beanType)) {

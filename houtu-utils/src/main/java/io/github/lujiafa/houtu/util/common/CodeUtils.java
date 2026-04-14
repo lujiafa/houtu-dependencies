@@ -143,7 +143,7 @@ public class CodeUtils {
         b[18] = b[22];
         System.arraycopy(confuse, 0, b, 21, 2);
         char[] chars = new char[32];
-        IntStream.range(0, 8).parallel().forEach(i -> {
+        IntStream.range(0, 8).forEach(i -> {
             int m = i * 3;
             int n = i * 4;
             chars[n] = CHAR64[b[m] >> 2 & 0x3F];
@@ -176,11 +176,11 @@ public class CodeUtils {
             return new RuleData();
         char[] chars = rule.toCharArray();
         int[] charIndexArray = new int[32];
-        IntStream.range(0, 32).parallel().forEach(i -> {
-            charIndexArray[i] = IntStream.range(0, 64).parallel().filter(j -> CHAR64[j] == chars[i]).findAny().getAsInt();
+        IntStream.range(0, 32).forEach(i -> {
+            charIndexArray[i] = IntStream.range(0, 64).filter(j -> CHAR64[j] == chars[i]).findFirst().getAsInt();
         });
         byte[] b = new byte[24];
-        IntStream.range(0, 8).parallel().forEach(i -> {
+        IntStream.range(0, 8).forEach(i -> {
             int m = i * 3;
             int n = i * 4;
             b[m] = (byte) (charIndexArray[n] << 2 | charIndexArray[n + 1] >> 4);

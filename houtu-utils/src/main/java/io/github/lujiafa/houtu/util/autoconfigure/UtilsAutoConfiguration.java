@@ -95,10 +95,10 @@ public class UtilsAutoConfiguration {
             httpClientBuilder.setUserAgent(httpClientProperties.getRequest().getUserAgent());
         }
         if (requestInterceptors != null && !requestInterceptors.isEmpty()) {
-            requestInterceptors.stream().forEach(i -> httpClientBuilder.addRequestInterceptorLast(i));
+            requestInterceptors.forEach(i -> httpClientBuilder.addRequestInterceptorLast(i));
         }
         if (responseInterceptors != null && !responseInterceptors.isEmpty()) {
-            responseInterceptors.stream().forEach(i -> httpClientBuilder.addResponseInterceptorLast(i));
+            responseInterceptors.forEach(i -> httpClientBuilder.addResponseInterceptorLast(i));
         }
         if (execChainHandlers != null && !execChainHandlers.isEmpty()) {
             Collections.reverse(execChainHandlers);
@@ -143,7 +143,7 @@ public class UtilsAutoConfiguration {
                     }
 
                     public X509Certificate[] getAcceptedIssuers() {
-                        return null;
+                        return new X509Certificate[0];
                     }
                 }}, new SecureRandom());
                 sslConnectionSocketFactoryBuilder.setSslContext(sslContext);

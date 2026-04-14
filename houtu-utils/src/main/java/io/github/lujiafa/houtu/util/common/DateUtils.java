@@ -1,6 +1,5 @@
 package io.github.lujiafa.houtu.util.common;
 
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
@@ -14,16 +13,9 @@ import java.util.TimeZone;
  */
 public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
 
-    final static DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
     final static DateTimeFormatter LOCAL_DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-    final static DateFormat DATE_TIME_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     final static DateTimeFormatter LOCAL_DATE_TIME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-    final static DateFormat DATE_TIME_UTC_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
     final static DateTimeFormatter LOCAL_DATE_TIME_UTC_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
-
-    static {
-        DATE_TIME_UTC_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
-    }
 
     /**
      * 通过date获取时间格式化字符串。示例：2020-01-01
@@ -31,7 +23,7 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
      * @return String
      */
     public static String formatDate(Date date) {
-        return DATE_FORMAT.format(date);
+        return new SimpleDateFormat("yyyy-MM-dd").format(date);
     }
 
     /**
@@ -49,7 +41,7 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
      * @return String
      */
     public static String formatDateTime(Date dateTime) {
-        return DATE_TIME_FORMAT.format(dateTime);
+        return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(dateTime);
     }
 
     /**
@@ -67,7 +59,9 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
      * @return String
      */
     public static String formatUTCDateTime(Date date) {
-        return DATE_TIME_UTC_FORMAT.format(date);
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+        return sdf.format(date);
     }
 
     /**

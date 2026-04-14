@@ -48,21 +48,6 @@ public class ActuatorWebMetricsAutoConfiguration {
     @ConditionalOnProperty(prefix = "management.metrics.distribution.percentiles", name = {"http.client.requests"})
     public static class ActuatorHttpClient5Configuration {
 
-//        @Bean
-//        @ConditionalOnMissingBean
-//        public HttpClient5ExecChainTagsProvider httpClient5ExecChainTagsProvider() {
-//            return new DefaultHttpClient5ExecChainTagsProvider();
-//        }
-//
-//        @Bean
-//        @ConditionalOnMissingBean
-//        public ActuatorHttpClient5ExecChainHandler actuatorHttpClient5ExecChainHandler(MeterRegistry meterRegistry, MetricsProperties properties, ObservationProperties observationProperties, HttpClient5ExecChainTagsProvider httpClient5ExecChainTagsProvider) {
-//            // DefaultClientRequestObservationConvention
-//            ObservationProperties.Http.Client.ClientRequests requests = observationProperties.getHttp().getClient().getRequests();
-//            AutoTimer autoTimer =  AutoTimer.ENABLED;
-//            return new ActuatorHttpClient5ExecChainHandler(meterRegistry, requests.getName(), autoTimer, httpClient5ExecChainTagsProvider);
-//        }
-
         @Bean
         @ConditionalOnMissingBean
         public ActuatorHttpClient5ExecChainHandlerObservation actuatorHttpClient5ExecChainHandler(ObservationRegistry observationRegistry, ObservationProperties observationProperties) {

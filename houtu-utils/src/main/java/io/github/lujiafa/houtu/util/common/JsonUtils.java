@@ -12,8 +12,8 @@ import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 public class JsonUtils {
 
 	// 启用忽略空值序列化"objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);"
-	static ObjectMapper nonNullObjectMapper;
-	static ObjectMapper objectMapper;
+	static volatile ObjectMapper nonNullObjectMapper;
+	static volatile ObjectMapper objectMapper;
 
 	static {
 		objectMapper = getObjectMapper(null);

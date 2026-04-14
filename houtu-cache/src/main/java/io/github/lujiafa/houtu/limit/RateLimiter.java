@@ -140,7 +140,7 @@ public class RateLimiter {
             long windowSize = this.windowSize.toMillis();
             slidingWindowRateLimiter.tryAcquireSupplier = () -> {
                 String key = String.format(KEY_PATTERN, name, System.currentTimeMillis() / windowSize);
-                long ttl = (ttl = windowSize * 3 / 1000) < 1 ? 1 : ttl; // 过期时间不能小于1秒，单位seconds
+                long ttl = Math.max(windowSize * 3 / 1000, 1); // 过期时间不能小于1秒，单位seconds
                 List keys = Collections.singletonList(key);
                 return redisTemplate.execute(SLIDING_WINDOW_SCRIPT,
                         SlidingWindowBuilder.ARGS_SERIALIZER,
@@ -179,7 +179,7 @@ public class RateLimiter {
             long windowSize = this.windowSize.toMillis();
             slidingWindowRateLimiter.tryAcquireSupplier = () -> {
                 String key = String.format(KEY_PATTERN, name);
-                long ttl = (ttl = windowSize * 3 / 1000) < 1 ? 1 : ttl; // 过期时间不能小于1秒，单位seconds
+                long ttl = Math.max(windowSize * 3 / 1000, 1); // 过期时间不能小于1秒，单位seconds
                 List keys = Collections.singletonList(key);
                 return redisTemplate.execute(SLIDING_WINDOW_SCRIPT,
                         SlidingWindowBuilder.ARGS_SERIALIZER,

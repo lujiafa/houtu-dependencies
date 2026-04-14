@@ -29,7 +29,7 @@ public class EfficientSessionRepository extends RedisSessionRepository {
     public EfficientSessionRepository(CacheManager cacheManager, RedisTemplate redisTemplate, SessionProperties sessionProperties) {
         super(sessionProperties, redisTemplate);
         Assert.notNull(cacheManager, "parameter cacheManager cannot be null.");
-        if (cacheManager.getCacheNames().parallelStream().anyMatch(name -> Objects.equals(name, sessionProperties.getEfficientCacheName()))) {
+        if (cacheManager.getCacheNames().stream().anyMatch(name -> Objects.equals(name, sessionProperties.getEfficientCacheName()))) {
             cache = cacheManager.getCache(sessionProperties.getEfficientCacheName());
         } else {
             logger.warn("EfficientSessionRepository cache is not configured, please configure cache: {}", sessionProperties.getEfficientCacheName());

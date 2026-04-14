@@ -34,7 +34,7 @@ public class RedisSessionRepository extends SessionPersistentRepository {
         String sessionCacheKey = cachePrefix + session.getId();
         this.redisTemplate.opsForValue().set(sessionCacheKey, session, expire, TimeUnit.SECONDS);
         if (!uniqueCompositeMutexMap.isEmpty()) {
-            uniqueCompositeMutexMap.entrySet().parallelStream().forEach(e -> {
+            uniqueCompositeMutexMap.entrySet().stream().forEach(e -> {
                 String cacheKey = String.format("%s:mutex:%s:%s", cachePrefix, e.getKey(), e.getValue());
                 redisTemplate.opsForValue().set(cacheKey, session.getId(), expire, TimeUnit.SECONDS);
             });
@@ -51,8 +51,8 @@ public class RedisSessionRepository extends SessionPersistentRepository {
             Map<String, String> uniqueCompositeMutexMap = uniqueCompositeMutexFunction.apply(session);
             if (uniqueCompositeMutexMap.isEmpty())
                 return session;
-            List<String> cacheKeyList = uniqueCompositeMutexMap.entrySet().parallelStream().map(e -> String.format("%s:mutex:%s:%s", cachePrefix, e.getKey(), e.getValue())).collect(Collectors.toList());
-            if (cacheKeyList.parallelStream().allMatch(k -> sessionId.equals(this.redisTemplate.opsForValue().get(k))))
+            List<String> cacheKeyList = uniqueCompositeMutexMap.entrySet().stream().map(e -> String.format("%s:mutex:%s:%s", cachePrefix, e.getKey(), e.getValue())).collect(Collectors.toList());
+            if (cacheKeyList.stream().allMatch(k -> sessionId.equals(this.redisTemplate.opsForValue().get(k))))
                 return session;
         }
         return null;
@@ -67,8 +67,8 @@ public class RedisSessionRepository extends SessionPersistentRepository {
             if (uniqueCompositeMutexMap.isEmpty())
                 return true;
             return uniqueCompositeMutexMap.entrySet()
-                    .parallelStream().map(e -> String.format("%s:mutex:%s:%s", cachePrefix, e.getKey(), e.getValue())).collect(Collectors.toList())
-                    .parallelStream()
+                    .stream().map(e -> String.format("%s:mutex:%s:%s", cachePrefix, e.getKey(), e.getValue())).collect(Collectors.toList())
+                    .stream()
                     .allMatch(k -> this.redisTemplate.expire(k, this.sessionProperties.getExpire().getSeconds(), TimeUnit.SECONDS));
         }
         return false;
@@ -79,9 +79,9 @@ public class RedisSessionRepository extends SessionPersistentRepository {
         String sessionCacheKey = this.sessionProperties.getRedisBaseKey() + session.getId();
         redisTemplate.delete(sessionCacheKey);
         uniqueCompositeMutexMap.entrySet()
-                .parallelStream()
+                .stream()
                 .map(e -> this.sessionProperties.getRedisBaseKey() + String.format(":mutex:%s:%s", e.getKey(), e.getValue())).collect(Collectors.toList())
-                .parallelStream()
+                .stream()
                 .forEach(k -> this.redisTemplate.execute(RedisScriptConstant.SESSION_DEL_MUTEX_DATA_SCRIPT, Collections.singletonList(k), session.getId()));
     }
 

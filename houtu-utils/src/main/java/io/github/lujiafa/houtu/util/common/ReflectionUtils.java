@@ -95,7 +95,7 @@ public class ReflectionUtils extends org.springframework.util.ReflectionUtils {
 			}
 		}));
 		Set<Field> targetFieldSet = ReflectionUtils.findFields(target.getClass(), includePrivate, includeStatic, includeSuper, false);
-		targetFieldSet.parallelStream().forEach(f -> {
+		targetFieldSet.stream().forEach(f -> {
 			Object val = argMap.get(f.getName());
 			if (val == null) {
 				return;
