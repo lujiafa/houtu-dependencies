@@ -35,7 +35,7 @@ public class WebSecurityAutoConfiguration {
                                                                        SessionValidator sessionValidator,
                                                                        SignatureValidator signatureValidator,
                                                                        PermissionValidator permissionValidator,
-                                                                       @Qualifier("redisTemplate") RedisTemplate<Object, Object> redisTemplate) {
+                                                                       @Qualifier("redisTemplate") RedisTemplate<String, ?> redisTemplate) {
         return new WebSecurityHandlerInterceptor(environment, sessionProperties, sessionValidator, signatureValidator, permissionValidator, redisTemplate);
     }
 

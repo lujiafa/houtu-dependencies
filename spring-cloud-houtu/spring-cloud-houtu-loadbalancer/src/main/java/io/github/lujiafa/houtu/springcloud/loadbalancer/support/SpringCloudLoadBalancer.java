@@ -17,6 +17,7 @@ import org.springframework.util.CollectionUtils;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
@@ -49,7 +50,10 @@ public class SpringCloudLoadBalancer implements ReactorServiceInstanceLoadBalanc
         this.serviceInstanceListSupplierProvider = serviceInstanceListSupplierProvider;
         this.serviceId = serviceId;
         this.clusterName = clusterName;
-        this.clusterNameFunction = clusterNameFunction == null ? serviceInstance -> serviceInstance.getMetadata().get(DEFAULT_METADATA_CLUSTER_NAME) : clusterNameFunction;
+        this.clusterNameFunction = clusterNameFunction == null ? serviceInstance -> {
+            Map<String, String> metadata = serviceInstance.getMetadata();
+            return metadata != null ? metadata.get(DEFAULT_METADATA_CLUSTER_NAME) : null;
+        } : clusterNameFunction;
         this.position = new AtomicLong((new Random()).nextInt(1000));
     }
 

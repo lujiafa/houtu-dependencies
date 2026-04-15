@@ -52,8 +52,8 @@ public class BLock implements Lock, AutoCloseable {
 	public boolean tryLock() {
 		try {
 			return rlock.tryLock(DEFAULT_LOCK_WAIT_TIME, leaseTime, unit);
-		} catch (Exception e) {
-			logger.debug("{} tryLock fail, {}", rlock.getName(), e.getMessage());
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
 			return false;
 		}
 	}
@@ -64,13 +64,8 @@ public class BLock implements Lock, AutoCloseable {
 	 * @param unit 时间单位
 	 */
 	@Override
-	public boolean tryLock(long waitTime, TimeUnit unit) {
-		try {
-			return rlock.tryLock(waitTime, leaseTime, unit);
-		} catch (InterruptedException e) {
-			logger.debug("{} tryLock fail, {}", rlock.getName(), e.getMessage());
-			return false;
-		}
+	public boolean tryLock(long waitTime, TimeUnit unit) throws InterruptedException {
+		return rlock.tryLock(waitTime, leaseTime, unit);
 	}
 
 	/**

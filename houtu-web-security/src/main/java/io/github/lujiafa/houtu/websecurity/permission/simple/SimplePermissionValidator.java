@@ -25,13 +25,13 @@ public class SimplePermissionValidator implements PermissionValidator {
 		Session session = securityContext.getSession();
 		if (requiresRole != null && requiresRole.value().length > 0) {
 			if (!verify(session.getRoles(), requiresRole.value(), requiresRole.logic())) {
-				logger.debug("权限验证|角色权限验证失败[sessionId={}, method={}]", session.getId(), securityContext.getMethod().getName());
+				logger.debug("Permission check|role verification failed [sessionId={}, method={}]", session.getId(), securityContext.getMethod().getName());
 				throw new PermissionException(ErrorCode.build(ErrorCodeConstant.ACCESS_PERMISSIONS_DENIED));
 			}
 		}
 		if (requiresPermission != null && requiresPermission.value().length > 0) {
 			if (!verify(session.getPermissions(), requiresPermission.value(), requiresPermission.logic())) {
-				logger.debug("权限验证|权限验证失败[sessionId={}, method={}]", session.getId(), securityContext.getMethod().getName());
+				logger.debug("Permission check|permission verification failed [sessionId={}, method={}]", session.getId(), securityContext.getMethod().getName());
 				throw new PermissionException(ErrorCode.build(ErrorCodeConstant.ACCESS_PERMISSIONS_DENIED));
 			}
 		}

@@ -298,7 +298,7 @@ public class WebUtils extends org.springframework.web.util.WebUtils {
                     return mediaTypes;
                 }
             } catch (Exception e) {
-                logger.debug("获取请求头accept参数失败|{}", e.getMessage());
+                logger.debug("Failed to parse request Accept header|{}", e.getMessage());
             }
         }
         return Arrays.asList(MediaType.ALL);
@@ -335,7 +335,7 @@ public class WebUtils extends org.springframework.web.util.WebUtils {
                     return mediaTypes;
                 }
             } catch (Exception e) {
-                logger.debug("获取请求头accept参数失败|{}", e.getMessage());
+                logger.debug("Failed to parse request Accept header|{}", e.getMessage());
             }
         }
         return Arrays.asList(MediaType.ALL);
@@ -473,16 +473,12 @@ public class WebUtils extends org.springframework.web.util.WebUtils {
         Assert.notNull(mediaType, "value cannot be null");
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
         response.setContentType(mediaType.toString());
-        PrintWriter writer = null;
         try {
-            writer = response.getWriter();
+            PrintWriter writer = response.getWriter();
             writer.write(value);
             writer.flush();
-        } catch (IOException e) {
-        } finally {
-            if (writer != null) {
-                writer.close();
-            }
+        } catch (IOException ignored) {
+            // response may already be committed
         }
     }
 

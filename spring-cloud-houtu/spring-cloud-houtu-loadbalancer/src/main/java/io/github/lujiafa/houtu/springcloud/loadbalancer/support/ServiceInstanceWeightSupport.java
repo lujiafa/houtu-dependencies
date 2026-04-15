@@ -48,7 +48,7 @@ public final class ServiceInstanceWeightSupport {
             weight = SpringCloudWeightFunction.DEFAULT_WEIGHT;
         }
         metadata.put(serviceInstanceType.getWeightName(), String.valueOf(weight));
-        logger.info("降级服务实例权重({}={}:{}, instanceId={})：{} -> {}", serviceInstance.getServiceId(), serviceInstance.getHost(), serviceInstance.getPort(), serviceInstance.getInstanceId(), weightStr, weight);
+        logger.info("Downgrade service instance weight ({}={}:{}, instanceId={}): {} -> {}", serviceInstance.getServiceId(), serviceInstance.getHost(), serviceInstance.getPort(), serviceInstance.getInstanceId(), weightStr, weight);
         return weight;
     }
 
@@ -69,7 +69,10 @@ public final class ServiceInstanceWeightSupport {
         if (originalWeightStr == null) {
             return SpringCloudWeightFunction.build().apply(serviceInstance);
         }
-        int originalWeight =  (originalWeight = new BigDecimal(originalWeightStr).setScale(0, RoundingMode.CEILING).intValue()) <= 0 ? SpringCloudWeightFunction.DEFAULT_WEIGHT : originalWeight;
+        int originalWeight = new BigDecimal(originalWeightStr).setScale(0, RoundingMode.CEILING).intValue();
+        if (originalWeight <= 0) {
+            originalWeight = SpringCloudWeightFunction.DEFAULT_WEIGHT;
+        }
         String weightStr = metadata.get(serviceInstanceType.getWeightName());
         BigDecimal weightBigDecimal = weightStr != null && !weightStr.isEmpty() ? new BigDecimal(weightStr) : BigDecimal.valueOf(SpringCloudWeightFunction.DEFAULT_WEIGHT);
         int weight = weightBigDecimal.multiply(UPGRADE_FACTOR).setScale(0, RoundingMode.CEILING).intValue();
@@ -78,7 +81,7 @@ public final class ServiceInstanceWeightSupport {
             metadata.remove(originalWeightKey);
         }
         metadata.put(serviceInstanceType.getWeightName(), String.valueOf(weight));
-        logger.info("恢复服务实例权重({}={}:{}, instanceId={})：{} -> {}", serviceInstance.getServiceId(), serviceInstance.getHost(), serviceInstance.getPort(), serviceInstance.getInstanceId(), weightStr, weight);
+        logger.info("Restore service instance weight ({}={}:{}, instanceId={}): {} -> {}", serviceInstance.getServiceId(), serviceInstance.getHost(), serviceInstance.getPort(), serviceInstance.getInstanceId(), weightStr, weight);
         return weight;
     }
 }

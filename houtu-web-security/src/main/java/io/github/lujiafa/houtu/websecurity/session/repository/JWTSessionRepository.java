@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.util.StringUtils;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import javax.crypto.SecretKey;
 import java.security.Key;
 import java.security.PublicKey;
@@ -53,7 +54,7 @@ public class JWTSessionRepository implements SessionRepository {
 
     @Override
     public boolean save(Session session, HttpServletResponse response) {
-        HashMap claims = new HashMap();
+        HashMap<String, String> claims = new HashMap<>();
         claims.put(ATTR_NAME_PERMISSIONS, JsonUtils.toString(session.getPermissions()));
         claims.put(ATTR_NAME_ROLES, JsonUtils.toString(session.getRoles()));
         claims.put(ATTR_NAME_ATTRS, JsonUtils.toString(session.getAttributes()));
@@ -78,21 +79,21 @@ public class JWTSessionRepository implements SessionRepository {
                 SimpleSession session = new SimpleSession(sessionId, DateUtils.toLocalDateTime(claims.getIssuedAt()));
                 String permissionsString = (String) claims.get(ATTR_NAME_PERMISSIONS);
                 if (permissionsString != null) {
-                    session.addPermissions(JsonUtils.parseObject(permissionsString, HashSet.class));
+                    session.addPermissions(JsonUtils.parseObject(permissionsString, new TypeReference<HashSet<String>>() {}));
                 }
                 String rolesString = (String) claims.get(ATTR_NAME_ROLES);
                 if (rolesString != null) {
-                    session.addRoles(JsonUtils.parseObject(rolesString, HashSet.class));
+                    session.addRoles(JsonUtils.parseObject(rolesString, new TypeReference<HashSet<String>>() {}));
                 }
                 String attributesString = (String) claims.get(ATTR_NAME_ATTRS);
                 if (attributesString != null) {
-                    session.setAttributes(JsonUtils.parseObject(attributesString, HashMap.class));
+                    session.setAttributes(JsonUtils.parseObject(attributesString, new TypeReference<HashMap<String, Object>>() {}));
                 }
                 return session;
             } catch (Exception e) {
                 // JWT解析失败，返回null
                 if (logger.isDebugEnabled()) {
-                    logger.debug("JWT解析失败|{}", e.getMessage(), e);
+                    logger.debug("JWT parsing failed|{}", e.getMessage(), e);
                 }
             }
         }

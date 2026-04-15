@@ -48,7 +48,7 @@ public class UnifiedHandlerExceptionResolver implements HandlerExceptionResolver
         if ((businessException = customizers(request, response, handler, ex)) != null
             || (businessException = resolveBusinessException(ex)) != null) {
             if (logger.isDebugEnabled()) {
-                logger.debug("业务异常|code={}, message={}|{}", businessException.getErrorCode().getCode(), businessException.getErrorCode().getMessage(), ex.getMessage());
+                logger.debug("Business exception|code={}, message={}|{}", businessException.getErrorCode().getCode(), businessException.getErrorCode().getMessage(), ex.getMessage());
             }
         } else if (ex instanceof BindException) { // 数据绑定异常
             BindingResult bindingResult = ((BindException) ex).getBindingResult();
@@ -61,7 +61,7 @@ public class UnifiedHandlerExceptionResolver implements HandlerExceptionResolver
                 tempStringBuilder.append(oe.getDefaultMessage());
             }
             if (logger.isDebugEnabled()) {
-                logger.debug("数据绑定失败|BindException|{}", tempStringBuilder);
+                logger.debug("Data binding failed|BindException|{}", tempStringBuilder);
             }
             businessException = new BusinessException(ErrorCode.build(ErrorCodeConstant.PARAMETER_ERROR, request.getLocale(), new Object[]{tempStringBuilder.toString()}), ex);
         } else {

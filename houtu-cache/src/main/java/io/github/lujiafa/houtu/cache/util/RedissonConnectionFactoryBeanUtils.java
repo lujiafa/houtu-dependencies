@@ -59,11 +59,11 @@ public class RedissonConnectionFactoryBeanUtils {
     public static RedissonClient redisson(File configFile) {
         Assert.notNull(configFile, "redisson config file can not be null.");
         Config cfg;
-        try {
-            cfg = Config.fromYAML(new FileInputStream(configFile));
+        try (FileInputStream fis = new FileInputStream(configFile)) {
+            cfg = Config.fromYAML(fis);
         } catch (IOException e) {
-            try {
-                cfg = Config.fromJSON(new FileInputStream(configFile));
+            try (FileInputStream fis = new FileInputStream(configFile)) {
+                cfg = Config.fromJSON(fis);
             } catch (IOException ie) {
                 ie.addSuppressed(e);
                 throw new IllegalArgumentException("Can't parse config", ie);

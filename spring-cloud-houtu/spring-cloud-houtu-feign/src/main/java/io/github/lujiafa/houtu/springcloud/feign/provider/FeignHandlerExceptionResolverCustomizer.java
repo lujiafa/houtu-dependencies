@@ -32,7 +32,7 @@ public class FeignHandlerExceptionResolverCustomizer implements HandlerException
         if ((e instanceof DecodeException || (e = e.getCause()) instanceof DecodeException) && e.getCause() instanceof FeignThroughBusinessException) {
             FeignThroughBusinessException throughBusinessException = (FeignThroughBusinessException) e.getCause();
             if (logger.isDebugEnabled()) {
-                logger.debug("Feign透传异常|FeignThroughBusinessException|{}|code={},message={}", ExceptionHeader.decode(throughBusinessException.getServiceName()), throughBusinessException.getErrorCode().getCode(), throughBusinessException.getErrorCode().getMessage());
+                logger.debug("Feign pass-through exception|FeignThroughBusinessException|{}|code={},message={}", ExceptionHeader.decode(throughBusinessException.getServiceName()), throughBusinessException.getErrorCode().getCode(), throughBusinessException.getErrorCode().getMessage());
             }
             response.setHeader(ExceptionHeader.RESPONSE_EXCEPTION_HEADER_NAME, throughBusinessException.getServiceName());
             return throughBusinessException;
