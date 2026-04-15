@@ -296,7 +296,7 @@ The major and minor version numbers of the project align with Spring Boot, makin
 
 | Houtu | JDK | Spring Boot | Spring Cloud | Spring Cloud Alibaba |
 |:-----:|:---:|:-----------:|:------------:|:--------------------:|
-| **3.5.2** | 17 | 3.5.11 | 2025.0.1 | 2025.0.0.0 |
+| **3.5.2** | 17 | 3.5.13 | 2025.0.2 | 2025.0.0.0 |
 | 3.5.1 | 17 | 3.5.11 | 2025.0.1 | 2025.0.0.0 |
 | 3.5.0 | 17 | 3.5.11 | 2025.0.0 ~ 2025.0.1 | 2023.0.1.2 ~ 2025.0.0.0 |
 | 3.4.0 | 17 | 3.4.13 | 2024.0.2 | 2023.0.1.2 ~ 2023.0.3.4 |
@@ -315,8 +315,8 @@ The major and minor version numbers of the project align with Spring Boot, makin
 |------------|---------|
 | Redisson | 3.51.0 |
 | Cache2k | 2.6.1.Final |
-| JJWT | 0.12.7 |
-| Bouncy Castle | 1.82 |
+| JJWT | 0.13.0 |
+| Bouncy Castle | 1.84 |
 | SpringDoc OpenAPI | 2.8.9 |
 | Apache SkyWalking | 9.5.0 |
 
