@@ -84,14 +84,17 @@ public class EmbedResponseData extends LinkedHashMap<String, Object> implements 
 		return responseData;
 	}
 
-	static ObjectMapper objectMapper;
+	static volatile ObjectMapper objectMapper;
 	static ObjectMapper getObjectMapper() {
-		if (objectMapper != null)
+		ObjectMapper mapper = objectMapper;
+		if (mapper != null) return mapper;
+		synchronized (EmbedResponseData.class) {
+			if (objectMapper != null) return objectMapper;
+			objectMapper = SpringApplicationContext.getBean(ObjectMapper.class);
+			if (objectMapper == null) {
+				objectMapper = new ObjectMapper();
+			}
 			return objectMapper;
-		objectMapper = SpringApplicationContext.getBean(ObjectMapper.class);
-		if (objectMapper == null) {
-			objectMapper = new ObjectMapper();
 		}
-		return objectMapper;
 	}
 }

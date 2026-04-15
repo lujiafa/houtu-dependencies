@@ -22,7 +22,7 @@ public abstract class AbstractServiceContext extends TimerTask implements Servic
     private final Timer timer = new Timer();
     private final ReentrantLock lock = new ReentrantLock();
 
-    protected ServiceStatus serviceState = ServiceStatus.DOWN;
+    protected volatile ServiceStatus serviceState = ServiceStatus.DOWN;
     // 服务注册器
     protected ServiceRegistry serviceRegistry;
     // 当前服务注册对象

@@ -34,16 +34,10 @@ public class SmartErrorView extends SmartView {
 		if (MediaType.TEXT_HTML.includes(mediaType)
 				|| MediaType.APPLICATION_XHTML_XML.includes(mediaType)) {
 			String responseContent = SupportDefaultErrorPageTemplate.getPage(errorCode.getMessage(), (String) request.getAttribute(WebSupportConstant.ERROR_REDIRECT_PAGE_ATTR_NAME));
-			ServletOutputStream out = response.getOutputStream();
-			try {
-				response.setContentType(mediaType.toString());
+			response.setContentType(mediaType.toString());
+			try (ServletOutputStream out = response.getOutputStream()) {
 				out.write(responseContent.getBytes(charset.name()));
 				out.flush();
-			} finally {
-				try {
-					out.close();
-				} catch (IOException ex) {
-				}
 			}
 			return;
 		}

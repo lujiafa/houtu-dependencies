@@ -15,6 +15,7 @@ import reactor.core.publisher.Flux;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 public class HintBasedServiceInstanceListSupplier extends org.springframework.cloud.loadbalancer.core.HintBasedServiceInstanceListSupplier {
 
@@ -76,12 +77,13 @@ public class HintBasedServiceInstanceListSupplier extends org.springframework.cl
     }
 
     protected List<ServiceInstance> filteredByHint(List<ServiceInstance> instances, String hint) {
-        Iterator var4 = instances.iterator();
-        List<ServiceInstance> defaultInstances = new ArrayList();
+        Iterator<ServiceInstance> var4 = instances.iterator();
+        List<ServiceInstance> defaultInstances = new ArrayList<>();
         if (!StringUtils.hasText(hint)) {
             while(var4.hasNext()) {
-                ServiceInstance serviceInstance = (ServiceInstance)var4.next();
-                String metaHint = serviceInstance.getMetadata().get(LoadBalancerConstant.METADATA_HINT_NAME);
+                ServiceInstance serviceInstance = var4.next();
+                Map<String, String> metadata = serviceInstance.getMetadata();
+                String metaHint = metadata != null ? metadata.get(LoadBalancerConstant.METADATA_HINT_NAME) : null;
                 if (!StringUtils.hasText(metaHint)) {
                     defaultInstances.add(serviceInstance);
                 }
@@ -92,10 +94,11 @@ public class HintBasedServiceInstanceListSupplier extends org.springframework.cl
             return instances;
         }
 
-        List<ServiceInstance> filteredInstances = new ArrayList();
+        List<ServiceInstance> filteredInstances = new ArrayList<>();
         while(var4.hasNext()) {
-            ServiceInstance serviceInstance = (ServiceInstance)var4.next();
-            String metaHint = serviceInstance.getMetadata().get(LoadBalancerConstant.METADATA_HINT_NAME);
+            ServiceInstance serviceInstance = var4.next();
+            Map<String, String> metadata = serviceInstance.getMetadata();
+            String metaHint = metadata != null ? metadata.get(LoadBalancerConstant.METADATA_HINT_NAME) : null;
             if (!StringUtils.hasText(metaHint)) {
                 defaultInstances.add(serviceInstance);
                 continue;

@@ -35,33 +35,31 @@ import java.io.PrintWriter;
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.ReentrantLock;
 
 public class WebSecurityHandlerInterceptor implements HandlerInterceptor, Ordered {
 
-    private static final Map<Method, SecurityAnnotation> CACHE_MAP = new java.util.HashMap<>();
+    private static final Map<Method, SecurityAnnotation> CACHE_MAP = new java.util.concurrent.ConcurrentHashMap<>();
     private static final SecurityAnnotation EMPTY_ANNOTATION_INFO = new SecurityAnnotation();
-    private static final ReentrantLock CACHE_LOCK = new ReentrantLock();
-    private static final int CACHE_MAX_SIZE = 2048;
 
     private SessionProperties sessionProperties;
     private SessionValidator sessionValidator;
     private PermissionValidator permissionValidator;
     private SignatureValidator signatureValidator;
-    private RedisTemplate redisTemplate;
+    private RedisTemplate<String, Object> redisTemplate;
     private String applicationName;
 
+    @SuppressWarnings("unchecked")
     public WebSecurityHandlerInterceptor(Environment env,
                                          SessionProperties sessionProperties,
                                          SessionValidator sessionValidator,
                                          SignatureValidator signatureValidator,
                                          PermissionValidator permissionValidator,
-                                         RedisTemplate redisTemplate) {
+                                         RedisTemplate<String, ?> redisTemplate) {
         this.sessionProperties = sessionProperties;
         this.sessionValidator = sessionValidator;
         this.permissionValidator = permissionValidator;
         this.signatureValidator = signatureValidator;
-        this.redisTemplate = redisTemplate;
+        this.redisTemplate = (RedisTemplate<String, Object>) redisTemplate;
         applicationName = env.getProperty("spring.application.name", CharConstant.HYPHEN);
     }
 
@@ -127,7 +125,8 @@ public class WebSecurityHandlerInterceptor implements HandlerInterceptor, Ordere
                         pw.write("<html><script type=\"text/javascript\">top.location.href=" + sessionProperties.getLoginUrl().trim() + "</script></html>");
                         pw.flush();
                         pw.close();
-                    } catch (IOException ie) {
+                    } catch (IOException ignored) {
+                        // response may already be committed
                     }
                     return;
                 }
@@ -177,14 +176,8 @@ public class WebSecurityHandlerInterceptor implements HandlerInterceptor, Ordere
             securityAnnotation.setCheckSign(AnnotationUtils.getAnnotationByPriorityMethod(method, CheckSign.class));
             securityAnnotation.setRequiresRole(AnnotationUtils.getAnnotationByPriorityMethod(method, RequiresRole.class));
             securityAnnotation.setRequiresPermission(AnnotationUtils.getAnnotationByPriorityMethod(method, RequiresPermission.class));
-            if (CACHE_MAP.size() <= CACHE_MAX_SIZE) {
-                if (CACHE_LOCK.tryLock()) {
-                    if (CACHE_MAP.size() <= CACHE_MAX_SIZE) {
-                        CACHE_MAP.put(method, securityAnnotation.isAnnotationsEmpty() ? EMPTY_ANNOTATION_INFO : securityAnnotation);
-                    }
-                    CACHE_LOCK.unlock();
-                }
-            }
+            CACHE_MAP.putIfAbsent(method, securityAnnotation.isAnnotationsEmpty() ? EMPTY_ANNOTATION_INFO : securityAnnotation);
+            securityAnnotation = CACHE_MAP.get(method);
         }
         securityContext.setSecurityAnnotation(securityAnnotation);
         return securityContext;

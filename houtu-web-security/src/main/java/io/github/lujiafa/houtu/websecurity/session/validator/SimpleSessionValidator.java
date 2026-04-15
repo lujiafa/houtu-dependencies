@@ -25,7 +25,7 @@ public class SimpleSessionValidator implements SessionValidator {
         Session session = SessionContext.get();
         if (session == null) {
             if (logger.isDebugEnabled()) {
-                logger.debug("会话已过期，获取会话对象失败");
+                logger.debug("Session expired, failed to retrieve session");
             }
             throw new SessionException(ErrorCode.build(ErrorCodeConstant.SESSION_EXPIRED));
         }

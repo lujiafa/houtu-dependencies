@@ -20,11 +20,12 @@ import java.util.stream.Collectors;
  */
 public class RedisSessionRepository extends SessionPersistentRepository {
 
-    protected RedisTemplate redisTemplate;
+    protected RedisTemplate<String, Object> redisTemplate;
 
-    public RedisSessionRepository(SessionProperties sessionProperties, RedisTemplate redisTemplate) {
+    @SuppressWarnings("unchecked")
+    public RedisSessionRepository(SessionProperties sessionProperties, RedisTemplate<String, ?> redisTemplate) {
         super(sessionProperties);
-        this.redisTemplate = redisTemplate;
+        this.redisTemplate = (RedisTemplate<String, Object>) redisTemplate;
     }
 
     @Override

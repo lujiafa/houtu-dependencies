@@ -45,14 +45,11 @@ public final class ZipUtils {
      * @param charset             编码方式
      * @Description:解压ZIP文件，解压到指定目录
      */
-    @SuppressWarnings("resource")
     public static void decompressZip(String zipFilePath, String targetDirectoryPath, Charset charset) throws IOException {
             charset = charset == null ? StandardCharsets.UTF_8 : charset;
             File zip = new File(zipFilePath);
             Assert.isTrue(zip.exists(), "zipFilePath is not exists");
             Assert.isTrue(zip.isFile(), "zipFilePath is not a zip file path");
-            // 创建ZipFile对象并指定编码
-            ZipFile zipFile = new ZipFile(zip, charset);
             if (StringUtils.isEmpty(targetDirectoryPath)) {
                 targetDirectoryPath = zip.getParent();
             }
@@ -62,22 +59,27 @@ public final class ZipUtils {
             } else {
                 targetDirectoryFile.mkdirs();
             }
-            Enumeration<?> entries = zipFile.entries();
-            while (entries.hasMoreElements()) {
-                ZipEntry entry = (ZipEntry) entries.nextElement();
-                File file = new File(FilePathUtils.concat(targetDirectoryPath, entry.getName()));
-                if (entry.isDirectory()) {
-                    // 若目录不存在，则创建
-                    if (!file.exists())
-                        file.mkdirs();
-                } else {
-                    File parent = file.getParentFile();
-                    // 若上级目录不存在，则创建
-                    if (!parent.exists())
-                        parent.mkdirs();
-                    try (InputStream is = zipFile.getInputStream(entry); OutputStream os = new FileOutputStream(file)) {
-                        StreamUtils.copy(is, os);
-                        os.flush();
+            try (ZipFile zipFile = new ZipFile(zip, charset)) {
+                Enumeration<?> entries = zipFile.entries();
+                while (entries.hasMoreElements()) {
+                    ZipEntry entry = (ZipEntry) entries.nextElement();
+                    File file = new File(FilePathUtils.concat(targetDirectoryPath, entry.getName()));
+                    // Zip Slip protection
+                    String canonicalDest = targetDirectoryFile.getCanonicalPath();
+                    if (!file.getCanonicalPath().startsWith(canonicalDest + File.separator)) {
+                        throw new IOException("Zip entry is outside of the target directory: " + entry.getName());
+                    }
+                    if (entry.isDirectory()) {
+                        if (!file.exists())
+                            file.mkdirs();
+                    } else {
+                        File parent = file.getParentFile();
+                        if (!parent.exists())
+                            parent.mkdirs();
+                        try (InputStream is = zipFile.getInputStream(entry); OutputStream os = new FileOutputStream(file)) {
+                            StreamUtils.copy(is, os);
+                            os.flush();
+                        }
                     }
                 }
             }
@@ -143,8 +145,10 @@ public final class ZipUtils {
         if (file.isDirectory()) {// 判断是否为目录
             zos.putNextEntry(new ZipEntry(basePath = FilePathUtils.concat(basePath == null ? CharConstant.EMPTY : basePath, file.getName(), CharConstant.SLASH)));
             File[] files = file.listFiles();
-            for (File f : files) {
-                compressZip(zos, f, basePath);
+            if (files != null) {
+                for (File f : files) {
+                    compressZip(zos, f, basePath);
+                }
             }
         } else if (file.isFile()) {
             zos.putNextEntry(new ZipEntry(basePath = FilePathUtils.concat(basePath == null ? CharConstant.EMPTY : basePath, file.getName())));

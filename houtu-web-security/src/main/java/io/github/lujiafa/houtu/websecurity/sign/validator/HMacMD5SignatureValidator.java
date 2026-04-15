@@ -33,7 +33,7 @@ public class HMacMD5SignatureValidator extends AbstractSignatureValidator {
 			}
 		} catch (Exception e) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("签名验证失败 - {}", e.getMessage(), e);
+				logger.debug("Signature verification failed - {}", e.getMessage(), e);
 			}
 			throw new SignatureException(ErrorCode.build(ErrorCodeConstant.INVALID_SIGNATURE_INFO));
 		}

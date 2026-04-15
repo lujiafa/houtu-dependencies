@@ -116,7 +116,7 @@ public class CachingStreamHttpServletRequest extends HttpServletRequestWrapper i
             StreamUtils.copy(servletInputStream, cachingOutputStream = new ByteArrayOutputStream());
             servletInputStream.close();
         } catch (Exception e) {
-            logger.error("获取请求数据异常|{}", e.getMessage(), e);
+            logger.error("Failed to read request body|{}", e.getMessage(), e);
             throw new BusinessException(ErrorCode.build(ErrorCodeConstant.DATA_LOADING_FAILED, getRequest().getLocale()), e);
         }
         return cachingOutputStream;

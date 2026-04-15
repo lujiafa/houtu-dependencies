@@ -26,7 +26,13 @@ public class StandardDecryptionPropertySource extends PropertySource<Map<String,
 
     @Override
     public Object getProperty(String name) {
-        if (!initialized) reinitialize();
+        if (!initialized) {
+            synchronized (this) {
+                if (!initialized) {
+                    reinitialize();
+                }
+            }
+        }
         return source.get(name);
     }
 
@@ -38,7 +44,7 @@ public class StandardDecryptionPropertySource extends PropertySource<Map<String,
         environment.getPropertySources().addFirst(this);
     }
 
-    public void reinitialize() {
+    public synchronized void reinitialize() {
         this.initialized = true;
         if (environment == null) return;
         Binder binder = Binder.get(environment);
@@ -46,7 +52,7 @@ public class StandardDecryptionPropertySource extends PropertySource<Map<String,
         List<String> encryptKeys = decryptProperties.getEncryptKeys();
         if (encryptKeys != null && !encryptKeys.isEmpty() && decryptProperties.getDecryptProcessorClass() != null) {
             try {
-                DecryptProcessor decryptProcessor = decryptProperties.getDecryptProcessorClass().newInstance();
+                DecryptProcessor decryptProcessor = decryptProperties.getDecryptProcessorClass().getDeclaredConstructor().newInstance();
                 encryptKeys.stream().forEach(key -> {
                     String property = environment.getProperty(key);
                     if (property != null && !property.isEmpty()) {
