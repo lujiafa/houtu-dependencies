@@ -18,7 +18,7 @@ public class EurekaServiceContext extends AbstractServiceContext {
     @Override
     protected ServiceStatus processStatus(Object statusObject) {
         if (statusObject instanceof Map<?,?>) {
-            return ServiceStatus.of(((Map) statusObject).get(STATUS_KEY_NAME));
+            return ServiceStatus.of(((Map<?, ?>) statusObject).get(STATUS_KEY_NAME));
         }
         return ServiceStatus.of(statusObject);
     }

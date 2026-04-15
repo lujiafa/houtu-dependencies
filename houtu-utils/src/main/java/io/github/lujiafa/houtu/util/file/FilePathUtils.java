@@ -40,7 +40,7 @@ public class FilePathUtils {
     public static String concat(String basePath, String... subPaths) {
         if (basePath == null
                 && (subPaths == null || subPaths.length == 0 || Arrays.stream(subPaths).allMatch(sp -> sp == null))) {
-            throw new IllegalArgumentException("参数不能同时为空");
+            throw new IllegalArgumentException("Parameters cannot all be null or empty");
         }
         final StringBuilder targetPath = new StringBuilder(StringUtils.isBlank(basePath) ? CharConstant.EMPTY : basePath.trim());
         Arrays.stream(subPaths).forEach(sp -> {

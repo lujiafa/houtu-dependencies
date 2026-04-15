@@ -20,7 +20,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Constraint(validatedBy = { XssConstraintValidator.class })
 public @interface NotXss {
 	
-	static final String DEFAULT_MESSAGE = "内容包含不安全信息";
+	static final String DEFAULT_MESSAGE = "Content contains unsafe information";
 
 	String message() default DEFAULT_MESSAGE;
 

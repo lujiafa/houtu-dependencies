@@ -68,7 +68,7 @@ public final class ByteUtils {
 			int highNibble = Character.digit(hex.charAt(2 * i), 16);
 			int lowNibble = Character.digit(hex.charAt(2 * i + 1), 16);
 			if (highNibble == -1 || lowNibble == -1) {
-				throw new IllegalArgumentException("输入的字符串包含非法字符");
+				throw new IllegalArgumentException("Input string contains illegal characters");
 			}
 			value[i] = (byte) ((highNibble << 4) + lowNibble);
 		}

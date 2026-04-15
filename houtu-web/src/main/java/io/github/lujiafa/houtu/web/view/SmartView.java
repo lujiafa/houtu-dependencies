@@ -21,7 +21,7 @@ public class SmartView implements View {
     protected Object data;
     protected Charset charset = StandardCharsets.UTF_8;
 
-    protected static ExtensionHandlerMethodReturnValueHandler returnValueHandler;
+    protected static volatile ExtensionHandlerMethodReturnValueHandler returnValueHandler;
 
     public SmartView(Object data) {
         this.data = data;

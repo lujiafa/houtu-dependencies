@@ -12,7 +12,7 @@ import reactor.core.publisher.Mono;
 import java.net.URI;
 import java.util.List;
 
-import static org.springframework.web.reactive.function.BodyInserters.fromObject;
+import static org.springframework.web.reactive.function.BodyInserters.fromValue;
 
 
 public class SimpleBlockRequestHandler implements BlockRequestHandler {
@@ -42,7 +42,7 @@ public class SimpleBlockRequestHandler implements BlockRequestHandler {
             ErrorCode errorCode = ErrorCode.build(ErrorCodeConstant.SERVER_BUSY, new Object[]{throwable.getMessage() == null ? "block" : throwable.getMessage()});
             return ServerResponse.status(HttpStatus.TOO_MANY_REQUESTS)
                     .contentType(MediaType.APPLICATION_XML)
-                    .body(fromObject(errorCode));
+                    .body(fromValue(errorCode));
         } else if (MediaType.TEXT_HTML.includes(mediaType)) {
             if (blockPage != null) {
                 return ServerResponse.temporaryRedirect(blockPage).build();
@@ -51,7 +51,7 @@ public class SimpleBlockRequestHandler implements BlockRequestHandler {
         ErrorCode errorCode = ErrorCode.build(ErrorCodeConstant.SERVER_BUSY, new Object[]{throwable.getMessage() == null ? "block" : throwable.getMessage()});
         return ServerResponse.status(HttpStatus.TOO_MANY_REQUESTS)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(fromObject(errorCode));
+                .body(fromValue(errorCode));
     }
 
 }

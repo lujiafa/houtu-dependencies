@@ -359,7 +359,7 @@ public final class RSAUtils {
         byte[] dataBytes = data.bytes();
         int keySizeBytes = keySize.getKeySize() / 8;
         if (dataBytes.length > keySizeBytes) {
-            throw new IllegalArgumentException("数据长度超过密钥长度，建议使用分段加密");
+            throw new IllegalArgumentException("Data length exceeds key length, consider using segmented encryption");
         }
         byte[] padded = new byte[keySizeBytes];
         // 使用0填充到左侧，实现左对齐的自定义填充

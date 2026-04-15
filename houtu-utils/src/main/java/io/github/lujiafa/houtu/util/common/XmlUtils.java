@@ -34,7 +34,7 @@ public class XmlUtils {
 	 */
 	public static String toXmlWithJAXB(Object obj, Charset charset) throws JAXBException {
 		if (obj == null) {
-			throw new IllegalArgumentException("parameter obj must cannot be null.");
+			throw new IllegalArgumentException("parameter obj cannot be null.");
 		}
 		JAXBContext context = JAXBContext.newInstance(obj.getClass());
 		Marshaller marshaller = context.createMarshaller();

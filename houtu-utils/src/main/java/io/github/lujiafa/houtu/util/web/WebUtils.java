@@ -387,7 +387,7 @@ public class WebUtils extends org.springframework.web.util.WebUtils {
         if (requestIp != null) {
             return requestIp.trim();
         }
-        throw new RuntimeException("获取请求IP信息失败");
+        throw new RuntimeException("Failed to retrieve request IP information");
     }
 
     /**
