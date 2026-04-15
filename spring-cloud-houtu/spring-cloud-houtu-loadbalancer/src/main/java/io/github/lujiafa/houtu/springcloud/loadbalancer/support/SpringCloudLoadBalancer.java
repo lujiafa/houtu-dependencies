@@ -80,7 +80,7 @@ public class SpringCloudLoadBalancer implements ReactorServiceInstanceLoadBalanc
         try {
             List<ServiceInstance> instancesToChoose = serviceInstances;
             if (StringUtils.isNotBlank(this.clusterName)) {
-                List<ServiceInstance> sameClusterInstances = (List) serviceInstances.stream().filter((serviceInstance) -> {
+                List<ServiceInstance> sameClusterInstances = serviceInstances.stream().filter((serviceInstance) -> {
                     return StringUtils.equals(clusterNameFunction.apply(serviceInstance), clusterName);
                 }).collect(Collectors.toList());
                 if (!CollectionUtils.isEmpty(sameClusterInstances)) {

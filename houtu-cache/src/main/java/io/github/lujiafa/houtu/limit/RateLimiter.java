@@ -63,9 +63,9 @@ public class RateLimiter {
 
 
     static String loadLuaFile(String fileName) {
-        try (InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(fileName)) {
-            Assert.notNull(inputStream, "Failed to load Lua file: " + fileName);
-            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+        InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(fileName);
+        Assert.notNull(inputStream, "Failed to load Lua file: " + fileName);
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
             StringBuilder content = new StringBuilder();
             String line;
             while ((line = reader.readLine()) != null) {
@@ -83,12 +83,12 @@ public class RateLimiter {
     public static abstract class SlidingWindowBuilder {
         static final GenericToStringSerializer<Long> ARGS_SERIALIZER = new GenericToStringSerializer<Long>(Long.class);
 
-        protected RedisTemplate<?, ?> redisTemplate;
+        protected RedisTemplate<String, ?> redisTemplate;
         protected String name = "default";
         protected int limit = 200;
         protected Duration windowSize = Duration.ofSeconds(10);
 
-        public SlidingWindowBuilder(RedisTemplate<?, ?> redisTemplate) {
+        public SlidingWindowBuilder(RedisTemplate<String, ?> redisTemplate) {
             Assert.notNull(redisTemplate, "redisTemplate must not be null");
             this.redisTemplate = redisTemplate;
         }
@@ -131,7 +131,7 @@ public class RateLimiter {
             SLIDING_WINDOW_SCRIPT.setScriptText(loadLuaFile("lua/fix-sliding-window.lua"));
         }
 
-        FixSlidingWindowBuilder(RedisTemplate<?, ?> redisTemplate) {
+        FixSlidingWindowBuilder(RedisTemplate<String, ?> redisTemplate) {
             super(redisTemplate);
         }
 
@@ -141,7 +141,7 @@ public class RateLimiter {
             slidingWindowRateLimiter.tryAcquireSupplier = () -> {
                 String key = String.format(KEY_PATTERN, name, System.currentTimeMillis() / windowSize);
                 long ttl = Math.max(windowSize * 3 / 1000, 1); // 过期时间不能小于1秒，单位seconds
-                List keys = Collections.singletonList(key);
+                List<String> keys = Collections.singletonList(key);
                 return redisTemplate.execute(SLIDING_WINDOW_SCRIPT,
                         SlidingWindowBuilder.ARGS_SERIALIZER,
                         SlidingWindowBuilder.ARGS_SERIALIZER,
@@ -170,7 +170,7 @@ public class RateLimiter {
             SLIDING_WINDOW_SCRIPT.setScriptText(loadLuaFile("lua/zset-sliding-window.lua"));
         }
 
-        RollingSlidingWindowBuilder(RedisTemplate<?, ?> redisTemplate) {
+        RollingSlidingWindowBuilder(RedisTemplate<String, ?> redisTemplate) {
             super(redisTemplate);
         }
 
@@ -180,7 +180,7 @@ public class RateLimiter {
             slidingWindowRateLimiter.tryAcquireSupplier = () -> {
                 String key = String.format(KEY_PATTERN, name);
                 long ttl = Math.max(windowSize * 3 / 1000, 1); // 过期时间不能小于1秒，单位seconds
-                List keys = Collections.singletonList(key);
+                List<String> keys = Collections.singletonList(key);
                 return redisTemplate.execute(SLIDING_WINDOW_SCRIPT,
                         SlidingWindowBuilder.ARGS_SERIALIZER,
                         RESULT_SERIALIZER,
