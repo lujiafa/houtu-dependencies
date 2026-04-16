@@ -111,7 +111,8 @@ Manage all versions uniformly via `dependencyManagement` in your project's `pom.
 
 **Distributed Lock** — concurrency control with a single annotation:
 ```java
-@Lock(prefix = "order", key = "#orderId", waitTime = 3, timeout = 10)
+// key supports: empty (auto class.method), param name ("orderId")
+@Lock(prefix = "order", key = "orderId", waitTime = 3, leaseTime = 10)
 public void processOrder(String orderId) {
     // Business logic; the framework handles locking and releasing automatically
 }
@@ -121,10 +122,8 @@ public void processOrder(String orderId) {
 ```java
 @SecurityWatch
 public interface UserMapper {
-    int insert(@SecurityParam User user);
-    
-    @SecurityWatch
-    User selectById(Long id); // Auto-decrypted on query
+    int insert(@SecurityParam User user); // Auto-encrypted on insert
+    User selectById(Long id);             // Auto-decrypted on query
 }
 ```
 
@@ -143,7 +142,7 @@ public ResponseData<Void> updateUser(UserForm form) {
 @AccessLog
 @PostMapping("/api/order")
 public ResponseData<Order> createOrder(OrderForm form) {
-    // Auto-recorded: POST|/api/order|192.168.1.1|...|createOrder|{...}|{...}|null|56ms
+    // Auto-recorded: POST|/api/order|192.168.1.1|Mozilla/5.0...|null|-|ResponseData XxController.createOrder(OrderForm)|{...}|{...}||56
 }
 ```
 
@@ -164,7 +163,7 @@ public ResponseData<Order> createOrder(OrderForm form) {
 |--------|-------------|
 | **houtu-web** | Web enhancements — auto parameter mapping (`BaseForm`/`BaseDTO`/`HashMap`), unified response (`ResponseData`), unified exception handling |
 | **houtu-web-security** | Business security — session management (JWT/Redis + L2 cache), request authentication, parameter signing, replay protection, RBAC role permissions |
-| **houtu-web-swagger** | API docs enhancement — based on SpringDoc OpenAPI, automatically maps annotation properties to Swagger documentation |
+| **houtu-web-swagger** | API docs enhancement — based on SpringDoc OpenAPI, provides a default OpenAPI configuration and Swagger UI for dev/test profiles |
 
 ### Data & Cache
 
@@ -197,9 +196,7 @@ public ResponseData<Order> createOrder(OrderForm form) {
 
 | Annotation | Module | Purpose |
 |------------|--------|---------|
-| `@Lock` | houtu-cache | Distributed lock; supports custom prefix, key expressions, wait/timeout |
-| `@ReqMonitor` | houtu-cache | Request-level performance monitoring |
-| `@RpcMonitor` | houtu-cache | RPC call performance monitoring |
+| `@Lock` | houtu-cache | Distributed lock; key supports: empty (auto `class.method`), param name (`"orderId"`); configurable waitTime/leaseTime |
 | `@CheckSession` | houtu-web-security | Validates user session validity |
 | `@CheckSign` | houtu-web-security | Request parameter signature verification |
 | `@CheckRepeatRequest` | houtu-web-security | Replay attack protection |
@@ -229,8 +226,8 @@ public ResponseData<Order> createOrder(OrderForm form) {
 
 | Property | Description | Default |
 |----------|-------------|---------|
-| `houtu.util.httpclient.pool.max-total` | Maximum total connections in pool | 80 |
-| `houtu.util.httpclient.pool.max-per-route` | Maximum connections per route | 10 |
+| `houtu.util.httpclient.pool.max-total` | Maximum total connections in pool | 200 |
+| `houtu.util.httpclient.pool.max-per-route` | Maximum connections per route | 50 |
 | `houtu.util.httpclient.request.connect-timeout` | Connection timeout (seconds) | 5 |
 | `houtu.util.httpclient.request.response-timeout` | Response timeout (seconds) | 15 |
 | `houtu.util.httpclient.proxy.hostname` | Proxy hostname | - |
@@ -244,7 +241,7 @@ public ResponseData<Order> createOrder(OrderForm form) {
 | Property | Description | Default |
 |----------|-------------|---------|
 | `houtu.web.exception-resolver` | Whether to enable the unified exception resolver | true |
-| `houtu.web.combine-form-resolver-type` | Combined parameter resolution mode (JSON / FORM) | JSON |
+| `houtu.web.combine-form-resolver-type` | Combined parameter resolution mode (JSON / NATIVE) | JSON |
 
 </details>
 
@@ -264,7 +261,7 @@ public ResponseData<Order> createOrder(OrderForm form) {
 | `houtu.web.session.redis.*` | Dedicated Redis config for sessions (falls back to default if omitted) | - |
 | `houtu.web.session.jwt-signature-key` | JWT signing key (required in JWT mode) | - |
 | `houtu.web.session.jwt-signature-verify-key` | JWT verification key | - |
-| `houtu.web.session.jwt-signature-algorithm` | JWT signing algorithm | - |
+| `houtu.web.session.jwt-signature-algorithm` | JWT signing algorithm | HS256 |
 | `houtu.web.security.enabled` | Whether to enable the security module | true |
 | `houtu.web.sign.sign-key` | HMacMD5 signature key (**required**) | - |
 
