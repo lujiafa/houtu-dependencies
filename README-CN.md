@@ -111,7 +111,8 @@
 
 **分布式锁** — 一个注解搞定并发控制：
 ```java
-@Lock(prefix = "order", key = "#orderId", waitTime = 3, timeout = 10)
+// key 支持：空值（自动 class.method）、参数名（"orderId"）、SpEL（"#orderId"、"#order.id"）
+@Lock(prefix = "order", key = "#orderId", waitTime = 3, leaseTime = 10)
 public void processOrder(String orderId) {
     // 业务逻辑，框架自动加锁/释放
 }
@@ -121,10 +122,8 @@ public void processOrder(String orderId) {
 ```java
 @SecurityWatch
 public interface UserMapper {
-    int insert(@SecurityParam User user);
-    
-    @SecurityWatch
-    User selectById(Long id); // 查询自动解密
+    int insert(@SecurityParam User user); // 插入自动加密
+    User selectById(Long id);             // 查询自动解密
 }
 ```
 
@@ -143,7 +142,7 @@ public ResponseData<Void> updateUser(UserForm form) {
 @AccessLog
 @PostMapping("/api/order")
 public ResponseData<Order> createOrder(OrderForm form) {
-    // 自动记录: POST|/api/order|192.168.1.1|...|createOrder|{...}|{...}|null|56ms
+    // 自动记录: POST|/api/order|192.168.1.1|Mozilla/5.0...|null|-|ResponseData XxController.createOrder(OrderForm)|{...}|{...}||56
 }
 ```
 
@@ -164,7 +163,7 @@ public ResponseData<Order> createOrder(OrderForm form) {
 |------|------|
 | **houtu-web** | Web 增强 — 自动参数映射（`BaseForm`/`BaseDTO`/`HashMap`）、统一响应（`ResponseData`）、统一异常处理 |
 | **houtu-web-security** | 业务安全 — 会话管理（JWT/Redis+L2缓存）、请求鉴权、参数签名、防重放、RBAC 角色权限 |
-| **houtu-web-swagger** | 文档增强 — 基于 SpringDoc OpenAPI，自动映射注解属性到 Swagger 文档 |
+| **houtu-web-swagger** | 文档增强 — 基于 SpringDoc OpenAPI，在 dev/test 环境自动配置默认 OpenAPI 文档及 Swagger UI |
 
 ### 数据 & 缓存
 
@@ -197,7 +196,7 @@ public ResponseData<Order> createOrder(OrderForm form) {
 
 | 注解 | 所属模块 | 用途 |
 |------|---------|------|
-| `@Lock` | houtu-cache | 分布式锁，支持自定义前缀、key 表达式、等待/超时时间 |
+| `@Lock` | houtu-cache | 分布式锁；key 支持：空值（自动 `class.method`）、参数名（`"orderId"`）、SpEL（`"#orderId"`）；可配置 waitTime/leaseTime |
 | `@CheckSession` | houtu-web-security | 校验用户会话有效性 |
 | `@CheckSign` | houtu-web-security | 请求参数签名验证 |
 | `@CheckRepeatRequest` | houtu-web-security | 防重放攻击 |
@@ -227,8 +226,8 @@ public ResponseData<Order> createOrder(OrderForm form) {
 
 | 配置项 | 说明 | 默认值 |
 |--------|------|--------|
-| `houtu.util.httpclient.pool.max-total` | 连接池最大连接数 | 80 |
-| `houtu.util.httpclient.pool.max-per-route` | 每路由最大连接数 | 10 |
+| `houtu.util.httpclient.pool.max-total` | 连接池最大连接数 | 200 |
+| `houtu.util.httpclient.pool.max-per-route` | 每路由最大连接数 | 50 |
 | `houtu.util.httpclient.request.connect-timeout` | 连接超时（秒） | 5 |
 | `houtu.util.httpclient.request.response-timeout` | 响应超时（秒） | 15 |
 | `houtu.util.httpclient.proxy.hostname` | 代理主机名 | - |
@@ -242,7 +241,7 @@ public ResponseData<Order> createOrder(OrderForm form) {
 | 配置项 | 说明 | 默认值 |
 |--------|------|--------|
 | `houtu.web.exception-resolver` | 是否启用统一异常解析器 | true |
-| `houtu.web.combine-form-resolver-type` | 复合参数解析方式（JSON / FORM） | JSON |
+| `houtu.web.combine-form-resolver-type` | 复合参数解析方式（JSON / NATIVE） | JSON |
 
 </details>
 
@@ -262,7 +261,7 @@ public ResponseData<Order> createOrder(OrderForm form) {
 | `houtu.web.session.redis.*` | 会话专用 Redis 配置（可缺省用默认） | - |
 | `houtu.web.session.jwt-signature-key` | JWT 签名密钥（JWT 模式必填） | - |
 | `houtu.web.session.jwt-signature-verify-key` | JWT 验签密钥 | - |
-| `houtu.web.session.jwt-signature-algorithm` | JWT 签名算法 | - |
+| `houtu.web.session.jwt-signature-algorithm` | JWT 签名算法 | HS256 |
 | `houtu.web.security.enabled` | 是否启用安全模块 | true |
 | `houtu.web.sign.sign-key` | HMacMD5 验签密钥（**必填**） | - |
 
