@@ -8,7 +8,7 @@ import java.util.function.LongSupplier;
  * @email lujiafayx@163.com
  * @date 2026年5月15日
  * @Description 经典 Twitter Snowflake 算法实现，纯 Java 不依赖 Spring。
- * <p>位结构：1 符号位 | 41 时间戳(ms) | workerBits | sequenceBits（默认 workerBits + sequenceBits 共计 10+12）。
+ * <p>位结构：1 符号位 | timestamp 时间戳(ms) | workerBits | sequenceBits（默认 timestamp + workerBits + sequenceBits 共计 41+10+12）。
  * <p>线程安全：所有状态变更均在 {@code synchronized(lock)} 内完成。
  * <p>用法示例：
  * <pre>{@code
