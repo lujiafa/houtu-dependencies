@@ -49,15 +49,15 @@ public final class Snowflake {
 
     public Snowflake(SnowflakeOptions options) {
         this.epoch = options.epoch();
-        this.workerId = options.workerId();
+        this.workerId = (options.datacenterId() << options.workerBits()) | options.workerId();
         this.maxBackwardMs = options.maxBackwardMs();
         this.clock = options.clock();
 
+        int workerBits = options.datacenterBits() + options.workerBits();
         int sequenceBits = options.sequenceBits();
-        int workerBits = options.workerBits();
 
-        this.sequenceMask = (1L << sequenceBits) - 1L;
         this.workerShift = sequenceBits;
+        this.sequenceMask = (1L << sequenceBits) - 1L;
         this.timestampShift = sequenceBits + workerBits;
     }
 
