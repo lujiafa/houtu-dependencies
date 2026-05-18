@@ -77,7 +77,7 @@
         <dependency>
             <groupId>io.github.lujiafa</groupId>
             <artifactId>houtu-dependencies</artifactId>
-            <version>3.5.2</version>
+            <version>3.5.3</version>
             <type>pom</type>
             <scope>import</scope>
         </dependency>
