@@ -144,7 +144,7 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
     }
 
     public static LocalDateTime toLocalDateTime(Date date) {
-        return toLocalDateTime(date, null);
+        return toLocalDateTime(date, (ZoneId) null);
     }
 
     /**
