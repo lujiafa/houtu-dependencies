@@ -17,11 +17,29 @@
     </properties>
 
     <dependencies>
-        <!-- 测试依赖 -->
         <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter</artifactId>
-            <scope>test</scope>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <!-- Redis-based WorkerIdProvider 可选依赖：仅当使用 io.github.lujiafa.houtu.id.workid.redis 包时需要 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <!-- DB-based WorkerIdProvider 可选依赖：仅当使用 io.github.lujiafa.houtu.id.workid.db 包时需要 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-jdbc</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>io.github.lujiafa</groupId>
+            <artifactId>houtu-utils</artifactId>
         </dependency>
     </dependencies>
 
