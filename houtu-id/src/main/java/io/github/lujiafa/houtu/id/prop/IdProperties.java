@@ -26,7 +26,7 @@ public class IdProperties {
         public enum Type { redis, db }
 
         /** 选择 WorkerIdProvider 后端；{@code null} 表示禁用 AutoConfiguration。 */
-        private Type type;
+        private Type type = Type.redis;
         /** workerId 位宽，默认 5（与 {@code SnowflakeOptions.DEFAULT_WORKER_BITS} 一致）。 */
         private int workerBits = 5;
 
