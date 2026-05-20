@@ -47,8 +47,8 @@
 │  ┌─── Web & 安全 ────┐  ┌─── 数据 & 缓存 ────┐  ┌─── 可观测性 ─────────┐  │
 │  │ houtu-web         │  │ houtu-cache        │  │ houtu-access-log     │  │
 │  │ houtu-web-security│  │ houtu-data-security│  │ houtu-actuator       │  │
-│  │ houtu-web-swagger │  └────────────────────┘  └──────────────────────┘  │
-│  └───────────────────┘                                                     │
+│  │ houtu-web-swagger │  │ houtu-id           │  └──────────────────────┘  │
+│  └───────────────────┘  └────────────────────┘                             │
 │                                                                             │
 │  ┌─── Spring Cloud 增强 ─────────────────────────────────────────────────┐  │
 │  │ spring-cloud-houtu-loadbalancer  (灰度/权重/自动降级)                  │  │
@@ -77,7 +77,7 @@
         <dependency>
             <groupId>io.github.lujiafa</groupId>
             <artifactId>houtu-dependencies</artifactId>
-            <version>2.7.3</version>
+            <version>2.7.4</version>
             <type>pom</type>
             <scope>import</scope>
         </dependency>
@@ -171,6 +171,7 @@ public ResponseData<Order> createOrder(OrderForm form) {
 |------|------|
 | **houtu-cache** | 缓存增强 — 多 RedisTemplate 实例化、Redisson/Jedis/Lettuce 扩展、`@Lock` 分布式锁、限流 |
 | **houtu-data-security** | 数据安全 — `@SecurityWatch` + `@SecurityParam` 持久化层自动加解密（默认 SM4），适用于身份证、手机号等敏感数据 |
+| **houtu-id** | 分布式 ID — Snowflake 生成器；基于 Redis/DB 的 `WorkerIdProvider`，租约+心跳（300s 失效/30s 心跳）；通过 `houtu.id.work-id.type` Spring Boot 自动装配 |
 
 ### 可观测性
 
@@ -277,6 +278,18 @@ public ResponseData<Order> createOrder(OrderForm form) {
 </details>
 
 <details>
+<summary><b>houtu-id</b> — 分布式 ID 配置</summary>
+
+| 配置项 | 说明 | 默认值   |
+|--------|------|-------|
+| `houtu.id.work-id.type` | WorkerIdProvider 后端：`redis` 或 `db`；不配置则禁用自动装配 | redis |
+| `houtu.id.work-id.worker-bits` | workerId 位宽，槽位数 = `2^workerBits` | 5     |
+
+> Identity（心跳所有权标识）自动解析：IP 取首个非 loopback 的 IPv4 网卡地址，端口取 `server.port`；任一缺失则 identity 退化为 UUID。
+
+</details>
+
+<details>
 <summary><b>spring-cloud-houtu-loadbalancer</b> — 负载均衡配置</summary>
 
 | 配置项 | 说明 | 默认值 |
@@ -293,12 +306,13 @@ public ResponseData<Order> createOrder(OrderForm form) {
 
 项目主版本号和次版本号与 Spring Boot 对应，便于快速定位兼容版本。
 
-| Houtu | JDK | Spring Boot | Spring Cloud | Spring Cloud Alibaba |
-|:-----:|:---:|:-----------:|:------------:|:--------------------:|
-| **2.7.3** | 1.8 | 2.7.18 | 2021.0.9 | 2021.0.6.2 |
-| 2.7.2 | 1.8 | 2.7.18 | 2021.0.9 | 2021.0.6.2 |
-| 2.7.1 | 1.8 | 2.7.18 | 2021.0.9 | 2021.0.6.2 |
-| 2.7.0 | 1.8 | 2.7.18 | 2021.0.9 | 2021.0.6.2 |
+|   Houtu   | JDK | Spring Boot | Spring Cloud | Spring Cloud Alibaba |
+|:---------:|:---:|:-----------:|:------------:|:--------------------:|
+| **2.7.4** | 1.8 |   2.7.18    | 2021.0.9 | 2021.0.6.2 |
+|   2.7.3   | 1.8 |   2.7.18    | 2021.0.9 | 2021.0.6.2 |
+|   2.7.2   | 1.8 |   2.7.18    | 2021.0.9 | 2021.0.6.2 |
+|   2.7.1   | 1.8 |   2.7.18    | 2021.0.9 | 2021.0.6.2 |
+|   2.7.0   | 1.8 |   2.7.18    | 2021.0.9 | 2021.0.6.2 |
 
 ---
 

@@ -47,8 +47,8 @@ In enterprise Java projects, teams often need to integrate numerous component fr
 │  ┌─── Web & Security ──────┐  ┌─── Data & Cache ────────┐  ┌─── Observability ──────────┐  │
 │  │ houtu-web               │  │ houtu-cache             │  │ houtu-access-log           │  │
 │  │ houtu-web-security      │  │ houtu-data-security     │  │ houtu-actuator             │  │
-│  │ houtu-web-swagger       │  └─────────────────────────┘  └────────────────────────────┘  │
-│  └─────────────────────────┘                                                               │
+│  │ houtu-web-swagger       │  │ houtu-id                │  └────────────────────────────┘  │
+│  └─────────────────────────┘  └─────────────────────────┘                                  │
 │                                                                                             │
 │  ┌─── Spring Cloud Enhancements ───────────────────────────────────────────────────────┐   │
 │  │ spring-cloud-houtu-loadbalancer  (canary/weighted/auto-failover)                    │   │
@@ -77,7 +77,7 @@ Manage all versions uniformly via `dependencyManagement` in your project's `pom.
         <dependency>
             <groupId>io.github.lujiafa</groupId>
             <artifactId>houtu-dependencies</artifactId>
-            <version>2.7.3</version>
+            <version>2.7.4</version>
             <type>pom</type>
             <scope>import</scope>
         </dependency>
@@ -171,6 +171,7 @@ public ResponseData<Order> createOrder(OrderForm form) {
 |--------|-------------|
 | **houtu-cache** | Cache enhancements — multiple RedisTemplate instances, Redisson/Jedis/Lettuce extensions, `@Lock` distributed lock, rate limiting |
 | **houtu-data-security** | Data security — `@SecurityWatch` + `@SecurityParam` auto encryption/decryption at the persistence layer (default SM4), for sensitive data like ID numbers and phone numbers |
+| **houtu-id** | Distributed ID — Snowflake generator; Redis/DB-backed `WorkerIdProvider` with lease + heartbeat (300s TTL / 30s heartbeat); Spring Boot AutoConfiguration via `houtu.id.work-id.type` |
 
 ### Observability
 
@@ -277,6 +278,18 @@ public ResponseData<Order> createOrder(OrderForm form) {
 </details>
 
 <details>
+<summary><b>houtu-id</b> — Distributed ID Configuration</summary>
+
+| Property | Description | Default |
+|----------|-------------|---------|
+| `houtu.id.work-id.type` | WorkerIdProvider backend: `redis` or `db`; leave unset to disable AutoConfiguration | redis   |
+| `houtu.id.work-id.worker-bits` | Worker id bit width; pool size = `2^workerBits` | 5       |
+
+> Identity (used for heartbeat ownership) is auto-resolved: IP from the first non-loopback IPv4 NIC, port from `server.port`. When either is unavailable the identity falls back to a UUID.
+
+</details>
+
+<details>
 <summary><b>spring-cloud-houtu-loadbalancer</b> — Load Balancer Configuration</summary>
 
 | Property | Description | Default |
@@ -293,12 +306,13 @@ public ResponseData<Order> createOrder(OrderForm form) {
 
 The major and minor version numbers of the project align with Spring Boot, making it easy to locate compatible versions.
 
-| Houtu | JDK | Spring Boot | Spring Cloud | Spring Cloud Alibaba |
-|:-----:|:---:|:-----------:|:------------:|:--------------------:|
-| **2.7.3** | 1.8 | 2.7.18 | 2021.0.9 | 2021.0.6.2 |
-| 2.7.2 | 1.8 | 2.7.18 | 2021.0.9 | 2021.0.6.2 |
-| 2.7.1 | 1.8 | 2.7.18 | 2021.0.9 | 2021.0.6.2 |
-| 2.7.0 | 1.8 | 2.7.18 | 2021.0.9 | 2021.0.6.2 |
+|   Houtu   | JDK | Spring Boot | Spring Cloud | Spring Cloud Alibaba |
+|:---------:|:---:|:-----------:|:------------:|:--------------------:|
+| **2.7.4** | 1.8 |   2.7.18    | 2021.0.9 | 2021.0.6.2 |
+|   2.7.3   | 1.8 |   2.7.18    | 2021.0.9 | 2021.0.6.2 |
+|   2.7.2   | 1.8 |   2.7.18    | 2021.0.9 | 2021.0.6.2 |
+|   2.7.1   | 1.8 |   2.7.18    | 2021.0.9 | 2021.0.6.2 |
+|   2.7.0   | 1.8 |   2.7.18    | 2021.0.9 | 2021.0.6.2 |
 
 ---
 

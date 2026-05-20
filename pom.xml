@@ -6,7 +6,7 @@
 
     <groupId>io.github.lujiafa</groupId>
     <artifactId>houtu-dependencies</artifactId>
-    <version>2.7.3</version>
+    <version>2.7.4</version>
     <packaging>pom</packaging>
 
     <name>Houtu Dependencies</name>
@@ -46,12 +46,13 @@
         <cache2k.version>2.6.1.Final</cache2k.version>
         <io.jsonwebtoken.version>0.12.7</io.jsonwebtoken.version>
         <redisson.version>3.51.0</redisson.version>
-        <io.github.lujiafa.houtu.version>2.7.3</io.github.lujiafa.houtu.version>
+        <io.github.lujiafa.houtu.version>2.7.4</io.github.lujiafa.houtu.version>
     </properties>
 
     <modules>
         <module>houtu-core</module>
         <module>houtu-utils</module>
+        <module>houtu-id</module>
         <module>houtu-cache</module>
         <module>houtu-access-log</module>
         <module>houtu-web</module>
@@ -116,6 +117,11 @@
             <dependency>
                 <groupId>io.github.lujiafa</groupId>
                 <artifactId>houtu-web-swagger</artifactId>
+                <version>${io.github.lujiafa.houtu.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.lujiafa</groupId>
+                <artifactId>houtu-id</artifactId>
                 <version>${io.github.lujiafa.houtu.version}</version>
             </dependency>
 

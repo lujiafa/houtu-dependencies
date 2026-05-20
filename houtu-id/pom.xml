@@ -9,8 +9,8 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>houtu-cache</artifactId>
-    <name>houtu-cache</name>
+    <artifactId>houtu-id</artifactId>
+    <name>houtu-id</name>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -19,43 +19,24 @@
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-aop</artifactId>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>org.redisson</groupId>
-            <artifactId>redisson</artifactId>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>org.redisson</groupId>
-            <artifactId>redisson-spring-data-27</artifactId>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>redis.clients</groupId>
-            <artifactId>jedis</artifactId>
+            <artifactId>spring-boot-starter</artifactId>
             <optional>true</optional>
         </dependency>
 
+        <!-- Redis-based WorkerIdProvider 可选依赖：仅当使用 io.github.lujiafa.houtu.id.workid.redis 包时需要 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-redis</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-pool2</artifactId>
+            <optional>true</optional>
         </dependency>
 
+        <!-- DB-based WorkerIdProvider 可选依赖：仅当使用 io.github.lujiafa.houtu.id.workid.db 包时需要 -->
         <dependency>
-            <groupId>io.github.lujiafa</groupId>
-            <artifactId>houtu-core</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-jdbc</artifactId>
+            <optional>true</optional>
         </dependency>
+
         <dependency>
             <groupId>io.github.lujiafa</groupId>
             <artifactId>houtu-utils</artifactId>
