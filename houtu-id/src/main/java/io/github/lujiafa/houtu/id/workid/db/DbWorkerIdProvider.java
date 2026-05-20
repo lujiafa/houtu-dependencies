@@ -120,16 +120,16 @@ public class DbWorkerIdProvider implements WorkerIdProvider, DisposableBean, Aut
             return new Lease(reused);
         }
 
+        // 从 0 起从小到大线性扫描，与 RedisWorkerIdProvider 行为一致：
+        // 优先填补低位空槽，避免优雅关闭后的低位行被跳过、池空间稀疏。
         long expireBefore = System.currentTimeMillis() - EXPIRE_MS;
-        long start = Math.floorMod((long) identity.hashCode(), maxWorkerId + 1L);
-        for (long offset = 0; offset <= maxWorkerId; offset++) {
-            long candidate = (start + offset) % (maxWorkerId + 1L);
-            if (tryOccupyExisting(key, candidate, expireBefore)) {
-                log.info("workerId occupied: key={}, workerId={}, identity={}", key, candidate, identity);
-                return new Lease(candidate);
-            }
+        for (long candidate = 0; candidate <= maxWorkerId; candidate++) {
             if (tryInsertNew(key, candidate)) {
                 log.info("workerId inserted: key={}, workerId={}, identity={}", key, candidate, identity);
+                return new Lease(candidate);
+            }
+            if (tryOccupyExisting(key, candidate, expireBefore)) {
+                log.info("workerId occupied: key={}, workerId={}, identity={}", key, candidate, identity);
                 return new Lease(candidate);
             }
         }
@@ -200,7 +200,21 @@ public class DbWorkerIdProvider implements WorkerIdProvider, DisposableBean, Aut
                                 "WHERE biz_code=? AND datacenter_id=? AND worker_id=? " +
                                 "  AND identity=?",
                         now, key.bizCode, key.datacenterId, lease.workerId, identity);
-                if (rows != 1) {
+                if (rows == 1) {
+                    log.debug("heartbeat ok: key={} workerId={} identity={}",
+                            key, lease.workerId, identity);
+                    return;
+                }
+                // 续约失败：可能是 (a) 行被 DELETE / 主从切换后新主无此行；
+                // (b) 行被另一 identity 持有但 last_heartbeat 已过期；
+                // (c) 行被活跃 identity 真正占用。前两种属于"失效或为空"，尝试在同一
+                // workerId 上重新占用以避免 workerId 漂移。
+                long expireBefore = now - EXPIRE_MS;
+                if (tryOccupyExisting(key, lease.workerId, expireBefore)
+                        || tryInsertNew(key, lease.workerId)) {
+                    log.info("heartbeat re-occupied: key={} workerId={} identity={}",
+                            key, lease.workerId, identity);
+                } else {
                     log.error("heartbeat lost ownership: key={} workerId={} identity={}",
                             key, lease.workerId, identity);
                 }

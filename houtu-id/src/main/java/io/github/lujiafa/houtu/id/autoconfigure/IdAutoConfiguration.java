@@ -15,6 +15,8 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
+import org.springframework.boot.autoconfigure.jdbc.JdbcTemplateAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -38,7 +40,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
  * <p>identity 端口动态取自 {@code server.port}；ip 由 Provider 自动解析本机网卡（loopback 时降级 UUID）。
  * 用户自定义同类型 bean 时通过 {@link ConditionalOnMissingBean} 让位。
  */
-@AutoConfiguration
+@AutoConfiguration(after = { RedisAutoConfiguration.class, JdbcTemplateAutoConfiguration.class })
 @EnableConfigurationProperties(IdProperties.class)
 public class IdAutoConfiguration {
 
@@ -47,7 +49,7 @@ public class IdAutoConfiguration {
     @Configuration(proxyBeanMethods = false)
     @ConditionalOnClass(StringRedisTemplate.class)
     @ConditionalOnBean(StringRedisTemplate.class)
-    @ConditionalOnProperty(prefix = "houtu.id.work-id", name = "type", havingValue = "redis")
+    @ConditionalOnProperty(prefix = "houtu.id.work-id", name = "type", havingValue = "redis", matchIfMissing = true)
     static class RedisWorkerIdConfiguration {
 
         @Bean

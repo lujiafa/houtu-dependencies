@@ -73,13 +73,22 @@ public class RedisWorkerIdProvider implements WorkerIdProvider, DisposableBean, 
             "return -1\n";
 
     /**
-     * 心跳续约：仅在 key 持有者为本进程时 EXPIRE 刷新 TTL。
-     * KEYS[1] = key；ARGV: identity, ttl；返回 1（成功）/0（不持有或 key 不在）。
+     * 心跳续约 / 空槽自愈：
+     * (1) GET == identity → EXPIRE 续期，返回 1（正常）；
+     * (2) GET == nil（key 过期或主从切换后未同步） → SET NX EX 在同一 wid 上重占用，成功返回 2；
+     * (3) 其他 identity 活跃持有 → 返回 0（lost ownership）。
+     * KEYS[1] = key；ARGV: identity, ttl；返回 1/2/0。
      */
     static final String HEARTBEAT_LUA =
-            "if redis.call('GET', KEYS[1]) == ARGV[1] then\n" +
+            "local v = redis.call('GET', KEYS[1])\n" +
+            "if v == ARGV[1] then\n" +
             "  redis.call('EXPIRE', KEYS[1], tonumber(ARGV[2]))\n" +
             "  return 1\n" +
+            "elseif v == false then\n" +
+            "  if redis.call('SET', KEYS[1], ARGV[1], 'EX', tonumber(ARGV[2]), 'NX') then\n" +
+            "    return 2\n" +
+            "  end\n" +
+            "  return 0\n" +
             "end\n" +
             "return 0\n";
 
@@ -210,7 +219,15 @@ public class RedisWorkerIdProvider implements WorkerIdProvider, DisposableBean, 
                         Collections.singletonList(k),
                         identity,
                         Long.toString(TTL_SECONDS));
-                if (res == null || res != 1L) {
+                long code = (res == null) ? 0L : res;
+                if (code == 1L) {
+                    log.debug("heartbeat ok: key={} workerId={} identity={}",
+                            key, lease.workerId, identity);
+                } else if (code == 2L) {
+                    // 空槽自愈：长时间网络抖动后 TTL 过期，或主从切换后新主无此 key
+                    log.info("heartbeat re-occupied empty slot: key={} workerId={} identity={}",
+                            key, lease.workerId, identity);
+                } else {
                     log.error("heartbeat lost ownership: key={} workerId={} identity={}",
                             key, lease.workerId, identity);
                 }
