@@ -9,6 +9,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -39,6 +40,8 @@ public class DbWorkerIdProvider implements WorkerIdProvider, DisposableBean, Aut
     static final long EXPIRE_MS = 300_000L;
     /** 30s 心跳一次。 */
     static final long HEARTBEAT_INTERVAL_MS = 30_000L;
+    /** 分页扫描已存在槽位时每页拉取行数。控制单次结果集大小，规避中间件 / max_allowed_packet 限制。 */
+    private static final int SCAN_PAGE_SIZE = 500;
 
     private final JdbcTemplate jdbcTemplate;
     /** 默认 workerBits；调用方未在 {@link #getWorkerId(String, long, Long)} 显式传入时使用。 */
@@ -114,24 +117,65 @@ public class DbWorkerIdProvider implements WorkerIdProvider, DisposableBean, Aut
     }
 
     private Lease acquireLease(TupleKey key, long maxWorkerId) {
+        // 1) 同 identity 历史行存在 → 直接续期复用
         Long reused = tryReuse(key);
         if (reused != null) {
             log.info("workerId reused: key={}, workerId={}, identity={}", key, reused, identity);
             return new Lease(reused);
         }
 
-        // 从 0 起从小到大线性扫描，与 RedisWorkerIdProvider 行为一致：
-        // 优先填补低位空槽，避免优雅关闭后的低位行被跳过、池空间稀疏。
+        // 2) 流式分页扫描：按 worker_id ASC 拉一页（PAGE=SCAN_PAGE_SIZE），边载边判——
+        //    发现首个 gap（空槽）或过期行即立即尝试 INSERT / UPDATE-CAS 占用，成功则 return；
+        //    不需要任何内存查找表，自然实现"早退"——绝大多数请求只加载 1 页。
+        //    并发抢先（INSERT 唯一键冲突 / UPDATE rows=0）→ advance expected → 继续判定。
         long expireBefore = System.currentTimeMillis() - EXPIRE_MS;
-        for (long candidate = 0; candidate <= maxWorkerId; candidate++) {
-            if (tryInsertNew(key, candidate)) {
-                log.info("workerId inserted: key={}, workerId={}, identity={}", key, candidate, identity);
-                return new Lease(candidate);
+        int expected = 0;   // 下一个待判定的 worker_id
+        int cursor = 0;     // 下一页 SELECT 的起始 worker_id
+        while (cursor <= maxWorkerId) {
+            List<long[]> page = jdbcTemplate.query(
+                    "SELECT worker_id, last_heartbeat FROM snowflake_worker " +
+                            "WHERE biz_code=? AND datacenter_id=? AND worker_id>=? " +
+                            "ORDER BY worker_id ASC LIMIT ?",
+                    (rs, n) -> new long[]{rs.getInt(1), rs.getLong(2)},
+                    key.bizCode, key.datacenterId, cursor, SCAN_PAGE_SIZE);
+
+            for (long[] row : page) {
+                int wid = (int) row[0];
+                // expected..wid-1 之间是 gap：从最小起尝试 INSERT，发现可用即早退
+                while (expected < wid && expected <= maxWorkerId) {
+                    if (tryInsertNew(key, expected)) {
+                        log.info("workerId inserted: key={}, workerId={}, identity={}",
+                                key, expected, identity);
+                        return new Lease(expected);
+                    }
+                    expected++;
+                }
+                if (expected > maxWorkerId) {
+                    break;
+                }
+                // expected == wid：已存在行，过期则尝试抢占
+                if (row[1] < expireBefore
+                        && tryOccupyExisting(key, expected, expireBefore)) {
+                    log.info("workerId occupied: key={}, workerId={}, identity={}",
+                            key, expected, identity);
+                    return new Lease(expected);
+                }
+                expected++;
             }
-            if (tryOccupyExisting(key, candidate, expireBefore)) {
-                log.info("workerId occupied: key={}, workerId={}, identity={}", key, candidate, identity);
-                return new Lease(candidate);
+
+            // 末页（返回 < PAGE_SIZE）或 expected 已越界 → 处理尾部空槽后退出
+            if (page.size() < SCAN_PAGE_SIZE || expected > maxWorkerId) {
+                while (expected <= maxWorkerId) {
+                    if (tryInsertNew(key, expected)) {
+                        log.info("workerId inserted: key={}, workerId={}, identity={}",
+                                key, expected, identity);
+                        return new Lease(expected);
+                    }
+                    expected++;
+                }
+                break;
             }
+            cursor = expected; // 下一页从未处理位置继续
         }
         throw new IllegalStateException(
                 "workerId pool exhausted for " + key + ", max=" + maxWorkerId);
@@ -146,10 +190,19 @@ public class DbWorkerIdProvider implements WorkerIdProvider, DisposableBean, Aut
         if (rows == 0) {
             return null;
         }
-        return jdbcTemplate.queryForObject(
+        // 用 query() + List 替代 queryForObject()，避免 UPDATE 与 SELECT 之间行被外部 DELETE
+        // 或主从切换瞬间副本回退时抛 EmptyResultDataAccessException。极小概率事件 → 降级到扫描分支。
+        List<Long> workerIds = jdbcTemplate.query(
                 "SELECT worker_id FROM snowflake_worker " +
                         "WHERE biz_code=? AND datacenter_id=? AND identity=?",
-                Long.class, key.bizCode, key.datacenterId, identity);
+                (rs, n) -> rs.getLong(1),
+                key.bizCode, key.datacenterId, identity);
+        if (workerIds.isEmpty()) {
+            log.warn("tryReuse: row vanished between UPDATE and SELECT, falling back to scan. key={} identity={}",
+                    key, identity);
+            return null;
+        }
+        return workerIds.get(0);
     }
 
     private boolean tryOccupyExisting(TupleKey key, long candidate, long expireBefore) {
