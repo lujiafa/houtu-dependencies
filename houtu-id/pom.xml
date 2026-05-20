@@ -9,40 +9,37 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>houtu-web-security</artifactId>
-    <name>houtu-web-security</name>
+    <artifactId>houtu-id</artifactId>
+    <name>houtu-id</name>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
 
     <dependencies>
         <dependency>
-            <groupId>org.redisson</groupId>
-            <artifactId>redisson</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
             <optional>true</optional>
         </dependency>
-        <!-- Cache2k -->
+
+        <!-- Redis-based WorkerIdProvider 可选依赖：仅当使用 io.github.lujiafa.houtu.id.workid.redis 包时需要 -->
         <dependency>
-            <groupId>org.cache2k</groupId>
-            <artifactId>cache2k-api</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
             <optional>true</optional>
         </dependency>
+
+        <!-- DB-based WorkerIdProvider 可选依赖：仅当使用 io.github.lujiafa.houtu.id.workid.db 包时需要 -->
         <dependency>
-            <groupId>org.cache2k</groupId>
-            <artifactId>cache2k-spring</artifactId>
-            <optional>true</optional>
-        </dependency>
-        <!-- jwt -->
-        <dependency>
-            <groupId>io.jsonwebtoken</groupId>
-            <artifactId>jjwt-api</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-jdbc</artifactId>
             <optional>true</optional>
         </dependency>
 
         <dependency>
             <groupId>io.github.lujiafa</groupId>
-            <artifactId>houtu-cache</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.github.lujiafa</groupId>
-            <artifactId>houtu-web</artifactId>
+            <artifactId>houtu-utils</artifactId>
         </dependency>
     </dependencies>
 

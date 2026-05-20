@@ -1,0 +1,31 @@
+{
+	"properties": [
+		{
+			"name": "houtu.id.work-id.type",
+			"type": "io.github.lujiafa.houtu.id.prop.IdProperties$WorkId$Type",
+			"description": "WorkerIdProvider backend type. Defaults to redis; explicitly set to db to switch backend.",
+			"defaultValue": "redis"
+		},
+		{
+			"name": "houtu.id.work-id.worker-bits",
+			"type": "java.lang.Integer",
+			"description": "Bit width of workerId; pool capacity is (1 << workerBits). Default 5, aligned with SnowflakeOptions.DEFAULT_WORKER_BITS.",
+			"defaultValue": 5
+		}
+	],
+	"hints": [
+		{
+			"name": "houtu.id.work-id.type",
+			"values": [
+				{
+					"value": "redis",
+					"description": "Use Redis as the WorkerId allocation backend (RedisWorkerIdProvider). Requires a StringRedisTemplate bean on the classpath."
+				},
+				{
+					"value": "db",
+					"description": "Use a relational database as the WorkerId allocation backend (DbWorkerIdProvider). Requires a JdbcTemplate bean and the snowflake_worker table (see workid/db/example-ddl.sql)."
+				}
+			]
+		}
+	]
+}

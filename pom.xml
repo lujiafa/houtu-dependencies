@@ -6,7 +6,7 @@
 
     <groupId>io.github.lujiafa</groupId>
     <artifactId>houtu-dependencies</artifactId>
-    <version>3.5.2</version>
+    <version>3.5.3</version>
     <packaging>pom</packaging>
 
     <name>Houtu Dependencies</name>
@@ -42,17 +42,18 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <skipTests>true</skipTests>
-        <spring-boot-starter-parent.version>3.5.13</spring-boot-starter-parent.version>
+        <spring-boot-starter-parent.version>3.5.14</spring-boot-starter-parent.version>
         <jakarta.xml.bind-api.version>4.0.2</jakarta.xml.bind-api.version>
         <cache2k.version>2.6.1.Final</cache2k.version>
         <io.jsonwebtoken.version>0.13.0</io.jsonwebtoken.version>
         <redisson.version>3.51.0</redisson.version>
-        <io.github.lujiafa.houtu.version>3.5.2</io.github.lujiafa.houtu.version>
+        <io.github.lujiafa.houtu.version>3.5.3</io.github.lujiafa.houtu.version>
     </properties>
 
     <modules>
         <module>houtu-core</module>
         <module>houtu-utils</module>
+        <module>houtu-id</module>
         <module>houtu-cache</module>
         <module>houtu-access-log</module>
         <module>houtu-web</module>
@@ -117,6 +118,11 @@
             <dependency>
                 <groupId>io.github.lujiafa</groupId>
                 <artifactId>houtu-web-swagger</artifactId>
+                <version>${io.github.lujiafa.houtu.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.lujiafa</groupId>
+                <artifactId>houtu-id</artifactId>
                 <version>${io.github.lujiafa.houtu.version}</version>
             </dependency>
 
