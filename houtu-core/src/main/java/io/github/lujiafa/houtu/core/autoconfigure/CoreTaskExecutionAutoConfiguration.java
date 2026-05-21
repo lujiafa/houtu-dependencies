@@ -5,11 +5,11 @@ import io.github.lujiafa.houtu.core.concurrent.TransferTaskSchedulerBuilder;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.task.TaskExecutionAutoConfiguration;
 import org.springframework.boot.autoconfigure.task.TaskExecutionProperties;
+import org.springframework.boot.autoconfigure.task.TaskSchedulingAutoConfiguration;
 import org.springframework.boot.autoconfigure.task.TaskSchedulingProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.task.TaskExecutorBuilder;
@@ -17,18 +17,16 @@ import org.springframework.boot.task.TaskExecutorCustomizer;
 import org.springframework.boot.task.TaskSchedulerBuilder;
 import org.springframework.boot.task.TaskSchedulerCustomizer;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.core.task.TaskDecorator;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
-import java.util.concurrent.ExecutorService;
 import java.util.stream.Stream;
 
 
 @AutoConfiguration
 @EnableConfigurationProperties({TaskExecutionProperties.class, TaskSchedulingProperties.class})
-@AutoConfigureBefore(TaskExecutionAutoConfiguration.class)
+@AutoConfigureBefore(value = {TaskExecutionAutoConfiguration.class, TaskSchedulingAutoConfiguration.class})
 public class CoreTaskExecutionAutoConfiguration {
 
     @Bean
@@ -65,14 +63,6 @@ public class CoreTaskExecutionAutoConfiguration {
         builder = builder.threadNamePrefix(properties.getThreadNamePrefix());
         builder = builder.customizers(threadPoolTaskSchedulerCustomizers);
         return builder;
-    }
-
-    @Lazy
-    @Bean
-    @ConditionalOnMissingBean(ExecutorService.class)
-    @ConditionalOnBean({ThreadPoolTaskExecutor.class})
-    public ExecutorService executorService(ThreadPoolTaskExecutor taskExecutor) {
-        return taskExecutor.getThreadPoolExecutor();
     }
 
 }
