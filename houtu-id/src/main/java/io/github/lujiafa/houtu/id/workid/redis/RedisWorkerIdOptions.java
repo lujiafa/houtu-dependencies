@@ -17,7 +17,7 @@ public final class RedisWorkerIdOptions {
 
     private final String ip;
     private final Integer port;
-    private final int workerBits;
+    private final Integer workerBits;
     private final String keyPrefix;
 
     private RedisWorkerIdOptions(Builder b) {
@@ -29,7 +29,7 @@ public final class RedisWorkerIdOptions {
 
     public String ip() { return ip; }
     public Integer port() { return port; }
-    public int workerBits() { return workerBits; }
+    public Integer workerBits() { return workerBits; }
     public String keyPrefix() { return keyPrefix; }
 
     public static Builder builder() {
@@ -39,7 +39,7 @@ public final class RedisWorkerIdOptions {
     public static final class Builder {
         private String ip;
         private Integer port;
-        private int workerBits;
+        private Integer workerBits;
         private String keyPrefix = DEFAULT_KEY_PREFIX;
 
         public Builder ip(String ip) {
@@ -64,7 +64,7 @@ public final class RedisWorkerIdOptions {
         }
 
         public RedisWorkerIdOptions build() {
-            if (workerBits <= 0) {
+            if (workerBits != null && workerBits <= 0) {
                 throw new IllegalStateException(
                         "workerBits must be set and > 0, got " + workerBits);
             }

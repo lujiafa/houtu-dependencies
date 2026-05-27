@@ -15,7 +15,7 @@ import java.util.function.LongSupplier;
  * Snowflake snowflake = new Snowflake(
  *     SnowflakeOptions.builder()
  *         .workerId(103L)                    // 单一 10bit workerId
- *         .build());                          // 默认 epoch=2025-01-01Z, 容忍 &le; 200ms 时钟回拨
+ *         .build());                          // 默认 epoch=2026-01-01Z, 容忍 &le; 200ms 时钟回拨
  *
  * // 习惯 (dc, wk) 写法的便利重载：
  * Snowflake s2 = new Snowflake(
@@ -69,7 +69,7 @@ public final class Snowflake {
             long now = clock.getAsLong();
 
             // 时钟回拨处理：
-            //  - maxBackwardMs == 0（默认严格模式）：任何回拨直接抛 RuntimeException
+            //  - maxBackwardMs == 0：任何回拨直接抛 RuntimeException
             //  - maxBackwardMs > 0：回拨在阈值内则 park 等待时钟追上，超过阈值仍抛异常
             if (now < lastTimestamp) {
                 do {

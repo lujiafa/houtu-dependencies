@@ -1,5 +1,7 @@
 package io.github.lujiafa.houtu.id.workid;
 
+import io.github.lujiafa.houtu.id.snowflake.SnowflakeOptions;
+
 /**
  * @author Jon
  * @email lujiafayx@163.com
@@ -18,11 +20,6 @@ package io.github.lujiafa.houtu.id.workid;
 public interface WorkerIdProvider{
 
     /**
-     * 默认 datacenterId 数据中心标识
-     */
-    long DEFAULT_DATACENTER_ID = 0L;
-
-    /**
      * 在指定业务码下，为指定数据中心获取 workerId。
      * <ul>
      *   <li>同一服务器服务 (hostname, appName, bizCode, datacenterId) 重复调用返回同一个 workerId（幂等）。</li>
@@ -34,7 +31,7 @@ public interface WorkerIdProvider{
      * @param workerBits workerId 位数
      * @return workerId
      */
-    long getWorkerId(String bizCode, long datacenterId, Long workerBits);
+    long getWorkerId(String bizCode, long datacenterId, Integer workerBits);
 
     default long getWorkerId(String bizCode, long datacenterId) {
         return getWorkerId(bizCode, datacenterId, null);
@@ -46,8 +43,8 @@ public interface WorkerIdProvider{
      * @param bizCode 业务码（首位参数，命名空间根）
      * @param workerBits workerId 位数
      */
-    default long getWorkerId(String bizCode, Long workerBits) {
-        return getWorkerId(bizCode, DEFAULT_DATACENTER_ID, workerBits);
+    default long getWorkerId(String bizCode, Integer workerBits) {
+        return getWorkerId(bizCode, SnowflakeOptions.DEFAULT_DATACENTER_ID, workerBits);
     }
 
     /**
@@ -56,7 +53,7 @@ public interface WorkerIdProvider{
      * @param bizCode 业务码（首位参数，命名空间根）
      */
     default long getWorkerId(String bizCode) {
-        return getWorkerId(bizCode, DEFAULT_DATACENTER_ID, null);
+        return getWorkerId(bizCode, SnowflakeOptions.DEFAULT_DATACENTER_ID, null);
     }
 
 

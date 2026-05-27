@@ -15,7 +15,7 @@ public final class DbWorkerIdOptions {
 
     private final String ip;
     private final Integer port;
-    private final int workerBits;
+    private final Integer workerBits;
 
     private DbWorkerIdOptions(Builder b) {
         this.ip = b.ip;
@@ -25,7 +25,7 @@ public final class DbWorkerIdOptions {
 
     public String ip() { return ip; }
     public Integer port() { return port; }
-    public int workerBits() { return workerBits; }
+    public Integer workerBits() { return workerBits; }
 
     public static Builder builder() {
         return new Builder();
@@ -34,7 +34,7 @@ public final class DbWorkerIdOptions {
     public static final class Builder {
         private String ip;
         private Integer port;
-        private int workerBits;
+        private Integer workerBits;
 
         public Builder ip(String ip) {
             this.ip = ip;
@@ -53,7 +53,7 @@ public final class DbWorkerIdOptions {
         }
 
         public DbWorkerIdOptions build() {
-            if (workerBits <= 0) {
+            if (workerBits != null && workerBits <= 0) {
                 throw new IllegalStateException(
                         "workerBits must be set and > 0, got " + workerBits);
             }

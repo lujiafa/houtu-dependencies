@@ -44,8 +44,8 @@ public class DbWorkerIdProvider implements WorkerIdProvider, DisposableBean, Aut
     private static final int SCAN_PAGE_SIZE = 500;
 
     private final JdbcTemplate jdbcTemplate;
-    /** 默认 workerBits；调用方未在 {@link #getWorkerId(String, long, Long)} 显式传入时使用。 */
-    private final int workerBits;
+    /** 默认 workerBits；调用方未在 {@link #getWorkerId(String, long, Integer)} 显式传入时使用。 */
+    private final Integer workerBits;
     private final String identity;
     private final ScheduledExecutorService executor;
     private final ConcurrentHashMap<TupleKey, Lease> leases = new ConcurrentHashMap<>();
@@ -97,7 +97,7 @@ public class DbWorkerIdProvider implements WorkerIdProvider, DisposableBean, Aut
      * 全局一致性。
      */
     @Override
-    public long getWorkerId(String bizCode, long datacenterId, Long workerBits) {
+    public long getWorkerId(String bizCode, long datacenterId, Integer workerBits) {
         if (closed) {
             throw new IllegalStateException("provider already closed");
         }
@@ -107,11 +107,17 @@ public class DbWorkerIdProvider implements WorkerIdProvider, DisposableBean, Aut
         if (datacenterId < 0) {
             throw new IllegalArgumentException("datacenterId must be >= 0");
         }
-        if (workerBits != null && workerBits <= 0) {
-            throw new IllegalArgumentException("workerBits must be > 0 when provided, got " + workerBits);
+        long maxWorkerId;
+        if (workerBits != null) {
+            if (workerBits <= 0) {
+                throw new IllegalArgumentException("workerBits must be > 0 when provided, got " + workerBits);
+            }
+            maxWorkerId = (1L << workerBits) - 1L;
+        } else if (this.workerBits != null) {
+            maxWorkerId = (1L << this.workerBits) - 1L;
+        } else {
+            throw new IllegalStateException("workerBits must be set");
         }
-        long bits = (workerBits != null) ? workerBits : this.workerBits;
-        long maxWorkerId = (1L << bits) - 1L;
         TupleKey key = new TupleKey(bizCode, datacenterId);
         return leases.computeIfAbsent(key, k -> acquireLease(k, maxWorkerId)).workerId;
     }
