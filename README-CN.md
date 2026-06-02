@@ -171,7 +171,7 @@ public ResponseData<Order> createOrder(OrderForm form) {
 |------|------|
 | **houtu-cache** | 缓存增强 — 多 RedisTemplate 实例化、Redisson/Jedis/Lettuce 扩展、`@Lock` 分布式锁、限流 |
 | **houtu-data-security** | 数据安全 — `@SecurityWatch` + `@SecurityParam` 持久化层自动加解密（默认 SM4），适用于身份证、手机号等敏感数据 |
-| **houtu-id** | 分布式 ID — Snowflake 生成器；基于 Redis/DB 的 `WorkerIdProvider`，租约+心跳（300s 失效/30s 心跳）；通过 `houtu.id.work-id.type` Spring Boot 自动装配 |
+| **houtu-id** | 分布式 ID — Snowflake 与 SnowflakeX（秒级时间戳 + 可选 custom 段）生成器；基于 Redis/DB 的 `WorkerIdProvider`，租约+心跳（300s 失效/30s 心跳）；通过 `houtu.id.work-id.type` Spring Boot 自动装配 |
 
 ### 可观测性
 
@@ -286,6 +286,12 @@ public ResponseData<Order> createOrder(OrderForm form) {
 | `houtu.id.work-id.worker-bits` | workerId 位宽，槽位数 = `2^workerBits` | 5     |
 
 > Identity（心跳所有权标识）自动解析：IP 取首个非 loopback 的 IPv4 网卡地址，端口取 `server.port`；任一缺失则 identity 退化为 UUID。
+>
+> **ID 生成器**（纯 Java，均复用上述 `WorkerIdProvider` 分配 workerId）：
+> - **Snowflake**（`io.github.lujiafa.houtu.id.snowflake`）：经典布局 `1 符号 + 41 时间戳(ms) + 10 机器位 + 12 序列`，低 22 位可调。
+> - **SnowflakeX**（`io.github.lujiafa.houtu.id.snowflakex`）：扩展版，布局 `1 符号 + 31 时间戳(秒) + machine + custom + sequence`；默认 `machine=10、custom=0、seq=22`（占满低 32 位，单节点约 2²² ≈ 419 万/秒，寿命约 68 年）。支持每次生成时传入 **`custom` 段**（`snowflakeX.next(custom)`，默认关闭，`customBits(N)` 开启，三段之和 ≤ 32），可把业务标识（如商户号用于分库分表）直接埋入 ID；毫秒精度处理时钟回拨。
+>
+> 两者均由代码构造（`SnowflakeXOptions` / `SnowflakeOptions`，非 Spring 自动装配），反解分别用 `SnowflakeXIds` / `SnowflakeIds`。
 
 </details>
 
