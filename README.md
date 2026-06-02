@@ -171,7 +171,7 @@ public ResponseData<Order> createOrder(OrderForm form) {
 |--------|-------------|
 | **houtu-cache** | Cache enhancements — multiple RedisTemplate instances, Redisson/Jedis/Lettuce extensions, `@Lock` distributed lock, rate limiting |
 | **houtu-data-security** | Data security — `@SecurityWatch` + `@SecurityParam` auto encryption/decryption at the persistence layer (default SM4), for sensitive data like ID numbers and phone numbers |
-| **houtu-id** | Distributed ID — Snowflake generator; Redis/DB-backed `WorkerIdProvider` with lease + heartbeat (300s TTL / 30s heartbeat); Spring Boot AutoConfiguration via `houtu.id.work-id.type` |
+| **houtu-id** | Distributed ID — Snowflake & SnowflakeX (seconds-based timestamp + optional custom segment) generators; Redis/DB-backed `WorkerIdProvider` with lease + heartbeat (300s TTL / 30s heartbeat); Spring Boot AutoConfiguration via `houtu.id.work-id.type` |
 
 ### Observability
 
@@ -286,6 +286,12 @@ public ResponseData<Order> createOrder(OrderForm form) {
 | `houtu.id.work-id.worker-bits` | Worker id bit width; pool size = `2^workerBits` | 5       |
 
 > Identity (used for heartbeat ownership) is auto-resolved: IP from the first non-loopback IPv4 NIC, port from `server.port`. When either is unavailable the identity falls back to a UUID.
+>
+> **ID generators** (pure Java, both reuse the `WorkerIdProvider` above for workerId allocation):
+> - **Snowflake** (`io.github.lujiafa.houtu.id.snowflake`): classic layout `1 sign + 41 timestamp(ms) + 10 machine + 12 sequence`, lower 22 bits configurable.
+> - **SnowflakeX** (`io.github.lujiafa.houtu.id.snowflakex`): extended variant, layout `1 sign + 31 timestamp(seconds) + machine + custom + sequence`; defaults `machine=10, custom=0, seq=22` (fills the low 32 bits, ~2²² ≈ 4.19M IDs/s per node, ~68-year lifespan). Adds a per-call **`custom` segment** (`snowflakeX.next(custom)`, off by default, enable via `customBits(N)`, with `machine+custom+seq ≤ 32`) to embed a business key (e.g. merchant id for sharding) directly into the ID; clock rollback handled at millisecond precision.
+>
+> Both are constructed in code (`SnowflakeXOptions` / `SnowflakeOptions`, not Spring-autoconfigured); decode via `SnowflakeXIds` / `SnowflakeIds` respectively.
 
 </details>
 
