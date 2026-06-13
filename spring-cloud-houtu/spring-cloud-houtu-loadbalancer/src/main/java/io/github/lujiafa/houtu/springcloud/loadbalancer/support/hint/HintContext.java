@@ -35,7 +35,7 @@ public final class HintContext {
         THREAD_LOCAL.remove();
     }
 
-    static class InnerHintData {
+    public static class InnerHintData {
         /** 代码级自定义预期HINT **/
         private String hint;
         /** 请求链路透传预期HINT数据 **/
