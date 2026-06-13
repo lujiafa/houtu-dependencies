@@ -1,8 +1,9 @@
-package io.github.lujiafa.houtu.springcloud.loadbalancer.support.hint;
+package io.github.lujiafa.houtu.springcloud.loadbalancer.support.hint.clients;
 
 import io.github.lujiafa.houtu.springcloud.loadbalancer.constant.LoadBalancerConstant;
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
+import io.github.lujiafa.houtu.springcloud.loadbalancer.support.hint.HintContext;
 
 public class HintFeignInterceptor implements RequestInterceptor {
 

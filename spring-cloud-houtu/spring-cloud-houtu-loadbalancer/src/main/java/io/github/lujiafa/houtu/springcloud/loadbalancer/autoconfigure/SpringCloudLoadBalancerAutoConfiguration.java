@@ -1,14 +1,14 @@
 package io.github.lujiafa.houtu.springcloud.loadbalancer.autoconfigure;
 
 
+import feign.Feign;
 import io.github.lujiafa.houtu.springcloud.loadbalancer.prop.SpringCloudLoadBalancerProperties;
 import io.github.lujiafa.houtu.springcloud.loadbalancer.support.SpringCloudLoadBalancerClientConfiguration;
 import io.github.lujiafa.houtu.springcloud.loadbalancer.support.condition.EnabledHintCondition;
-import io.github.lujiafa.houtu.springcloud.loadbalancer.support.hint.HintFeignInterceptor;
+import io.github.lujiafa.houtu.springcloud.loadbalancer.support.hint.clients.HintFeignInterceptor;
 import io.github.lujiafa.houtu.springcloud.loadbalancer.support.hint.HintGatewayWebFilter;
 import io.github.lujiafa.houtu.springcloud.loadbalancer.support.hint.HintRequestHandlerInterceptor;
 import io.github.lujiafa.houtu.springcloud.loadbalancer.support.hint.HintWebFilter;
-import feign.Feign;
 import jakarta.servlet.Servlet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
