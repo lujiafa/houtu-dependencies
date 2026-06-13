@@ -1,16 +1,17 @@
 package io.github.lujiafa.houtu.springcloud.feign.autoconfigure;
 
+import feign.Feign;
+import feign.codec.Decoder;
 import io.github.lujiafa.houtu.springcloud.feign.consumer.FeignDelegateDecoder;
 import io.github.lujiafa.houtu.springcloud.feign.consumer.loadbalancer.ExtensionDefaultFeignLoadBalancerConfiguration;
 import io.github.lujiafa.houtu.springcloud.feign.consumer.loadbalancer.ExtensionHttpClient5FeignLoadBalancerConfiguration;
 import io.github.lujiafa.houtu.springcloud.feign.consumer.loadbalancer.ExtensionOkHttpFeignLoadBalancerConfiguration;
 import io.github.lujiafa.houtu.util.autoconfigure.UtilsAutoConfiguration;
-import feign.Feign;
-import feign.codec.Decoder;
 import io.github.lujiafa.houtu.web.handler.UnifiedHandlerExceptionResolver;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
@@ -18,6 +19,7 @@ import org.springframework.cloud.client.loadbalancer.LoadBalancerAutoConfigurati
 import org.springframework.cloud.loadbalancer.config.BlockingLoadBalancerClientAutoConfiguration;
 import org.springframework.cloud.openfeign.FeignAutoConfiguration;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.cloud.openfeign.FeignClientFactory;
 import org.springframework.cloud.openfeign.loadbalancer.FeignLoadBalancerAutoConfiguration;
 import org.springframework.cloud.openfeign.support.HttpMessageConverterCustomizer;
 import org.springframework.cloud.openfeign.support.ResponseEntityDecoder;
@@ -30,6 +32,7 @@ import org.springframework.context.annotation.Import;
         after = {UtilsAutoConfiguration.class, BlockingLoadBalancerClientAutoConfiguration.class, LoadBalancerAutoConfiguration.class}
 )
 @ConditionalOnClass({Feign.class, FeignClient.class})
+@ConditionalOnBean(FeignClientFactory.class)
 @Import({ExtensionOkHttpFeignLoadBalancerConfiguration.class, ExtensionHttpClient5FeignLoadBalancerConfiguration.class, ExtensionDefaultFeignLoadBalancerConfiguration.class})
 public class FeignConsumerAutoConfiguration {
 
