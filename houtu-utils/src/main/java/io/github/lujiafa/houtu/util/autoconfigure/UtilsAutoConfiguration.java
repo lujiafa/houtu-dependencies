@@ -1,7 +1,5 @@
 package io.github.lujiafa.houtu.util.autoconfigure;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.lujiafa.houtu.util.common.JsonUtils;
 import io.github.lujiafa.houtu.util.http.HttpClients;
 import io.github.lujiafa.houtu.util.prop.HttpClientProperties;
 import org.slf4j.Logger;
@@ -21,8 +19,9 @@ import org.apache.hc.core5.http.ssl.TLS;
 import org.apache.hc.core5.ssl.SSLContexts;
 import org.apache.hc.core5.util.TimeValue;
 import org.apache.hc.core5.util.Timeout;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.BeanFactoryUtils;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -121,13 +120,6 @@ public class UtilsAutoConfiguration {
     @Scope(value = "singleton")
     public HttpClients httpClients(CloseableHttpClient httpClient) {
         return new HttpClients(httpClient);
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    @Scope(value = "singleton")
-    public JsonUtils jsonUtils(ObjectProvider<ObjectMapper> objectMapperObjectProvider) {
-        return new JsonUtils(objectMapperObjectProvider);
     }
 
     LayeredConnectionSocketFactory httpsSSLConnectionSocketFactory(Boolean disableSslValidation) {
