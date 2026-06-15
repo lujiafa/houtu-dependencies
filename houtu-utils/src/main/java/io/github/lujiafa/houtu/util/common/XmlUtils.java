@@ -64,12 +64,7 @@ public class XmlUtils {
 	 */
 	public static String toXml(Object obj, Charset charset) {
 		Assert.notNull(obj, "parameter obj cannot be null.");
-		Map<String, String> tmap = null;
-		if (obj instanceof Map) {
-			tmap = MapUtils.toStringMap((Map) obj);
-		} else {
-			tmap = IntrospectorUtils.toStringMap(obj);
-		}
+		Map<String, String> tmap = MapUtils.toStringMap(obj);
 		return toXml(tmap, charset);
 	}
 	

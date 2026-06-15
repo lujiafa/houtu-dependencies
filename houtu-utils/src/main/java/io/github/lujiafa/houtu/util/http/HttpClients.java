@@ -1,8 +1,8 @@
 package io.github.lujiafa.houtu.util.http;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import io.github.lujiafa.houtu.util.common.IntrospectorUtils;
 import io.github.lujiafa.houtu.util.common.JsonUtils;
+import io.github.lujiafa.houtu.util.common.MapUtils;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
@@ -218,7 +218,7 @@ public class HttpClients {
         }
 
         public RequestConfig headers(Object headers) {
-            this.headers = IntrospectorUtils.toMap(headers);
+            this.headers = MapUtils.toMap(headers);
             return this;
         }
 
@@ -236,7 +236,7 @@ public class HttpClients {
         }
 
         public RequestConfig params(Object params) {
-            this.params = IntrospectorUtils.toMap(params);
+            this.params = MapUtils.toMap(params);
             return this;
         }
 
@@ -300,7 +300,7 @@ public class HttpClients {
         }
 
         public MultipartConfig params(Object params) {
-            this.params = IntrospectorUtils.toMap(params);
+            this.params = MapUtils.toMap(params);
             return this;
         }
 
