@@ -1,5 +1,6 @@
 package io.github.lujiafa.houtu.websecurity.session.repository;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import io.github.lujiafa.houtu.util.common.CodeUtils;
 import io.github.lujiafa.houtu.util.common.CodecData;
 import io.github.lujiafa.houtu.util.common.DateUtils;
@@ -13,7 +14,8 @@ import io.github.lujiafa.houtu.websecurity.session.simple.SimpleSession;
 import io.github.lujiafa.houtu.websecurity.session.type.JWTSignatureAlgorithm;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.*;
+import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SecureDigestAlgorithm;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
@@ -21,7 +23,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.util.StringUtils;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import javax.crypto.SecretKey;
 import java.security.Key;
 import java.security.PublicKey;
