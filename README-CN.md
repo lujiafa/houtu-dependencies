@@ -312,7 +312,7 @@ public ResponseData<Order> createOrder(OrderForm form) {
 
 | 配置项 | 说明 | 默认值 |
 |--------|------|--------|
-| `houtu.feign.exception-source-trace` | 异常响应头是否输出服务追踪信息（当前为来源服务名，未来可扩展为整条调用链路；关闭时使用占位值） | false |
+| `houtu.feign.exception-source-trace` | 异常响应头是否输出来源服务名（关闭时使用占位值） | false |
 
 </details>
 
