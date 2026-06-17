@@ -26,7 +26,7 @@ public class FeignHandlerExceptionResolverCustomizer implements HandlerException
     private String sourceExceptionServiceName;
 
     /**
-     * 是否在异常响应头中输出服务追踪信息；关闭时使用 {@link FeignConstant#RESPONSE_EXCEPTION_HEADER_DEFAULT_VALUE} 占位。
+     * 是否在异常响应头中输出来源服务名；关闭时使用 {@link FeignConstant#RESPONSE_EXCEPTION_HEADER_DEFAULT_VALUE} 占位。
      */
     private final boolean exceptionSourceTrace;
 

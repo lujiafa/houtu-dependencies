@@ -312,7 +312,7 @@ public ResponseData<Order> createOrder(OrderForm form) {
 
 | Property | Description | Default |
 |----------|-------------|---------|
-| `houtu.feign.exception-source-trace` | Whether to write service trace info (currently the source service name) into the exception response header; a placeholder is used when disabled | false |
+| `houtu.feign.exception-source-trace` | Whether to write the source service name into the exception response header; a placeholder is used when disabled | false |
 
 </details>
 
