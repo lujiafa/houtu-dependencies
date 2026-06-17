@@ -20,11 +20,4 @@ public interface WebSupportConstant {
 	 */
 	String REPEAT_STREAM_HTTP_SERVLET_REQUEST_ATTR_NAME = "::REPEAT_STREAM_HTTP_SERVLET_REQUEST::";
 
-	/**
-	 * 默认响应数据一级字段名称
-	 * （分别对应错误码、错误消息、数据体）
-	 */
-	String DEFAULT_CODE_NAME = "code";
-	String DEFAULT_MESSAGE_NAME = "msg";
-	String DEFAULT_DATA_NAME = "data";
 }

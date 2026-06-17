@@ -242,6 +242,7 @@ public ResponseData<Order> createOrder(OrderForm form) {
 | Property | Description | Default |
 |----------|-------------|---------|
 | `houtu.web.exception-resolver` | Whether to enable the unified exception resolver | true |
+| `houtu.web.exception-fallback` | Whether to wrap unknown exceptions into a unified fallback response (disable on upstream services so they propagate and are surfaced by tracing) | true |
 | `houtu.web.combine-form-resolver-type` | Combined parameter resolution mode (JSON / NATIVE) | JSON |
 
 </details>

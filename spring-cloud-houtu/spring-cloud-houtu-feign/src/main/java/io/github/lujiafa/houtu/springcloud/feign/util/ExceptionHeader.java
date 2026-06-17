@@ -7,11 +7,6 @@ import java.nio.charset.StandardCharsets;
 public final class ExceptionHeader {
 
     /**
-     * Feign Provider场景中，返回异常信息响应头标记
-     */
-    public static final String RESPONSE_EXCEPTION_HEADER_NAME = "xe-service";
-
-    /**
      * 编码异常服务名称
      * @param serviceName 服务名称【M】
      * @return 编码后的服务名称【M】

@@ -1,11 +1,11 @@
 package io.github.lujiafa.houtu.springcloud.feign.provider;
 
+import feign.codec.DecodeException;
 import io.github.lujiafa.houtu.core.context.SpringApplicationContext;
 import io.github.lujiafa.houtu.core.exception.BusinessException;
 import io.github.lujiafa.houtu.springcloud.feign.constant.FeignConstant;
 import io.github.lujiafa.houtu.springcloud.feign.util.ExceptionHeader;
 import io.github.lujiafa.houtu.web.handler.HandlerExceptionResolverCustomizer;
-import feign.codec.DecodeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -14,7 +14,6 @@ import org.springframework.core.env.Environment;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.Objects;
 
 /**
  * @date 2018年6月4日
@@ -24,7 +23,16 @@ public class FeignHandlerExceptionResolverCustomizer implements HandlerException
 
     Logger logger = LoggerFactory.getLogger(FeignHandlerExceptionResolverCustomizer.class);
 
-    private String exceptionHeader;
+    private String sourceExceptionServiceName;
+
+    /**
+     * 是否在异常响应头中输出服务追踪信息；关闭时使用 {@link FeignConstant#RESPONSE_EXCEPTION_HEADER_DEFAULT_VALUE} 占位。
+     */
+    private final boolean exceptionSourceTrace;
+
+    public FeignHandlerExceptionResolverCustomizer(boolean exceptionSourceTrace) {
+        this.exceptionSourceTrace = exceptionSourceTrace;
+    }
 
     @Override
     public BusinessException process(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
@@ -34,12 +42,11 @@ public class FeignHandlerExceptionResolverCustomizer implements HandlerException
             if (logger.isDebugEnabled()) {
                 logger.debug("Feign pass-through exception|FeignThroughBusinessException|{}|code={},message={}", ExceptionHeader.decode(throughBusinessException.getServiceName()), throughBusinessException.getErrorCode().getCode(), throughBusinessException.getErrorCode().getMessage());
             }
-            response.setHeader(ExceptionHeader.RESPONSE_EXCEPTION_HEADER_NAME, throughBusinessException.getServiceName());
+            response.setHeader(FeignConstant.RESPONSE_EXCEPTION_HEADER_NAME, throughBusinessException.getServiceName());
             return throughBusinessException;
         }
-        if (Objects.nonNull(request.getAttribute(FeignConstant.FEIGN_PROVIDER_AUTO_HANDLER_ATTR_NAME))) {
-            response.setHeader(ExceptionHeader.RESPONSE_EXCEPTION_HEADER_NAME, exceptionHeader);
-        }
+        response.setHeader(FeignConstant.RESPONSE_EXCEPTION_HEADER_NAME,
+                exceptionSourceTrace ? sourceExceptionServiceName : FeignConstant.RESPONSE_EXCEPTION_HEADER_DEFAULT_VALUE);
         return null;
     }
 
@@ -47,7 +54,7 @@ public class FeignHandlerExceptionResolverCustomizer implements HandlerException
     public void afterPropertiesSet() throws Exception {
         Environment environment = SpringApplicationContext.getBean(Environment.class);
         String applicationName = environment != null ? environment.getProperty("spring.application.name", "UNKNOWN") : "UNKNOWN";
-        exceptionHeader = ExceptionHeader.encode(applicationName);
+        sourceExceptionServiceName = ExceptionHeader.encode(applicationName);
     }
 
     @Override

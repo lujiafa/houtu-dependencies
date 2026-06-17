@@ -242,6 +242,7 @@ public ResponseData<Order> createOrder(OrderForm form) {
 | 配置项 | 说明 | 默认值 |
 |--------|------|--------|
 | `houtu.web.exception-resolver` | 是否启用统一异常解析器 | true |
+| `houtu.web.exception-fallback` | 是否对未知异常启用统一兜底（上游服务可关闭以便链路追踪发现） | true |
 | `houtu.web.combine-form-resolver-type` | 复合参数解析方式（JSON / NATIVE） | JSON |
 
 </details>
