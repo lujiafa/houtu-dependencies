@@ -1,5 +1,7 @@
 package io.github.lujiafa.houtu.web.autoconfigure;
 
+import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.JSONWriter;
 import io.github.lujiafa.houtu.web.config.WebMvcConfigurer;
 import io.github.lujiafa.houtu.web.handler.*;
 import io.github.lujiafa.houtu.web.prop.WebProperties;
@@ -27,13 +29,25 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * <p>增强参考：
+ * <ul>
+ *   <li>org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguration</li>
+ *   <li>org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport</li>
+ *   <li>org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter</li>
+ *   <li>org.springframework.boot.autoconfigure.http.HttpMessageConvertersAutoConfiguration</li>
+ * </ul>
+ *
+ * @date 2026年6月16日
+ * @Description Web 模块自动配置
+ */
 @AutoConfiguration
 @EnableConfigurationProperties(WebProperties.class)
 @Import(ValidationConfiguration.class)
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 public class WebAutoConfiguration {
 
-    private WebProperties webProperties;
+    private final WebProperties webProperties;
 
     public WebAutoConfiguration(ObjectProvider<WebProperties> webPropertiesObjectProvider) {
         this.webProperties = webPropertiesObjectProvider.getIfAvailable();
@@ -59,25 +73,38 @@ public class WebAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
+    public Fastjson2HttpMessageConverter fastjson2HttpMessageConverter(ObjectProvider<JSONReader.Context> jsonReaderContextProvider, ObjectProvider<JSONWriter.Context> jsonWriterContextProvider) {
+        JSONReader.Context jsonReaderContext = jsonReaderContextProvider.getIfUnique();
+        JSONWriter.Context jsonWriterContext = jsonWriterContextProvider.getIfUnique();
+        return new Fastjson2HttpMessageConverter(jsonReaderContext, jsonWriterContext);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
     public CombineHandlerMethodArgumentResolver defaultHandlerMethodArgumentResolver(List<HttpMessageConverter<?>> messageConverters,
                                                                                      ApplicationContext applicationContext) {
-        return new CombineHandlerMethodArgumentResolver(getMessageConverters(messageConverters), getRequestBodyAdvice(applicationContext), webProperties.getCombineFormResolverType());
+        return new CombineHandlerMethodArgumentResolver(getMessageConverters(messageConverters),
+                getRequestBodyAdvice(applicationContext),
+                webProperties.getCombineFormResolverType());
     }
 
     @Bean
     @ConditionalOnMissingBean
     public ExtensionHandlerMethodReturnValueHandler defaultHandlerMethodReturnValueHandler(List<HttpMessageConverter<?>> messageConverters,
                                                                                            ApplicationContext applicationContext) {
-        return new ExtensionHandlerMethodReturnValueHandler(getMessageConverters(messageConverters), getResponseBodyAdvice(applicationContext));
+        return new ExtensionHandlerMethodReturnValueHandler(getMessageConverters(messageConverters),
+                getResponseBodyAdvice(applicationContext));
     }
 
     @Bean
-    public WebMvcConfigurer customWebMvcConfigurer(CombineHandlerMethodArgumentResolver argumentResolver,
+    public WebMvcConfigurer webMvcConfigurer(Fastjson2HttpMessageConverter fastjson2HttpMessageConverter,
+                                                   CombineHandlerMethodArgumentResolver argumentResolver,
                                                    ExtensionHandlerMethodReturnValueHandler returnValueHandler) {
         WebMvcConfigurer configurer = new WebMvcConfigurer();
         configurer.addHandlerMethodArgumentResolver(argumentResolver);
         configurer.addReturnValueHandler(returnValueHandler);
         configurer.addHandlerInterceptor(argumentResolver);
+        configurer.addHttpMessageConverter(fastjson2HttpMessageConverter);
         return configurer;
     }
 
@@ -102,7 +129,7 @@ public class WebAutoConfiguration {
      * @param messageConverters
      * @return List<HttpMessageConverter<?>>
      */
-    private List<HttpMessageConverter<?>> getMessageConverters(List<HttpMessageConverter<?>> messageConverters) {
+    protected List<HttpMessageConverter<?>> getMessageConverters(List<HttpMessageConverter<?>> messageConverters) {
         messageConverters = messageConverters == null ? new ArrayList<>() : messageConverters;
         if (messageConverters.isEmpty()) {
             messageConverters.add(new ByteArrayHttpMessageConverter());
@@ -118,7 +145,7 @@ public class WebAutoConfiguration {
      * @param applicationContext
      * @return List<Object>
      */
-    private List<Object> getRequestBodyAdvice(ApplicationContext applicationContext) {
+    protected List<Object> getRequestBodyAdvice(ApplicationContext applicationContext) {
         List<Object> requestBodyAdvices = new ArrayList<>();
         List<ControllerAdviceBean> adviceBeans = ControllerAdviceBean.findAnnotatedBeans(applicationContext);
         List<Object> responseBodyAdviceBeans = new ArrayList<>();
@@ -139,7 +166,7 @@ public class WebAutoConfiguration {
      * @param applicationContext
      * @return List<Object>
      */
-    private List<Object> getResponseBodyAdvice(ApplicationContext applicationContext) {
+    protected List<Object> getResponseBodyAdvice(ApplicationContext applicationContext) {
         List<Object> responseBodyAdvices = new ArrayList<>();
         List<ControllerAdviceBean> adviceBeans = ControllerAdviceBean.findAnnotatedBeans(applicationContext);
         List<Object> responseBodyAdviceBeans = new ArrayList<>();
@@ -153,4 +180,6 @@ public class WebAutoConfiguration {
         responseBodyAdvices.add(new JsonViewResponseBodyAdvice());
         return responseBodyAdvices;
     }
+
+
 }

@@ -55,7 +55,7 @@ public class UnifiedHandlerExceptionResolver implements HandlerExceptionResolver
             List<ObjectError> allErrors = bindingResult.getAllErrors();
             StringBuilder tempStringBuilder = new StringBuilder();
             for (ObjectError oe : allErrors) {
-                if (tempStringBuilder.length() > 0) {
+                if (!tempStringBuilder.isEmpty()) {
                     tempStringBuilder.append(CharConstant.SEMICOLON);
                 }
                 tempStringBuilder.append(oe.getDefaultMessage());
