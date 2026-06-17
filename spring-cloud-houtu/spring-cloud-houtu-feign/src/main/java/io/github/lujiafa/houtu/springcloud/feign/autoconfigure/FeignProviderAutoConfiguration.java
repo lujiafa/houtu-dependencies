@@ -1,13 +1,11 @@
 package io.github.lujiafa.houtu.springcloud.feign.autoconfigure;
 
-import io.github.lujiafa.houtu.springcloud.feign.provider.FeignBeanPostProcessor;
+import feign.Feign;
 import io.github.lujiafa.houtu.springcloud.feign.provider.FeignHandlerExceptionResolverCustomizer;
 import io.github.lujiafa.houtu.springcloud.feign.provider.FeignRequestMappingHandlerMapping;
 import io.github.lujiafa.houtu.util.common.ReflectionUtils;
-import feign.Feign;
 import io.github.lujiafa.houtu.web.handler.UnifiedHandlerExceptionResolver;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -24,12 +22,6 @@ import java.util.List;
 @ConditionalOnClass({Feign.class})
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 public class FeignProviderAutoConfiguration {
-
-    @Bean
-    @ConditionalOnMissingBean(FeignBeanPostProcessor.class)
-    public BeanPostProcessor feignBeanPostProcessor() {
-        return new FeignBeanPostProcessor();
-    }
 
     @Bean
     @ConditionalOnBean(value = RequestMappingHandlerMapping.class, name = "requestMappingHandlerMapping")
