@@ -18,10 +18,4 @@ public @interface AutoFeign {
      */
     boolean value() default true;
 
-    /**
-     * 是否开启类似@ResponseBody能力
-     * @return true-开启 false-关闭
-     */
-    boolean responseBody() default true;
-
 }
