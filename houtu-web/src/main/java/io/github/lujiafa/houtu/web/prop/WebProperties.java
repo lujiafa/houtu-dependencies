@@ -14,6 +14,11 @@ public class WebProperties {
 	private boolean exceptionResolver = true;
 
 	/**
+	 * 是否对未知异常启用统一兜底。关闭后未知异常将向上抛出，便于上游服务通过链路追踪发现
+	 */
+	private boolean exceptionFallback = true;
+
+	/**
 	 * 启用复合参数解析是如何处理Form参数
 	 */
 	private CombineFormResolverType combineFormResolverType = CombineFormResolverType.JSON;
@@ -24,6 +29,14 @@ public class WebProperties {
 
 	public void setExceptionResolver(boolean exceptionResolver) {
 		this.exceptionResolver = exceptionResolver;
+	}
+
+	public boolean isExceptionFallback() {
+		return exceptionFallback;
+	}
+
+	public void setExceptionFallback(boolean exceptionFallback) {
+		this.exceptionFallback = exceptionFallback;
 	}
 
 	public CombineFormResolverType getCombineFormResolverType() {

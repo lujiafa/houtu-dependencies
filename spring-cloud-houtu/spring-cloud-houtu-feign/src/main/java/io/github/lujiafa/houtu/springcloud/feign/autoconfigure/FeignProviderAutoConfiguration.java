@@ -1,6 +1,7 @@
 package io.github.lujiafa.houtu.springcloud.feign.autoconfigure;
 
 import feign.Feign;
+import io.github.lujiafa.houtu.springcloud.feign.prop.FeignProperties;
 import io.github.lujiafa.houtu.springcloud.feign.provider.FeignHandlerExceptionResolverCustomizer;
 import io.github.lujiafa.houtu.springcloud.feign.provider.FeignRequestMappingHandlerMapping;
 import io.github.lujiafa.houtu.util.common.ReflectionUtils;
@@ -11,6 +12,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.util.StringValueResolver;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
@@ -19,6 +21,7 @@ import java.util.Collections;
 import java.util.List;
 
 @AutoConfiguration
+@EnableConfigurationProperties(FeignProperties.class)
 @ConditionalOnClass({Feign.class})
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 public class FeignProviderAutoConfiguration {
@@ -54,8 +57,8 @@ public class FeignProviderAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     @ConditionalOnClass(UnifiedHandlerExceptionResolver.class)
-    public FeignHandlerExceptionResolverCustomizer feignHandlerExceptionResolver() {
-        return new FeignHandlerExceptionResolverCustomizer();
+    public FeignHandlerExceptionResolverCustomizer feignHandlerExceptionResolver(FeignProperties feignProperties) {
+        return new FeignHandlerExceptionResolverCustomizer(feignProperties.isExceptionSourceTrace());
     }
 
 }

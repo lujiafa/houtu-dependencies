@@ -5,7 +5,7 @@ import io.github.lujiafa.houtu.core.exception.ErrorCode;
 
 public class FeignThroughBusinessException extends BusinessException {
 
-    private String serviceName;
+    private final String serviceName;
 
     public FeignThroughBusinessException(String serviceName, Throwable cause) {
         super(cause);
