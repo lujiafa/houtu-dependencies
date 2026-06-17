@@ -7,6 +7,12 @@
 			"defaultValue": true
 		},
 		{
+			"name": "houtu.web.exception-fallback",
+			"type": "java.lang.Boolean",
+			"description": "Whether to wrap unknown exceptions into a unified fallback response. Disable on upstream services so unknown exceptions propagate and are surfaced by tracing.",
+			"defaultValue": true
+		},
+		{
 			"name": "houtu.web.combine-form-resolver-type",
 			"type": "io.github.lujiafa.houtu.web.type.CombineFormResolverType",
 			"description": "The processing method of composite parameter resolver for Form parameters.",

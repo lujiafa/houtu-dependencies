@@ -11,7 +11,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.Ordered;
-import org.springframework.util.Assert;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
@@ -30,13 +29,19 @@ public class UnifiedHandlerExceptionResolver implements HandlerExceptionResolver
 
     protected final Logger logger = LoggerFactory.getLogger(UnifiedHandlerExceptionResolver.class);
 
-    private List<HandlerExceptionResolverCustomizer> customizers = new ArrayList<>();
+    private final List<HandlerExceptionResolverCustomizer> customizers = new ArrayList<>();
+
+    /**
+     * 是否对未知异常启用统一兜底。关闭后未知异常将向上抛出，便于上游服务通过链路追踪发现。
+     */
+    private boolean exceptionFallback = true;
 
     public UnifiedHandlerExceptionResolver() {}
 
     public UnifiedHandlerExceptionResolver(List<HandlerExceptionResolverCustomizer> customizers) {
-        Assert.notNull(customizers, "customizers must not be null");
-        this.customizers = customizers;
+        if (customizers != null && !customizers.isEmpty()) {
+            this.customizers.addAll(customizers);
+        }
     }
 
     @Override
@@ -65,6 +70,9 @@ public class UnifiedHandlerExceptionResolver implements HandlerExceptionResolver
             }
             businessException = new BusinessException(ErrorCode.build(ErrorCodeConstant.PARAMETER_ERROR, request.getLocale(), new Object[]{tempStringBuilder.toString()}), ex);
         } else {
+            if (!exceptionFallback) {
+                return null;
+            }
             logger.error(ex.getMessage(), ex);
             businessException = new BusinessException(ErrorCode.build(ErrorCodeConstant.SERVER_BUSY, request.getLocale()), ex);
         }
@@ -105,6 +113,10 @@ public class UnifiedHandlerExceptionResolver implements HandlerExceptionResolver
 
     protected ErrorCode wrapErrorCode(ErrorCode errorCode) {
         return errorCode;
+    }
+
+    public void setExceptionFallback(boolean exceptionFallback) {
+        this.exceptionFallback = exceptionFallback;
     }
 
     @Override

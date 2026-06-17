@@ -2,6 +2,7 @@ package io.github.lujiafa.houtu.springcloud.feign.consumer;
 
 import io.github.lujiafa.houtu.core.exception.ErrorCode;
 import io.github.lujiafa.houtu.core.web.BaseResponseData;
+import io.github.lujiafa.houtu.springcloud.feign.constant.FeignConstant;
 import io.github.lujiafa.houtu.springcloud.feign.provider.FeignThroughBusinessException;
 import io.github.lujiafa.houtu.springcloud.feign.util.ExceptionHeader;
 import feign.FeignException;
@@ -9,6 +10,9 @@ import feign.Response;
 import feign.Util;
 import feign.codec.DecodeException;
 import feign.codec.Decoder;
+import io.github.lujiafa.houtu.web.constant.WebSupportConstant;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 
 import java.io.IOException;
@@ -26,6 +30,8 @@ import java.util.Optional;
  * @date: 2018/7/27
  */
 public class FeignDelegateDecoder implements Decoder {
+
+    private Logger logger = LoggerFactory.getLogger(FeignDelegateDecoder.class);
 
     private final Decoder delegate;
 
@@ -54,19 +60,19 @@ public class FeignDelegateDecoder implements Decoder {
      * @throws IOException
      */
     void checkResponseException(Response response, Type type) throws IOException {
-        Collection<String> exceptionValues = response.headers().get(ExceptionHeader.RESPONSE_EXCEPTION_HEADER_NAME);
-        if (exceptionValues != null
-                && response.status() == HttpStatus.OK.value()
+        Collection<String> exceptionValues;
+        if (response.status() == HttpStatus.OK.value()
+                && ((exceptionValues = response.headers().get(FeignConstant.RESPONSE_EXCEPTION_HEADER_NAME)) != null)
                 && !exceptionValues.isEmpty()) {
-            Class<?> rawType = type instanceof Class ? (Class<?>) type
-                    : type instanceof ParameterizedType ? (Class<?>) ((ParameterizedType) type).getRawType() : null;
-            if (rawType != null && (BaseResponseData.class.isAssignableFrom(rawType)
-                    || Map.class.isAssignableFrom(rawType))) {
-                return;
+            String headerValue = exceptionValues.iterator().next();
+            try {
+                ThroughErrorCode throughErrorCode = (ThroughErrorCode) delegate.decode(response, ThroughErrorCode.class);
+                throw new FeignThroughBusinessException(headerValue, throughErrorCode.toErrorCode());
+            } catch (Exception e) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Detected feign exception header but decode failed. headerValue: {}, e: {}", headerValue, e.getMessage(), e);
+                }
             }
-            String exServiceHeader = exceptionValues.iterator().next();
-            ThroughErrorCode throughErrorCode = (ThroughErrorCode) delegate.decode(response, ThroughErrorCode.class);
-            throw new FeignThroughBusinessException(exServiceHeader, throughErrorCode.toErrorCode());
         }
     }
 

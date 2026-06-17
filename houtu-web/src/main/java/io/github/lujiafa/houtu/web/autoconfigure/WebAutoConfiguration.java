@@ -16,6 +16,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.core.env.Environment;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
@@ -64,11 +65,12 @@ public class WebAutoConfiguration {
     @ConditionalOnMissingBean
     @ConditionalOnProperty(prefix = WebProperties.PROPERTIES_PREFIX, value = "exception-resolver", havingValue = "true", matchIfMissing = true)
     public UnifiedHandlerExceptionResolver unifiedHandlerExceptionResolver(ObjectProvider<List<HandlerExceptionResolverCustomizer>> customizersObjectProvider) {
-        List<HandlerExceptionResolverCustomizer> errorCodeResolvers = customizersObjectProvider.getIfAvailable();
-        if (errorCodeResolvers == null || errorCodeResolvers.isEmpty()) {
-            return new UnifiedHandlerExceptionResolver();
-        }
-        return new UnifiedHandlerExceptionResolver(errorCodeResolvers);
+        List<HandlerExceptionResolverCustomizer> exceptionResolverCustomizers = customizersObjectProvider.getIfAvailable();
+        UnifiedHandlerExceptionResolver resolver = (exceptionResolverCustomizers == null || exceptionResolverCustomizers.isEmpty())
+                ? new UnifiedHandlerExceptionResolver()
+                : new UnifiedHandlerExceptionResolver(exceptionResolverCustomizers);
+        resolver.setExceptionFallback(webProperties.isExceptionFallback());
+        return resolver;
     }
 
     @Bean
