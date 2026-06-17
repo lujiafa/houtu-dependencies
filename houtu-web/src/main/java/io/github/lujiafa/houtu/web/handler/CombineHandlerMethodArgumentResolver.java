@@ -12,6 +12,8 @@ import io.github.lujiafa.houtu.web.type.CombineFormResolverType;
 import io.github.lujiafa.houtu.web.util.CachingStreamHttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.Ordered;
 import org.springframework.core.ResolvableType;
@@ -35,6 +37,7 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.method.annotation.AbstractMessageConverterMethodArgumentResolver;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -44,19 +47,20 @@ import java.util.*;
  * @date 2016年6月4日
  * @Description 参数解析处理器
  */
-public class CombineHandlerMethodArgumentResolver extends AbstractMessageConverterMethodArgumentResolver implements HandlerMethodArgumentResolver, HandlerInterceptor, Ordered {
+public class CombineHandlerMethodArgumentResolver extends AbstractMessageConverterMethodArgumentResolver implements BeanPostProcessor, HandlerMethodArgumentResolver, HandlerInterceptor, Ordered {
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private final List<MediaType> formMediaTypes = new ArrayList<>();
 
-    private CombineFormResolverType combineFormArgumentResolverType;
-    private CustomModelAttributeMethodProcessor customModelAttributeMethodProcessor;
+    private final CombineFormResolverType combineFormArgumentResolverType;
 
-    public CombineHandlerMethodArgumentResolver(List<HttpMessageConverter<?>> converters,
+    private final CustomModelAttributeMethodProcessor customModelAttributeMethodProcessor;
+
+    public CombineHandlerMethodArgumentResolver(List<HttpMessageConverter<?>> messageConverters,
                                                 List<Object> requestResponseBodyAdvice,
                                                 CombineFormResolverType combineFormArgumentResolverType) {
-        super(converters, requestResponseBodyAdvice);
+        super(new ArrayList<HttpMessageConverter<?>>(messageConverters), requestResponseBodyAdvice);
         this.combineFormArgumentResolverType = combineFormArgumentResolverType;
         formMediaTypes.addAll(new FormHttpMessageConverter().getSupportedMediaTypes());
         customModelAttributeMethodProcessor = new CustomModelAttributeMethodProcessor();
@@ -73,7 +77,7 @@ public class CombineHandlerMethodArgumentResolver extends AbstractMessageConvert
         return false;
     }
 
-    public Map resolveBodyArgumentReturnMap(MethodParameter parameter, NativeWebRequest webRequest) throws Exception {
+    public Map<?, ?> resolveBodyArgumentReturnMap(MethodParameter parameter, NativeWebRequest webRequest) throws Exception {
         HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
         if (HashMap.class.isAssignableFrom(parameter.getParameterType()) && supportResolverRequestBody(request, parameter)) {
             request.setAttribute(WebSupportConstant.CACHING_STREAM_ENABLE_ATTR_NAME, AnnotationUtils.getAnnotationByPriorityMethod(parameter.getMethod(), CachingParam.class) != null);
@@ -204,8 +208,20 @@ public class CombineHandlerMethodArgumentResolver extends AbstractMessageConvert
     }
 
     @Override
+    public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+        if (bean instanceof RequestMappingHandlerAdapter) {
+            List<HttpMessageConverter<?>> messageConverters = ((RequestMappingHandlerAdapter) bean).getMessageConverters();
+            if (!messageConverters.isEmpty()) {
+                this.messageConverters.clear();
+                this.messageConverters.addAll(messageConverters);
+            }
+        }
+        return bean;
+    }
+
+    @Override
     public int getOrder() {
-        return Ordered.HIGHEST_PRECEDENCE + 10;
+        return 0;
     }
 
     static class CustomModelAttributeMethodProcessor extends ModelAttributeMethodProcessor {

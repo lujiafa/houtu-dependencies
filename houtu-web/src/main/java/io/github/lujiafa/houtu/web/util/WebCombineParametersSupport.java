@@ -45,7 +45,7 @@ public final class WebCombineParametersSupport {
      * @return LinkedHashMap
      */
     public static LinkedHashMap getBodyParameterMap(HttpServletRequest request, HttpServletResponse response) {
-        Assert.notNull(combineHandlerMethodArgumentResolver, "CombineHandlerMethodArgumentResolver must not be null");
+        Assert.notNull(combineHandlerMethodArgumentResolver, "combineHandlerMethodArgumentResolver must not be null");
         try {
             ServletWebRequest servletWebRequest = new ServletWebRequest(request, response);
             return (LinkedHashMap) combineHandlerMethodArgumentResolver.resolveBodyArgumentReturnMap(METHOD_PARAMETER, servletWebRequest);
@@ -72,7 +72,7 @@ public final class WebCombineParametersSupport {
         }
     }
 
-    class ParameterMapWrapper {
+    static class ParameterMapWrapper {
         final static String METHOD_NAME = "get";
         @CachingParam
         public void get(LinkedHashMap<String, Object> parameterMap) {}

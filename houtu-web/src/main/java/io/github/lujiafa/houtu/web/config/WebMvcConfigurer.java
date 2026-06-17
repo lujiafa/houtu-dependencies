@@ -33,7 +33,7 @@ public class WebMvcConfigurer implements org.springframework.web.servlet.config.
 	
 	@Override
 	public int getOrder() {
-		return HIGHEST_PRECEDENCE + 1;
+		return 0;
 	}
 	
 	
