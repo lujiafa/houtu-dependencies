@@ -307,6 +307,15 @@ public ResponseData<Order> createOrder(OrderForm form) {
 
 </details>
 
+<details>
+<summary><b>spring-cloud-houtu-feign</b> — Feign Configuration</summary>
+
+| Property | Description | Default |
+|----------|-------------|---------|
+| `houtu.feign.exception-source-trace` | Whether to write service trace info (currently the source service name) into the exception response header; a placeholder is used when disabled | false |
+
+</details>
+
 ---
 
 ## Version Compatibility
