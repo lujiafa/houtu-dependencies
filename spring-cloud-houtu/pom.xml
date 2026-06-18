@@ -20,6 +20,7 @@
 
     <modules>
         <module>spring-cloud-houtu-loadbalancer</module>
+        <module>spring-cloud-houtu-http-exchange</module>
         <module>spring-cloud-houtu-feign</module>
         <module>spring-cloud-houtu-discovery</module>
         <module>spring-cloud-houtu-alibaba-sentinel</module>
@@ -54,6 +55,11 @@
             <dependency>
                 <groupId>io.github.lujiafa</groupId>
                 <artifactId>spring-cloud-houtu-loadbalancer</artifactId>
+                <version>${io.github.lujiafa.houtu.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.lujiafa</groupId>
+                <artifactId>spring-cloud-houtu-http-exchange</artifactId>
                 <version>${io.github.lujiafa.houtu.version}</version>
             </dependency>
             <dependency>
