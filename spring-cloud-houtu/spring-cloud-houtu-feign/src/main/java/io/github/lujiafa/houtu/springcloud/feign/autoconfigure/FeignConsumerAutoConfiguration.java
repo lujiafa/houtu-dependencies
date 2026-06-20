@@ -4,7 +4,7 @@ import io.github.lujiafa.houtu.springcloud.feign.consumer.FeignDelegateDecoder;
 import io.github.lujiafa.houtu.springcloud.feign.consumer.loadbalancer.ExtensionDefaultFeignLoadBalancerConfiguration;
 import io.github.lujiafa.houtu.springcloud.feign.consumer.loadbalancer.ExtensionHttpClient5FeignLoadBalancerConfiguration;
 import io.github.lujiafa.houtu.springcloud.feign.consumer.loadbalancer.ExtensionOkHttpFeignLoadBalancerConfiguration;
-import io.github.lujiafa.houtu.util.autoconfigure.UtilsAutoConfiguration;
+import io.github.lujiafa.houtu.util.autoconfigure.HttpClient5AutoConfiguration;
 import feign.Feign;
 import feign.codec.Decoder;
 import io.github.lujiafa.houtu.web.handler.UnifiedHandlerExceptionResolver;
@@ -27,7 +27,7 @@ import org.springframework.context.annotation.Import;
 
 @AutoConfiguration(
         before = {FeignLoadBalancerAutoConfiguration.class, FeignAutoConfiguration.class},
-        after = {UtilsAutoConfiguration.class, BlockingLoadBalancerClientAutoConfiguration.class, LoadBalancerAutoConfiguration.class}
+        after = {HttpClient5AutoConfiguration.class, BlockingLoadBalancerClientAutoConfiguration.class, LoadBalancerAutoConfiguration.class}
 )
 @ConditionalOnClass({Feign.class, FeignClient.class})
 @Import({ExtensionOkHttpFeignLoadBalancerConfiguration.class, ExtensionHttpClient5FeignLoadBalancerConfiguration.class, ExtensionDefaultFeignLoadBalancerConfiguration.class})
