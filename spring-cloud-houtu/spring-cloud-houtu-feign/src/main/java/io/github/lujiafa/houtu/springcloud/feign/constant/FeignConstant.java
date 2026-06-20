@@ -13,8 +13,4 @@ public interface FeignConstant {
      */
     String FEIGN_PROVIDER_AUTO_HANDLER_ATTR_NAME = FeignClient.class.getName() + ".AUTO_USE";
 
-
-    String RESPONSE_EXCEPTION_HEADER_NAME = "XE-STATE";
-    String RESPONSE_EXCEPTION_HEADER_DEFAULT_VALUE = "E";
-
 }
