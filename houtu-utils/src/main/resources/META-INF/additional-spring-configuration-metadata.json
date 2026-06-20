@@ -1,39 +1,93 @@
 {
   "properties": [
     {
-      "name": "houtu.util.httpclient.pool.max-total",
+      "name": "houtu.client.httpclient.disable-cookie-management",
+      "type": "java.lang.Boolean",
+      "description": "Whether to disable HttpClient cookie management.",
+      "defaultValue": true
+    },
+    {
+      "name": "houtu.client.httpclient.pool.max-total",
       "type": "java.lang.Integer",
       "description": "Maximum number of connections in the connection pool.",
-      "defaultValue": 80
+      "defaultValue": 2000
     },
     {
-      "name": "houtu.util.httpclient.pool.max-per-route",
+      "name": "houtu.client.httpclient.pool.max-per-route",
       "type": "java.lang.Integer",
       "description": "Default maximum connections per route.",
-      "defaultValue": 10
+      "defaultValue": 500
     },
     {
-      "name": "houtu.util.httpclient.request.connect-timeout",
-      "type": "java.lang.Integer",
-      "description": "Connection timeout (seconds).",
-      "defaultValue": 5
+      "name": "houtu.client.httpclient.pool.disable-ssl-validation",
+      "type": "java.lang.Boolean",
+      "description": "Whether to trust all certificates and skip hostname verification (test/intranet only)."
     },
     {
-      "name": "houtu.util.httpclient.request.response-timeout",
-      "type": "java.lang.Integer",
-      "description": "Response timeout (seconds).",
-      "defaultValue": 15
+      "name": "houtu.client.httpclient.pool.pool-reuse-policy",
+      "type": "org.apache.hc.core5.pool.PoolReusePolicy",
+      "description": "Connection pool reuse policy (LIFO or FIFO)."
     },
     {
-      "name": "houtu.util.httpclient.proxy.hostname",
+      "name": "houtu.client.httpclient.pool.pool-concurrency-policy",
+      "type": "org.apache.hc.core5.pool.PoolConcurrencyPolicy",
+      "description": "Connection pool concurrency policy (STRICT or LAX)."
+    },
+    {
+      "name": "houtu.client.httpclient.pool.time-to-live",
+      "type": "java.time.Duration",
+      "description": "Maximum time-to-live of a pooled connection."
+    },
+    {
+      "name": "houtu.client.httpclient.pool.validate-after-inactivity",
+      "type": "java.time.Duration",
+      "description": "Re-validate a pooled connection before reuse after this period of inactivity."
+    },
+    {
+      "name": "houtu.client.httpclient.pool.evict-expired-connections",
+      "type": "java.lang.Boolean",
+      "description": "Whether to evict expired connections from the pool.",
+      "defaultValue": true
+    },
+    {
+      "name": "houtu.client.httpclient.pool.evict-idle-time",
+      "type": "java.time.Duration",
+      "description": "Evict connections idle longer than this duration (disabled when not set)."
+    },
+    {
+      "name": "houtu.client.httpclient.request.connect-timeout",
+      "type": "java.time.Duration",
+      "description": "Connection establishment timeout; falls back to spring.http.client.connect-timeout when not set."
+    },
+    {
+      "name": "houtu.client.httpclient.request.read-timeout",
+      "type": "java.time.Duration",
+      "description": "Socket read timeout (SO_TIMEOUT); falls back to spring.http.client.read-timeout when not set."
+    },
+    {
+      "name": "houtu.client.httpclient.request.connection-keep-alive",
+      "type": "java.time.Duration",
+      "description": "Default connection keep-alive duration."
+    },
+    {
+      "name": "houtu.client.httpclient.request.user-agent",
+      "type": "java.lang.String",
+      "description": "Default User-Agent request header."
+    },
+    {
+      "name": "houtu.client.httpclient.request.redirects-enabled",
+      "type": "java.lang.Boolean",
+      "description": "Whether to follow redirects; falls back to spring.http.client.redirects when not set."
+    },
+    {
+      "name": "houtu.client.httpclient.proxy.hostname",
       "type": "java.lang.String",
       "description": "Request proxy hostname."
     },
     {
-      "name": "houtu.util.httpclient.proxy.port",
+      "name": "houtu.client.httpclient.proxy.port",
       "type": "java.lang.Integer",
       "description": "Request proxy port."
     }
   ]
 }
-

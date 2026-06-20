@@ -227,12 +227,23 @@ public ResponseData<Order> createOrder(OrderForm form) {
 
 | Property | Description | Default |
 |----------|-------------|---------|
-| `houtu.util.httpclient.pool.max-total` | Maximum total connections in pool | 200 |
-| `houtu.util.httpclient.pool.max-per-route` | Maximum connections per route | 50 |
-| `houtu.util.httpclient.request.connect-timeout` | Connection timeout (seconds) | 5 |
-| `houtu.util.httpclient.request.response-timeout` | Response timeout (seconds) | 15 |
-| `houtu.util.httpclient.proxy.hostname` | Proxy hostname | - |
-| `houtu.util.httpclient.proxy.port` | Proxy port | - |
+| `houtu.client.httpclient.pool.max-total` | Maximum total connections in pool | 2000 |
+| `houtu.client.httpclient.pool.max-per-route` | Maximum connections per route | 500 |
+| `houtu.client.httpclient.pool.disable-ssl-validation` | Trust all certificates & skip hostname verification (test/intranet only) | false |
+| `houtu.client.httpclient.pool.pool-reuse-policy` | Connection reuse policy (LIFO / FIFO) | - |
+| `houtu.client.httpclient.pool.pool-concurrency-policy` | Pool concurrency policy (STRICT / LAX) | - |
+| `houtu.client.httpclient.pool.time-to-live` | Max time-to-live of a pooled connection (Duration) | - |
+| `houtu.client.httpclient.pool.validate-after-inactivity` | Re-validate connection after inactivity (Duration) | - |
+| `houtu.client.httpclient.pool.evict-expired-connections` | Evict expired connections | true |
+| `houtu.client.httpclient.pool.evict-idle-time` | Evict connections idle longer than this (Duration) | - |
+| `houtu.client.httpclient.request.connect-timeout` | Connection timeout (Duration); falls back to `spring.http.client.connect-timeout` | - |
+| `houtu.client.httpclient.request.read-timeout` | Socket read timeout (Duration); falls back to `spring.http.client.read-timeout` | - |
+| `houtu.client.httpclient.request.connection-keep-alive` | Connection keep-alive (Duration) | - |
+| `houtu.client.httpclient.request.user-agent` | Default User-Agent header | - |
+| `houtu.client.httpclient.request.redirects-enabled` | Follow redirects; falls back to `spring.http.client.redirects` | - |
+| `houtu.client.httpclient.proxy.hostname` | Proxy hostname | - |
+| `houtu.client.httpclient.proxy.port` | Proxy port | - |
+| `houtu.client.httpclient.disable-cookie-management` | Disable cookie management | true |
 
 </details>
 

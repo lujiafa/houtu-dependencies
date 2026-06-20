@@ -227,12 +227,23 @@ public ResponseData<Order> createOrder(OrderForm form) {
 
 | 配置项 | 说明 | 默认值 |
 |--------|------|--------|
-| `houtu.util.httpclient.pool.max-total` | 连接池最大连接数 | 200 |
-| `houtu.util.httpclient.pool.max-per-route` | 每路由最大连接数 | 50 |
-| `houtu.util.httpclient.request.connect-timeout` | 连接超时（秒） | 5 |
-| `houtu.util.httpclient.request.response-timeout` | 响应超时（秒） | 15 |
-| `houtu.util.httpclient.proxy.hostname` | 代理主机名 | - |
-| `houtu.util.httpclient.proxy.port` | 代理端口 | - |
+| `houtu.client.httpclient.pool.max-total` | 连接池最大连接数 | 2000 |
+| `houtu.client.httpclient.pool.max-per-route` | 每路由最大连接数 | 500 |
+| `houtu.client.httpclient.pool.disable-ssl-validation` | 信任全部证书并跳过主机名校验（仅测试/内网） | false |
+| `houtu.client.httpclient.pool.pool-reuse-policy` | 连接复用策略（LIFO / FIFO） | - |
+| `houtu.client.httpclient.pool.pool-concurrency-policy` | 连接池并发策略（STRICT / LAX） | - |
+| `houtu.client.httpclient.pool.time-to-live` | 连接存活上限（Duration） | - |
+| `houtu.client.httpclient.pool.validate-after-inactivity` | 空闲后复用前重新校验（Duration） | - |
+| `houtu.client.httpclient.pool.evict-expired-connections` | 驱逐过期连接 | true |
+| `houtu.client.httpclient.pool.evict-idle-time` | 驱逐空闲超过该时长的连接（Duration） | - |
+| `houtu.client.httpclient.request.connect-timeout` | 连接超时（Duration）；未配置时回退 `spring.http.client.connect-timeout` | - |
+| `houtu.client.httpclient.request.read-timeout` | Socket 读超时（Duration）；未配置时回退 `spring.http.client.read-timeout` | - |
+| `houtu.client.httpclient.request.connection-keep-alive` | 连接保活时间（Duration） | - |
+| `houtu.client.httpclient.request.user-agent` | 默认 User-Agent | - |
+| `houtu.client.httpclient.request.redirects-enabled` | 是否跟随重定向；未配置时回退 `spring.http.client.redirects` | - |
+| `houtu.client.httpclient.proxy.hostname` | 代理主机名 | - |
+| `houtu.client.httpclient.proxy.port` | 代理端口 | - |
+| `houtu.client.httpclient.disable-cookie-management` | 禁用 Cookie 管理 | true |
 
 </details>
 
