@@ -245,6 +245,8 @@ public ResponseData<Order> createOrder(OrderForm form) {
 | `houtu.client.httpclient.proxy.port` | 代理端口 | - |
 | `houtu.client.httpclient.disable-cookie-management` | 禁用 Cookie 管理 | true |
 
+> **说明：** `request.connect-timeout` / `request.read-timeout` / `request.redirects-enabled` 无内置默认值。未配置时回退到 `spring.http.client.*`，再回退到底层 HttpClient 默认（连接约 3 分钟、读取无限制）。生产环境请显式配置（此处或 `spring.http.client.*`），以免请求长时间挂起。
+
 </details>
 
 <details>

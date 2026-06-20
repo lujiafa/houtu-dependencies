@@ -245,6 +245,8 @@ public ResponseData<Order> createOrder(OrderForm form) {
 | `houtu.client.httpclient.proxy.port` | Proxy port | - |
 | `houtu.client.httpclient.disable-cookie-management` | Disable cookie management | true |
 
+> **Note:** `request.connect-timeout` / `request.read-timeout` / `request.redirects-enabled` have no built-in default. When unset they fall back to `spring.http.client.*`, then to the underlying HttpClient defaults (connect ≈ 3 min, read = unlimited). Configure them (here or under `spring.http.client.*`) in production to avoid hanging requests.
+
 </details>
 
 <details>
