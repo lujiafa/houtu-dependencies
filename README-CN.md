@@ -307,15 +307,6 @@ public ResponseData<Order> createOrder(OrderForm form) {
 
 </details>
 
-<details>
-<summary><b>spring-cloud-houtu-feign</b> — Feign 配置</summary>
-
-| 配置项 | 说明 | 默认值 |
-|--------|------|--------|
-| `houtu.feign.exception-source-trace` | 异常响应头是否输出来源服务名（关闭时使用占位值） | false |
-
-</details>
-
 ---
 
 ## 版本兼容
