@@ -2,7 +2,6 @@ package io.github.lujiafa.houtu.springcloud.feign.autoconfigure;
 
 import feign.Feign;
 import io.github.lujiafa.houtu.springcloud.feign.prop.FeignProperties;
-import io.github.lujiafa.houtu.springcloud.feign.provider.FeignHandlerExceptionResolverCustomizer;
 import io.github.lujiafa.houtu.springcloud.feign.provider.FeignRequestMappingHandlerMapping;
 import io.github.lujiafa.houtu.util.common.ReflectionUtils;
 import io.github.lujiafa.houtu.web.handler.UnifiedHandlerExceptionResolver;
@@ -52,13 +51,6 @@ public class FeignProviderAutoConfiguration {
         mapping.setUseRegisteredSuffixPatternMatch(requestMappingHandlerMapping.useRegisteredSuffixPatternMatch());
 
         return mapping;
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    @ConditionalOnClass(UnifiedHandlerExceptionResolver.class)
-    public FeignHandlerExceptionResolverCustomizer feignHandlerExceptionResolver(FeignProperties feignProperties) {
-        return new FeignHandlerExceptionResolverCustomizer(feignProperties.isExceptionSourceTrace());
     }
 
 }
