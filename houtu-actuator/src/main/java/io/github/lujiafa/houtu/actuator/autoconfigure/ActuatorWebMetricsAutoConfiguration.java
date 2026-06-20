@@ -1,13 +1,9 @@
 package io.github.lujiafa.houtu.actuator.autoconfigure;
 
-import io.github.lujiafa.houtu.actuator.metrics.client.ActuatorHttpClient5ExecChainHandlerObservation;
 import io.github.lujiafa.houtu.actuator.metrics.webmvc.ResponseBodyAdviceAndWebMvcTagsContributor;
-import io.micrometer.observation.ObservationRegistry;
-import org.apache.hc.client5.http.classic.HttpClient;
 import org.springframework.boot.actuate.autoconfigure.metrics.CompositeMeterRegistryAutoConfiguration;
 import org.springframework.boot.actuate.autoconfigure.metrics.MetricsAutoConfiguration;
 import org.springframework.boot.actuate.autoconfigure.metrics.export.simple.SimpleMetricsExportAutoConfiguration;
-import org.springframework.boot.actuate.autoconfigure.observation.ObservationProperties;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -43,16 +39,4 @@ public class ActuatorWebMetricsAutoConfiguration {
         }
     }
 
-    @Configuration
-    @ConditionalOnClass(HttpClient.class)
-    @ConditionalOnProperty(prefix = "management.metrics.distribution.percentiles", name = {"http.client.requests"})
-    public static class ActuatorHttpClient5Configuration {
-
-        @Bean
-        @ConditionalOnMissingBean
-        public ActuatorHttpClient5ExecChainHandlerObservation actuatorHttpClient5ExecChainHandler(ObservationRegistry observationRegistry, ObservationProperties observationProperties) {
-            return new ActuatorHttpClient5ExecChainHandlerObservation(observationRegistry, new ActuatorHttpClient5ExecChainHandlerObservation.HttpClient5ObservationConvention(observationProperties.getHttp().getClient().getRequests().getName()));
-        }
-
-    }
 }
