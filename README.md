@@ -52,7 +52,7 @@ In enterprise Java projects, teams often need to integrate numerous component fr
 │                                                                                             │
 │  ┌─── Spring Cloud Enhancements ───────────────────────────────────────────────────────┐   │
 │  │ spring-cloud-houtu-loadbalancer  (canary/weighted/auto-failover)                    │   │
-│  │ spring-cloud-houtu-feign         (@AutoFeign auto-publish / exception propagation)  │   │
+│  │ spring-cloud-houtu-feign         (@AutoFeign auto-publish)                          │   │
 │  │ spring-cloud-houtu-discovery     (service health self-check / discovery enhancement)│   │
 │  │ spring-cloud-houtu-sentinel      (circuit breaking / Nacos rule persistence)        │   │
 │  └─────────────────────────────────────────────────────────────────────────────────────┘   │
@@ -187,7 +187,7 @@ public ResponseData<Order> createOrder(OrderForm form) {
 | Module | Description |
 |--------|-------------|
 | **spring-cloud-houtu-loadbalancer** | Smart routing — full-link canary (hint), weighted routing, automatic failover on instance errors |
-| **spring-cloud-houtu-feign** | Feign enhancements — `@AutoFeign` auto-publishes interfaces to HandlerMapping, upstream exception propagation |
+| **spring-cloud-houtu-feign** | Feign enhancements — `@AutoFeign` auto-publishes interfaces to HandlerMapping |
 | **spring-cloud-houtu-discovery** | Discovery enhancements — service online status self-check `ServiceContext` (for batch jobs/MQ scenarios), enhanced health detection |
 | **spring-cloud-houtu-sentinel** | Circuit breaking & rate limiting — Alibaba Sentinel integration with Nacos rule persistence |
 
