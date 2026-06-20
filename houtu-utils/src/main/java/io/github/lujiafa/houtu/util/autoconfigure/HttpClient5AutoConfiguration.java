@@ -9,8 +9,6 @@ import org.apache.hc.core5.http.HttpHost;
 import org.apache.hc.core5.http.ssl.TLS;
 import org.apache.hc.core5.util.TimeValue;
 import org.apache.hc.core5.util.Timeout;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -34,8 +32,6 @@ import java.security.cert.X509Certificate;
 @EnableConfigurationProperties(HttpClient5Properties.class)
 @ConditionalOnClass(CloseableHttpClient.class)
 public class HttpClient5AutoConfiguration {
-
-    private static final Logger logger = LoggerFactory.getLogger(HttpClient5AutoConfiguration.class);
 
     @Bean
     @ConditionalOnMissingBean
@@ -114,9 +110,9 @@ public class HttpClient5AutoConfiguration {
         }
 
         /**
-         * 构建 TLS 套接字策略。
-         * <p>当 {@code disableSslValidation=true} 时信任全部证书并跳过主机名校验（仅用于测试/内网场景）；
-         * 否则返回 {@code null}，沿用连接管理器的系统默认（builder 已调用 useSystemProperties()）。
+         * 构建信任全部证书并跳过主机名校验的 TLS 套接字策略（仅用于测试/内网/对接旧服务等场景）。
+         * <p>仅当 {@code pool.disable-ssl-validation=true} 时调用；启用 TLS 1.0~1.3 以兼容老旧服务端
+         * （TLS 1.0/1.1 可能受 JDK 的 {@code jdk.tls.disabledAlgorithms} 限制，需在 JVM 层放开）。
          */
         private TlsSocketStrategy disableTlsSocketStrategy() {
             try {
@@ -134,7 +130,7 @@ public class HttpClient5AutoConfiguration {
                 }}, new SecureRandom());
                 return ClientTlsStrategyBuilder.create()
                         .setSslContext(sslContext)
-                        .setTlsVersions(TLS.V_1_2, TLS.V_1_3)
+                        .setTlsVersions(TLS.V_1_0, TLS.V_1_1, TLS.V_1_2, TLS.V_1_3)
                         .setHostnameVerifier(NoopHostnameVerifier.INSTANCE)
                         .buildClassic();
             } catch (NoSuchAlgorithmException | KeyManagementException e) {
