@@ -1,4 +1,4 @@
-package io.github.lujiafa.houtu.springcloud.feign.condition;
+package io.github.lujiafa.houtu.springcloud.httpexchange.condition;
 
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -9,12 +9,13 @@ import org.springframework.core.type.AnnotatedTypeMetadata;
 import org.springframework.web.client.RestClient;
 
 /**
- * 当容器中已存在带 {@link LoadBalanced} 限定符的 {@link RestClient.Builder} Bean（任意 Bean 名）时条件不成立，
- * 用于让自动配置的 loadbalanceRestClientBuilder 在用户已自定义负载均衡 Builder 时回退。
+ * Does not match when a {@link RestClient.Builder} bean qualified with {@link LoadBalanced} (under any bean name)
+ * already exists in the container, allowing the auto-configured {@code loadbalanceRestClientBuilder} to back off
+ * when the user has supplied a custom load-balanced builder.
  *
- * <p>{@code @ConditionalOnMissingBean(annotation = LoadBalanced.class)} 仅按注解匹配、不限定类型，
- * 会被其它 {@code @LoadBalanced} Bean（如 WebClient.Builder、RestTemplate）误触发；
- * 此 Condition 同时校验「类型为 RestClient.Builder」且「带 @LoadBalanced」。
+ * <p>{@code @ConditionalOnMissingBean(annotation = LoadBalanced.class)} matches by annotation only, regardless of
+ * type, and would be falsely triggered by other {@code @LoadBalanced} beans (e.g. WebClient.Builder, RestTemplate);
+ * this Condition checks both "type is RestClient.Builder" and "annotated with @LoadBalanced".
  */
 public class OnMissingLoadBalancedRestClientBuilder implements Condition {
 
@@ -24,7 +25,7 @@ public class OnMissingLoadBalancedRestClientBuilder implements Condition {
         if (beanFactory == null) {
             return true;
         }
-        // allowEagerInit=false：仅按定义/工厂方法返回类型匹配，不会触发 Bean 实例化
+        // allowEagerInit=false: match by definition/factory-method return type only, without triggering bean instantiation
         String[] names = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(
                 beanFactory, RestClient.Builder.class, true, false);
         for (String name : names) {

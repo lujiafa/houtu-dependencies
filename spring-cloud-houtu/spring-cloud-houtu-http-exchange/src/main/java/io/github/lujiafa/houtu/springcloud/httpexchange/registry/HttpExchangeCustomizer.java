@@ -1,4 +1,4 @@
-package io.github.lujiafa.houtu.springcloud.feign.consumer;
+package io.github.lujiafa.houtu.springcloud.httpexchange.registry;
 
 @FunctionalInterface
 public interface HttpExchangeCustomizer {
