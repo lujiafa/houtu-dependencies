@@ -35,7 +35,7 @@ public class HttpExchangeAutoConfiguration {
     @ConditionalOnClass(RestClient.class)
     public static class RestClientExchangeConfiguration {
 
-        @Bean
+        @Bean(defaultCandidate = false)
         @LoadBalanced
         @ConditionalOnBean(RestClient.Builder.class)
         @Conditional(OnMissingLoadBalancedRestClientBuilder.class)
@@ -55,7 +55,7 @@ public class HttpExchangeAutoConfiguration {
     @ConditionalOnClass(WebClient.class)
     public static class WebClientExchangeConfiguration {
 
-        @Bean
+        @Bean(defaultCandidate = false)
         @LoadBalanced
         @ConditionalOnBean(WebClient.Builder.class)
         @Conditional(OnMissingLoadBalancedWebClientBuilder.class)
