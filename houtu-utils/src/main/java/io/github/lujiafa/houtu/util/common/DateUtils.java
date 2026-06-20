@@ -166,20 +166,7 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
      * @return Date
      */
     public static Date toDate(long timestamp) {
-        return toDate(timestamp, null);
-    }
-
-    /**
-     * 通过时间戳获取时间对象
-     * @param timestamp UTC时间戳
-     * @param zoneId 时区
-     * @return Date
-     */
-    public static Date toDate(long timestamp, ZoneId zoneId) {
-        if (zoneId == null) {
-            zoneId = TimeZone.getDefault().toZoneId();
-        }
-        return Date.from(Instant.ofEpochMilli(timestamp).atZone(zoneId).toInstant());
+        return new Date(timestamp);
     }
 
     /**
