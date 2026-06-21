@@ -54,7 +54,7 @@
 │  │ spring-cloud-houtu-loadbalancer  (灰度/权重/自动降级)                  │  │
 │  │ spring-cloud-houtu-feign         (@AutoFeign 自动发布)                 │  │
 │  │ spring-cloud-houtu-discovery     (服务状态自检/健康增强)               │  │
-│  │ spring-cloud-houtu-sentinel      (熔断限流/Nacos 规则持久化)          │  │
+│  │ spring-cloud-houtu-alibaba-sentinel  (熔断限流/Nacos 规则持久化)      │  │
 │  └───────────────────────────────────────────────────────────────────────┘  │
 │                                                                             │
 │  ┌─── 基础层 ────────────────────────────────────────────────────────────┐  │
@@ -189,7 +189,7 @@ public ResponseData<Order> createOrder(OrderForm form) {
 | **spring-cloud-houtu-loadbalancer** | 智能路由 — 全链路灰度（hint）、权重路由、实例异常自动降级飘移 |
 | **spring-cloud-houtu-feign** | Feign 增强 — `@AutoFeign` 接口自动发布到 HandlerMapping |
 | **spring-cloud-houtu-discovery** | 发现增强 — 服务在线状态自检 `ServiceContext`（适用于任务/MQ 场景）、健康检测增强 |
-| **spring-cloud-houtu-sentinel** | 熔断限流 — Alibaba Sentinel 集成，支持 Nacos 规则持久化 |
+| **spring-cloud-houtu-alibaba-sentinel** | 熔断限流 — Alibaba Sentinel 集成，支持 Nacos 规则持久化 |
 
 ---
 
