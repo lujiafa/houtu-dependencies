@@ -77,7 +77,6 @@ public class SpringCloudLoadBalancerClientConfiguration {
     @Configuration(proxyBeanMethods = false)
     @ConditionalOnBlockingDiscoveryEnabled
     @Order(REACTIVE_SERVICE_INSTANCE_SUPPLIER_ORDER + 1)
-    @ConditionalOnProperty(name = "spring.cloud.loadbalancer.hint.enable", havingValue = "true", matchIfMissing = true)
     public static class BlockingSupportConfiguration {
         @Bean
         @ConditionalOnBean({DiscoveryClient.class})
@@ -120,7 +119,6 @@ public class SpringCloudLoadBalancerClientConfiguration {
     @Configuration(proxyBeanMethods = false)
     @ConditionalOnReactiveDiscoveryEnabled
     @Order(REACTIVE_SERVICE_INSTANCE_SUPPLIER_ORDER)
-    @ConditionalOnProperty(name = "spring.cloud.loadbalancer.hint.enable", havingValue = "true", matchIfMissing = true)
     public static class ReactiveSupportConfiguration {
         @Bean
         @ConditionalOnBean({ReactiveDiscoveryClient.class})
