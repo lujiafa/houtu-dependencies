@@ -248,3 +248,46 @@ spring:
             type: json
             rule-type: flow
 ```
+
+## 5. spring-cloud-houtu-http-exchange
+An enhancement for Spring's HTTP Interface (`@HttpExchange`). It automatically registers interface proxies backed by `RestClient`/`WebClient` as beans, so you can consume remote services through declarative interfaces — and the underlying builder is `@LoadBalanced`, so service-id base URLs are resolved through Spring Cloud LoadBalancer.
+
+Maven dependency:
+```pom
+<dependency>
+    <groupId>io.github.lujiafa</groupId>
+    <artifactId>spring-cloud-houtu-http-exchange</artifactId>
+    <version>3.5.3</version>
+</dependency>
+```
+
+### 5.1 Usage
+Declare an HTTP Interface (annotate the type with `@HttpExchange`, or declare methods with `@GetExchange`/`@PostExchange`, etc.):
+```java
+@HttpExchange
+public interface UserApi {
+    @GetExchange("/user/{id}")
+    User getUser(@PathVariable Long id);
+}
+```
+
+Register the interface against a base URL by exposing an `HttpExchangeCustomizer` bean. The base URL can be a concrete address or a service id (e.g. `http://user-service`) resolved by load balancing:
+```java
+@Bean
+public HttpExchangeCustomizer userApiCustomizer() {
+    return registry -> registry
+            // RestClient-backed proxy
+            .registryRestClient("http://user-service", UserApi.class)
+            // or WebClient-backed proxy
+            .registryWebClient("http://order-service", OrderApi.class);
+}
+```
+The registered interfaces become injectable beans:
+```java
+@Autowired
+private UserApi userApi;
+```
+
+> Notes:
+> - The service interface must be an interface and must carry `@HttpExchange` on the type or declare at least one `@HttpExchange`-(meta)annotated method; otherwise registration fails fast.
+> - `RestClient` (servlet) and `WebClient` (reactive/WebFlux) registrars are auto-configured independently based on what's on the classpath.

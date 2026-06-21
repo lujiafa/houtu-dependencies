@@ -248,3 +248,46 @@ spring:
             type: json
             rule-type: flow
 ```
+
+## 五、spring-cloud-houtu-http-exchange
+针对 Spring HTTP Interface（`@HttpExchange`）的增强：自动将基于 `RestClient`/`WebClient` 的接口代理注册为 Bean，从而以声明式接口调用远程服务；底层 Builder 标注了 `@LoadBalanced`，因此以服务名为 baseUrl 时会经 Spring Cloud LoadBalancer 解析。
+
+Maven 依赖：
+```pom
+<dependency>
+    <groupId>io.github.lujiafa</groupId>
+    <artifactId>spring-cloud-houtu-http-exchange</artifactId>
+    <version>3.5.3</version>
+</dependency>
+```
+
+### 5.1 使用方式
+声明一个 HTTP Interface（在类型上标注 `@HttpExchange`，或在方法上使用 `@GetExchange`/`@PostExchange` 等）：
+```java
+@HttpExchange
+public interface UserApi {
+    @GetExchange("/user/{id}")
+    User getUser(@PathVariable Long id);
+}
+```
+
+通过暴露 `HttpExchangeCustomizer` Bean，把接口注册到某个 baseUrl。baseUrl 可以是具体地址，也可以是经负载均衡解析的服务名（如 `http://user-service`）：
+```java
+@Bean
+public HttpExchangeCustomizer userApiCustomizer() {
+    return registry -> registry
+            // 基于 RestClient 的代理
+            .registryRestClient("http://user-service", UserApi.class)
+            // 或基于 WebClient 的代理
+            .registryWebClient("http://order-service", OrderApi.class);
+}
+```
+注册后的接口即可直接注入使用：
+```java
+@Autowired
+private UserApi userApi;
+```
+
+> 说明：
+> - 服务类必须是接口，且类型上带 `@HttpExchange` 或至少声明一个被 `@HttpExchange`（元）注解的方法，否则注册时即快速失败。
+> - `RestClient`（Servlet）与 `WebClient`（Reactive/WebFlux）两套注册器依据 classpath 各自独立自动装配。
