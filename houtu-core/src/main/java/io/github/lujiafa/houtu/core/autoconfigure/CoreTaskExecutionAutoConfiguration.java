@@ -21,8 +21,6 @@ import org.springframework.core.task.TaskDecorator;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
-import java.util.stream.Stream;
-
 
 @AutoConfiguration
 @EnableConfigurationProperties({TaskExecutionProperties.class, TaskSchedulingProperties.class})
@@ -34,35 +32,31 @@ public class CoreTaskExecutionAutoConfiguration {
     @ConditionalOnClass({ThreadPoolTaskExecutor.class})
     public ThreadPoolTaskExecutorBuilder threadPoolTaskExecutorBuilder(TaskExecutionProperties properties, ObjectProvider<ThreadPoolTaskExecutorCustomizer> threadPoolTaskExecutorCustomizers, ObjectProvider<TaskDecorator> taskDecorator) {
         TaskExecutionProperties.Pool pool = properties.getPool();
-        ThreadPoolTaskExecutorBuilder builder = new TransferTaskExecutorBuilder();
-        builder = builder.queueCapacity(pool.getQueueCapacity());
-        builder = builder.corePoolSize(pool.getCoreSize());
-        builder = builder.maxPoolSize(pool.getMaxSize());
-        builder = builder.allowCoreThreadTimeOut(pool.isAllowCoreThreadTimeout());
-        builder = builder.keepAlive(pool.getKeepAlive());
         TaskExecutionProperties.Shutdown shutdown = properties.getShutdown();
-        builder = builder.awaitTermination(shutdown.isAwaitTermination());
-        builder = builder.awaitTerminationPeriod(shutdown.getAwaitTerminationPeriod());
-        builder = builder.threadNamePrefix(properties.getThreadNamePrefix());
-        Stream var10001 = threadPoolTaskExecutorCustomizers.orderedStream();
-        var10001.getClass();
-        builder = builder.customizers(var10001::iterator);
-        builder = builder.taskDecorator((TaskDecorator)taskDecorator.getIfUnique());
-        return builder;
+        return new TransferTaskExecutorBuilder(new ThreadPoolTaskExecutorBuilder()
+                .queueCapacity(pool.getQueueCapacity())
+                .corePoolSize(pool.getCoreSize())
+                .maxPoolSize(pool.getMaxSize())
+                .allowCoreThreadTimeOut(pool.isAllowCoreThreadTimeout())
+                .keepAlive(pool.getKeepAlive())
+                .awaitTermination(shutdown.isAwaitTermination())
+                .awaitTerminationPeriod(shutdown.getAwaitTerminationPeriod())
+                .threadNamePrefix(properties.getThreadNamePrefix())
+                .customizers(threadPoolTaskExecutorCustomizers.orderedStream()::iterator)
+                .taskDecorator((TaskDecorator) taskDecorator.getIfUnique()));
     }
 
     @Bean
     @ConditionalOnMissingBean
     @ConditionalOnClass({ThreadPoolTaskScheduler.class})
     public ThreadPoolTaskSchedulerBuilder threadPoolTaskSchedulerBuilder(TaskSchedulingProperties properties, ObjectProvider<ThreadPoolTaskSchedulerCustomizer> threadPoolTaskSchedulerCustomizers) {
-        ThreadPoolTaskSchedulerBuilder builder = new TransferTaskSchedulerBuilder();
-        builder = builder.poolSize(properties.getPool().getSize());
         TaskSchedulingProperties.Shutdown shutdown = properties.getShutdown();
-        builder = builder.awaitTermination(shutdown.isAwaitTermination());
-        builder = builder.awaitTerminationPeriod(shutdown.getAwaitTerminationPeriod());
-        builder = builder.threadNamePrefix(properties.getThreadNamePrefix());
-        builder = builder.customizers(threadPoolTaskSchedulerCustomizers);
-        return builder;
+        return new TransferTaskSchedulerBuilder(new ThreadPoolTaskSchedulerBuilder()
+                .poolSize(properties.getPool().getSize())
+                .awaitTermination(shutdown.isAwaitTermination())
+                .awaitTerminationPeriod(shutdown.getAwaitTerminationPeriod())
+                .threadNamePrefix(properties.getThreadNamePrefix())
+                .customizers(threadPoolTaskSchedulerCustomizers));
     }
 
 }
