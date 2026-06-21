@@ -1,1 +1,1 @@
-io.github.lujiafa.houtu.springcloud.feign.autoconfigure.HttpExchangeAutoConfiguration
+io.github.lujiafa.houtu.springcloud.httpexchange.autoconfigure.HttpExchangeAutoConfiguration
