@@ -51,10 +51,11 @@ In enterprise Java projects, teams often need to integrate numerous component fr
 │  └─────────────────────────┘  └─────────────────────────┘                                  │
 │                                                                                             │
 │  ┌─── Spring Cloud Enhancements ───────────────────────────────────────────────────────┐   │
-│  │ spring-cloud-houtu-loadbalancer  (canary/weighted/auto-failover)                    │   │
-│  │ spring-cloud-houtu-feign         (@AutoFeign auto-publish)                          │   │
-│  │ spring-cloud-houtu-discovery     (service health self-check / discovery enhancement)│   │
-│  │ spring-cloud-houtu-sentinel      (circuit breaking / Nacos rule persistence)        │   │
+│  │ spring-cloud-houtu-loadbalancer  (canary / weighted / auto-failover)                │   │
+│  │ spring-cloud-houtu-http-exchange  (@HttpExchange client + load-balancing)           │   │
+│  │ spring-cloud-houtu-feign  (@AutoFeign auto-publish)                                 │   │
+│  │ spring-cloud-houtu-discovery  (health self-check / discovery enhancement)           │   │
+│  │ spring-cloud-houtu-alibaba-sentinel  (circuit breaking / Nacos rule persistence)    │   │
 │  └─────────────────────────────────────────────────────────────────────────────────────┘   │
 │                                                                                             │
 │  ┌─── Foundation Layer ────────────────────────────────────────────────────────────────┐   │
@@ -187,9 +188,10 @@ public ResponseData<Order> createOrder(OrderForm form) {
 | Module | Description |
 |--------|-------------|
 | **spring-cloud-houtu-loadbalancer** | Smart routing — full-link canary (hint), weighted routing, automatic failover on instance errors |
+| **spring-cloud-houtu-http-exchange** | HTTP Interface (`@HttpExchange`) client enhancement — auto-registers `RestClient`/`WebClient`-backed interface proxies with load-balancing, via an `HttpExchangeCustomizer` bean |
 | **spring-cloud-houtu-feign** | Feign enhancements — `@AutoFeign` auto-publishes interfaces to HandlerMapping |
 | **spring-cloud-houtu-discovery** | Discovery enhancements — service online status self-check `ServiceContext` (for batch jobs/MQ scenarios), enhanced health detection |
-| **spring-cloud-houtu-sentinel** | Circuit breaking & rate limiting — Alibaba Sentinel integration with Nacos rule persistence |
+| **spring-cloud-houtu-alibaba-sentinel** | Circuit breaking & rate limiting — Alibaba Sentinel integration with Nacos rule persistence |
 
 ---
 
@@ -328,7 +330,7 @@ The major and minor version numbers of the project align with Spring Boot, makin
 
 |   Houtu   | JDK | Spring Boot | Spring Cloud | Spring Cloud Alibaba |
 |:---------:|:---:|:-----------:|:------------:|:--------------------:|
-| **3.5.3** | 17 |   3.5.14    | 2025.0.2 | 2025.0.0.0 |
+| **3.5.3** | 17 |   3.5.15    | 2025.0.3 | 2025.0.0.0 |
 |   3.5.2   | 17 |   3.5.13    | 2025.0.2 | 2025.0.0.0 |
 |   3.5.1   | 17 |   3.5.11    | 2025.0.1 | 2025.0.0.0 |
 |   3.5.0   | 17 |   3.5.11    | 2025.0.0 ~ 2025.0.1 | 2023.0.1.2 ~ 2025.0.0.0 |
@@ -346,7 +348,7 @@ The major and minor version numbers of the project align with Spring Boot, makin
 
 | Dependency | Version |
 |------------|---------|
-| Redisson | 3.51.0 |
+| Redisson | 3.52.0 |
 | Cache2k | 2.6.1.Final |
 | JJWT | 0.13.0 |
 | Bouncy Castle | 1.84 |

@@ -52,9 +52,10 @@
 │                                                                             │
 │  ┌─── Spring Cloud 增强 ─────────────────────────────────────────────────┐  │
 │  │ spring-cloud-houtu-loadbalancer  (灰度/权重/自动降级)                  │  │
-│  │ spring-cloud-houtu-feign         (@AutoFeign 自动发布)                 │  │
-│  │ spring-cloud-houtu-discovery     (服务状态自检/健康增强)               │  │
-│  │ spring-cloud-houtu-sentinel      (熔断限流/Nacos 规则持久化)          │  │
+│  │ spring-cloud-houtu-http-exchange  (@HttpExchange 客户端+负载均衡)      │  │
+│  │ spring-cloud-houtu-feign  (@AutoFeign 自动发布)                        │  │
+│  │ spring-cloud-houtu-discovery  (服务状态自检/健康增强)                  │  │
+│  │ spring-cloud-houtu-alibaba-sentinel  (熔断限流/Nacos 规则持久化)       │  │
 │  └───────────────────────────────────────────────────────────────────────┘  │
 │                                                                             │
 │  ┌─── 基础层 ────────────────────────────────────────────────────────────┐  │
@@ -187,9 +188,10 @@ public ResponseData<Order> createOrder(OrderForm form) {
 | 模块 | 说明 |
 |------|------|
 | **spring-cloud-houtu-loadbalancer** | 智能路由 — 全链路灰度（hint）、权重路由、实例异常自动降级飘移 |
+| **spring-cloud-houtu-http-exchange** | HTTP Interface（`@HttpExchange`）客户端增强 — 通过 `HttpExchangeCustomizer` Bean 自动注册基于 `RestClient`/`WebClient` 的接口代理，并支持负载均衡 |
 | **spring-cloud-houtu-feign** | Feign 增强 — `@AutoFeign` 接口自动发布到 HandlerMapping |
 | **spring-cloud-houtu-discovery** | 发现增强 — 服务在线状态自检 `ServiceContext`（适用于任务/MQ 场景）、健康检测增强 |
-| **spring-cloud-houtu-sentinel** | 熔断限流 — Alibaba Sentinel 集成，支持 Nacos 规则持久化 |
+| **spring-cloud-houtu-alibaba-sentinel** | 熔断限流 — Alibaba Sentinel 集成，支持 Nacos 规则持久化 |
 
 ---
 
@@ -328,7 +330,7 @@ public ResponseData<Order> createOrder(OrderForm form) {
 
 |   Houtu   | JDK | Spring Boot | Spring Cloud | Spring Cloud Alibaba |
 |:---------:|:---:|:-----------:|:------------:|:--------------------:|
-| **3.5.3** | 17 |   3.5.14    | 2025.0.2 | 2025.0.0.0 |
+| **3.5.3** | 17 |   3.5.15    | 2025.0.3 | 2025.0.0.0 |
 |   3.5.2   | 17 |   3.5.13    | 2025.0.2 | 2025.0.0.0 |
 |   3.5.1   | 17 |   3.5.11    | 2025.0.1 | 2025.0.0.0 |
 |   3.5.0   | 17 |   3.5.11    | 2025.0.0 ~ 2025.0.1 | 2023.0.1.2 ~ 2025.0.0.0 |
@@ -346,7 +348,7 @@ public ResponseData<Order> createOrder(OrderForm form) {
 
 | 依赖 | 版本 |
 |------|------|
-| Redisson | 3.51.0 |
+| Redisson | 3.52.0 |
 | Cache2k | 2.6.1.Final |
 | JJWT | 0.13.0 |
 | Bouncy Castle | 1.84 |
