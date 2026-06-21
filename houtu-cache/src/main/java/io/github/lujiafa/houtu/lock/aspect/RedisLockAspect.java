@@ -8,7 +8,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
-import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.core.Ordered;
 import org.springframework.expression.EvaluationContext;
@@ -33,10 +32,7 @@ public class RedisLockAspect implements Ordered {
 	private static final ConcurrentHashMap<String, Expression> EXPRESSION_CACHE = new ConcurrentHashMap<>();
 	private static final ConcurrentHashMap<Method, Map<String, Integer>> PARAM_INDEX_CACHE = new ConcurrentHashMap<>();
 
-	@Pointcut("@annotation(io.github.lujiafa.houtu.lock.annotation.Lock)")
-	public void pointcut() {}
-
-	@Around(value = "pointcut() && @annotation(lock)")
+	@Around(value = "@annotation(lock)")
 	public Object doAround(ProceedingJoinPoint joinPoint, Lock lock) throws Throwable {
 		String lockKey = new StringBuilder(lock.prefix())
 				.append(getLockId(joinPoint, lock)).toString();
