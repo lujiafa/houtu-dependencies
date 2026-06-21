@@ -48,7 +48,7 @@ public class SignUtils {
 					queryStringBuilder.append("&");
 				queryStringBuilder.append("key=").append(key);
 			}
-			return Objects.equals(sign, queryStringBuilder.toString().getBytes(StandardCharsets.UTF_8));
+			return Objects.equals(sign, MD5Utils.hash(queryStringBuilder.toString().getBytes(StandardCharsets.UTF_8)).hex());
 		});
 	}
 
