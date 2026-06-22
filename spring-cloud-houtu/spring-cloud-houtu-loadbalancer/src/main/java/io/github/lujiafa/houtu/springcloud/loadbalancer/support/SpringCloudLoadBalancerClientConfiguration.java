@@ -6,6 +6,7 @@ import io.github.lujiafa.houtu.springcloud.loadbalancer.support.condition.Enable
 import io.github.lujiafa.houtu.springcloud.loadbalancer.support.condition.NacosLoadBalancerCondition;
 import io.github.lujiafa.houtu.util.constant.CharConstant;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.client.ConditionalOnBlockingDiscoveryEnabled;
@@ -48,6 +49,7 @@ public class SpringCloudLoadBalancerClientConfiguration {
     }
 
     @Configuration(proxyBeanMethods = false)
+    @ConditionalOnClass(com.alibaba.cloud.nacos.NacosDiscoveryProperties.class)
     @Conditional(NacosLoadBalancerCondition.class)
     public static class SpringCloudNacosLoadBalancerConfiguration {
         @Bean
