@@ -86,14 +86,14 @@ public class SecurityWatchAspect implements Ordered {
         List<Supplier<String>> getters = new ArrayList<>();
         List<SecuritySetter> setters = new ArrayList<>();
         SecurityWatch securityWatch = securityContext.getSecurityWatch();
-        buildSecurityParams(securityContext.getArgs(), securityContext.getParameterAnnotations(), getters, setters, new HashSet<>(), securityWatch.encryptMapKeys());
+        buildSecurityParams(securityContext.getArgs(), securityContext.getParameterAnnotations(), getters, setters, new HashSet<>(), securityWatch.encryptMapKeys(), OperateType.ENCRYPT);
         IdentityHashMap<String, String> recoveryMap = new IdentityHashMap<>();
         if (!getters.isEmpty()) {
             Map<String, String> encryptedProcessMap = new ConcurrentHashMap<>(getters.size());
             List<String> origins = getters.stream().map(g -> g.get()).collect(Collectors.toList());
             origins.stream().forEach(o -> {
                 if (encryptedProcessMap.get(o) == null) {
-                    encryptedProcessMap.put(o, securityProcessor.encrypt(securityContext.getMethod(), o));
+                    encryptedProcessMap.put(o, securityContext.getSecurityProcessor().encrypt(securityContext.getMethod(), o));
                 }
             });
             IdentityHashMap<String, String> encryptedMap = new IdentityHashMap<>();
@@ -111,11 +111,11 @@ public class SecurityWatchAspect implements Ordered {
 
     void recoveryParams(SecurityContext securityContext) {
         List<SecuritySetter> setters = new ArrayList<>();
-        buildSecurityParams(securityContext.getArgs(), securityContext.getParameterAnnotations(), null, setters, securityContext.getRecoveryAndDecryptProcessedSet(), null);
+        buildSecurityParams(securityContext.getArgs(), securityContext.getParameterAnnotations(), null, setters, securityContext.getRecoveryAndDecryptProcessedSet(), null, OperateType.RECOVERY);
         setters.stream().forEach(s -> s.set(securityContext.getRecoveryMap()));
     }
 
-    void buildSecurityParams(Object[] args, Annotation[][] parameterAnnotations, List<Supplier<String>> getters, List<SecuritySetter> setters, Set<Object> processedSet, String[] mapKeys) {
+    void buildSecurityParams(Object[] args, Annotation[][] parameterAnnotations, List<Supplier<String>> getters, List<SecuritySetter> setters, Set<Object> processedSet, String[] mapKeys, OperateType operateType) {
         for (int i = 0; i < args.length; i++) {
             Object arg = args[i];
             if (arg == null
@@ -130,7 +130,7 @@ public class SecurityWatchAspect implements Ordered {
                     setters.add(m -> args[finalI] = m.get(args[finalI]));
                 }
             } else {
-                build(arg, getters, setters, processedSet, mapKeys);
+                build(arg, getters, setters, processedSet, mapKeys, operateType);
             }
         }
     }
@@ -144,22 +144,22 @@ public class SecurityWatchAspect implements Ordered {
                     return original;
                 }
             }
-            return securityProcessor.decrypt(securityContext.getMethod(), (String) result);
+            return securityContext.getSecurityProcessor().decrypt(securityContext.getMethod(), (String) result);
         }
         List<Supplier<String>> getters = new ArrayList<>();
         List<SecuritySetter> setters = new ArrayList<>();
-        build(result, getters, setters, securityContext.getRecoveryAndDecryptProcessedSet(), securityContext.getSecurityWatch().decryptMapKeys());
+        build(result, getters, setters, securityContext.getRecoveryAndDecryptProcessedSet(), securityContext.getSecurityWatch().decryptMapKeys(), OperateType.DECRYPT);
         if (!getters.isEmpty()) {
             IdentityHashMap<String, String> recoveryMap = securityContext.getRecoveryMap();
             Map<String, String> decryptProcessMap = recoveryMap == null ? new ConcurrentHashMap<>(getters.size()) : new ConcurrentHashMap<>(recoveryMap);
-            List<String> encrypts = getters.stream().map(g -> g.get()).collect(Collectors.toList());
-            encrypts.stream().forEach(o -> {
+            List<String> decrypts = getters.stream().map(g -> g.get()).collect(Collectors.toList());
+            decrypts.stream().forEach(o -> {
                 if (decryptProcessMap.get(o) == null) {
-                    decryptProcessMap.put(o, securityProcessor.decrypt(securityContext.getMethod(), o));
+                    decryptProcessMap.put(o, securityContext.getSecurityProcessor().decrypt(securityContext.getMethod(), o));
                 }
             });
             IdentityHashMap<String, String> decryptionMap = recoveryMap == null ? new IdentityHashMap<>() : new IdentityHashMap<>(recoveryMap);
-            encrypts.stream().forEach(o -> {
+            decrypts.stream().forEach(o -> {
                 if (!decryptionMap.containsKey(o)) {
                     decryptionMap.put(o, decryptProcessMap.get(o));
                 }
@@ -169,20 +169,27 @@ public class SecurityWatchAspect implements Ordered {
         return result;
     }
 
-    void build(Object object, List<Supplier<String>> getters, List<SecuritySetter> setters, Set<Object> processedSet, String[] mapKeys) {
+    void build(Object object, List<Supplier<String>> getters, List<SecuritySetter> setters, Set<Object> processedSet, String[] mapKeys, OperateType operateType) {
         if (object == null || processedSet.contains(object)) return;
         if (object instanceof SecurityObject) {
-            List<Field> fieldList = Arrays.stream(object.getClass().getDeclaredFields()).filter(field ->
-                            (field.isAnnotationPresent(SecurityParam.class)
-                                    && !Modifier.isStatic(field.getModifiers())
-                                    && !Modifier.isFinal(field.getModifiers()))
-                                    || SecurityObject.class.isAssignableFrom(field.getType()))
-                    .collect(Collectors.toList());
+            List<Field> fieldList = new ArrayList<>();
+            Class<?> clazz = object.getClass();
+            while (clazz != null && SecurityObject.class.isAssignableFrom(clazz)) {
+                Arrays.stream(clazz.getDeclaredFields())
+                        .filter(field -> !Modifier.isStatic(field.getModifiers()) && !Modifier.isFinal(field.getModifiers()))
+                        .forEach(fieldList::add);
+                clazz = clazz.getSuperclass();
+            }
             if (fieldList.size() == 0) return;
             processedSet.add(object);
             try {
                 for (int i = 0; i < fieldList.size(); i++) {
                     Field field = fieldList.get(i);
+                    if (!OperateType.RECOVERY.equals(operateType)
+                            && !field.isAnnotationPresent(SecurityParam.class)
+                            && !SecurityObject.class.isAssignableFrom(field.getType())) {
+                        continue;
+                    }
                     field.setAccessible(true);
                     Object value = field.get(object);
                     if (value == null) continue;
@@ -203,7 +210,7 @@ public class SecurityWatchAspect implements Ordered {
                             });
                         }
                     } else {
-                        build(value, getters, setters, processedSet, mapKeys);
+                        build(value, getters, setters, processedSet, mapKeys, operateType);
                     }
                 }
             } catch (IllegalAccessException e) {
@@ -232,7 +239,7 @@ public class SecurityWatchAspect implements Ordered {
                         });
                     }
                 } else {
-                    build(value, getters, setters, processedSet, mapKeys);
+                    build(value, getters, setters, processedSet, mapKeys, operateType);
                 }
             }
         } else if (object instanceof List || object instanceof Set) {
@@ -243,21 +250,21 @@ public class SecurityWatchAspect implements Ordered {
             if (getters != null) {
                 origins.stream().filter(v -> v instanceof String).forEach(v -> getters.add(() -> (String) v));
             }
+            for (Object value : origins) {
+                if (!(value instanceof String)) {
+                    build(value, getters, setters, processedSet, mapKeys, operateType);
+                }
+            }
             if (setters != null) {
                 setters.add((m) -> {
                     collection.clear();
-                    for (int i = 0; i < origins.size(); i++) {
-                        Object value = origins.get(i);
+                    for (Object value : origins) {
                         if (value instanceof String) {
-                            String newValue = m.get((String) value);
-                            if (newValue == null) {
-                                collection.add((String) value);
-                            } else {
-                                collection.add(newValue);
-                            }
+                            String _value = (String) value;
+                            String newValue = m.get(_value);
+                            collection.add(newValue != null ? newValue : _value);
                         } else {
                             collection.add(value);
-                            build(value, getters, setters, processedSet, mapKeys);
                         }
                     }
                 });
@@ -265,35 +272,37 @@ public class SecurityWatchAspect implements Ordered {
         } else if (object instanceof Map) {
             Map<String, Object> map = (Map<String, Object>) object;
             if (map.isEmpty() || isImmutable(object.getClass())) return;
+            if (operateType != OperateType.RECOVERY && (mapKeys == null || mapKeys.length == 0)) return;
             processedSet.add(object);
             Map<String, Object> origins = new LinkedHashMap<>(map);
             Set<Map.Entry<String, Object>> entries = origins.entrySet();
+            Set<String> filterMapKeysSet = new HashSet<>(operateType == OperateType.RECOVERY ? origins.keySet() : Arrays.asList(mapKeys));
             if (getters != null) {
-                entries.stream().filter(e -> e.getValue() instanceof String).forEach(e -> getters.add(() -> (String) e.getValue()));
+                entries.stream().filter(e -> e.getValue() instanceof String && filterMapKeysSet.contains(e.getKey())).forEach(e -> getters.add(() -> (String) e.getValue()));
+            }
+            for (Map.Entry<String, Object> entry : entries) {
+                Object value = entry.getValue();
+                if (!(value instanceof String)
+                        && (filterMapKeysSet.contains(entry.getKey()) || value instanceof SecurityObject)) {
+                    build(value, getters, setters, processedSet, mapKeys, operateType);
+                }
             }
             if (setters != null) {
-                Set<String> encryptMapKeysSet = mapKeys == null || mapKeys.length == 0 ? map.keySet() : new HashSet<>(Arrays.asList(mapKeys));
                 setters.add(m -> {
                     map.clear();
                     for (Map.Entry<String, Object> entry : entries) {
                         String key = entry.getKey();
                         Object value = entry.getValue();
                         if (value instanceof String) {
-                            if (encryptMapKeysSet.contains(key)) {
-                                String newValue = m.get((String) value);
-                                if (newValue == null) {
-                                    map.put(key, (String) value);
-                                } else {
-                                    map.put(key, newValue);
-                                }
+                            String _value = (String) value;
+                            if (filterMapKeysSet.contains(key)) {
+                                String newValue = m.get(_value);
+                                map.put(key, newValue != null ? newValue : _value);
                             } else {
-                                map.put(key, (String) value);
+                                map.put(key, _value);
                             }
                         } else {
                             map.put(key, value);
-                            if (encryptMapKeysSet.contains(key) || value instanceof SecurityObject) {
-                                build(value, getters, setters, processedSet, mapKeys);
-                            }
                         }
                     }
                 });
@@ -319,7 +328,8 @@ public class SecurityWatchAspect implements Ordered {
 
     static enum OperateType {
         ENCRYPT,
-        DECRYPT;
+        DECRYPT,
+        RECOVERY;
     }
 
 
