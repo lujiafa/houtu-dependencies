@@ -80,10 +80,40 @@
       "description": "Default HMacMD5 signature verification key."
     },
     {
+      "name": "houtu.web.sign.sign-name",
+      "type": "java.lang.String",
+      "description": "Signature field name in request header or request parameters.",
+      "defaultValue": "sign"
+    },
+    {
+      "name": "houtu.web.sign.sign-source",
+      "type": "io.github.lujiafa.houtu.websecurity.sign.SignSource",
+      "description": "Where to read the signature from: HEADER, BODY, or BOTH (request header first, then request parameters).",
+      "defaultValue": "BOTH"
+    },
+    {
       "name": "houtu.web.repeat.expire",
       "type": "java.time.Duration",
       "description": "Anti-replay time window for repeated request check.",
       "defaultValue": "900s"
+    },
+    {
+      "name": "houtu.web.repeat.fields",
+      "type": "java.util.List<java.lang.String>",
+      "description": "Fields whose values are concatenated as the anti-replay cache key. Empty list disables anti-replay.",
+      "defaultValue": ["nonce", "timestamp", "sign"]
+    },
+    {
+      "name": "houtu.web.repeat.source",
+      "type": "io.github.lujiafa.houtu.websecurity.sign.SignSource",
+      "description": "Where to read anti-replay fields from: HEADER, BODY, or BOTH (request header first, then request parameters).",
+      "defaultValue": "BOTH"
+    },
+    {
+      "name": "houtu.web.sign.additional-params",
+      "type": "java.util.List<java.lang.String>",
+      "description": "Additional required parameters resolved via signSource and included in signature computation. Empty list means none.",
+      "defaultValue": ["nonce", "timestamp"]
     }
   ]
 }

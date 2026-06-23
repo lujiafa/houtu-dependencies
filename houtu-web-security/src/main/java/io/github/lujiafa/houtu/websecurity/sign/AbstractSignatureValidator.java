@@ -3,26 +3,54 @@ package io.github.lujiafa.houtu.websecurity.sign;
 import io.github.lujiafa.houtu.core.constant.ErrorCodeConstant;
 import io.github.lujiafa.houtu.core.exception.ErrorCode;
 import io.github.lujiafa.houtu.util.common.MapUtils;
-import io.github.lujiafa.houtu.websecurity.constant.SecurityConstant;
 import io.github.lujiafa.houtu.websecurity.exception.SignatureException;
 import io.github.lujiafa.houtu.websecurity.handler.SecurityContext;
+import io.github.lujiafa.houtu.websecurity.prop.SignProperties;
+import io.github.lujiafa.houtu.websecurity.prop.Source;
+import org.springframework.util.Assert;
 
+import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * 抽象签名验证器
  */
 public abstract class AbstractSignatureValidator implements SignatureValidator {
 
+    protected SignProperties signProperties;
+    protected boolean fromHeader;
+    protected boolean fromBody;
+
+    public AbstractSignatureValidator(SignProperties signProperties) {
+        Assert.notNull(signProperties, "signProperties must not be null");
+        this.signProperties = signProperties;
+        this.fromHeader = Source.HEADER == signProperties.getSource() || Source.BOTH == signProperties.getSource();
+        this.fromBody = Source.BODY == signProperties.getSource() || Source.BOTH == signProperties.getSource();
+    }
+
     @Override
     public void verify(SecurityContext securityContext) throws SignatureException {
-        Map<String, String> params = MapUtils.toStringMap(securityContext.getParameterMap());
-        String sign = params.get(SecurityConstant.PARAM_SIGNATURE_NAME);
-        if (sign == null) {
-            sign = securityContext.getRequest().getHeader(SecurityConstant.PARAM_SIGNATURE_NAME);
-        }
+        Map<String, String> params = MapUtils.toStringMap(securityContext.getParameterMap(), TreeMap::new);
+        // 解析签名值
+        String signName = signProperties.getSignName();
+        String sign = fromHeader ? securityContext.getRequest().getHeader(signName) : null;
+        sign = sign != null ? sign : (fromBody ? params.get(signName) : null);
         if (sign == null)
-            throw new SignatureException(ErrorCode.build(ErrorCodeConstant.PARAMETER_ERROR, new Object[]{SecurityConstant.PARAM_SIGNATURE_NAME}));
+            throw new SignatureException(ErrorCode.build(ErrorCodeConstant.PARAMETER_ERROR, new Object[]{signName}));
+        // 校验附加必填参数，来自请求头的需补写进参与签名计算的 params
+        List<String> additionalParams = signProperties.getAdditionalParams();
+        if (additionalParams != null) {
+            for (String name : additionalParams) {
+                String headerValue = fromHeader ? securityContext.getRequest().getHeader(name) : null;
+                String value = headerValue != null ? headerValue : (fromBody ? params.get(name) : null);
+                if (value == null)
+                    throw new SignatureException(ErrorCode.build(ErrorCodeConstant.PARAMETER_ERROR, new Object[]{name}));
+                if (headerValue != null) {
+                    params.put(name, headerValue);
+                }
+            }
+        }
         try {
             doVerify(securityContext, params, sign);
         } catch (Exception e) {
@@ -50,4 +78,5 @@ public abstract class AbstractSignatureValidator implements SignatureValidator {
      * @throws SignatureException 签名异常或验证失败
      */
     protected abstract void doVerify(SecurityContext securityContext, Map<String, String> params, String sign) throws SignatureException;
+
 }
