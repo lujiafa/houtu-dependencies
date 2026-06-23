@@ -15,5 +15,10 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @CachingParam
 public @interface CheckRepeatRequest {
-	
+
+	/**
+	 * 防重放时间窗口（秒）。0 表示使用全局配置 {@code houtu.web.sign.repeat-expire}（默认 15 分钟）。
+	 */
+	long expire() default 0;
+
 }
