@@ -13,9 +13,7 @@ public class SignatureConfiguration {
 	@Bean
 	@ConditionalOnMissingBean
 	public SignatureValidator signatureValidator(SignProperties signProperties) {
-		HMacMD5SignatureValidator signatureValidator = new HMacMD5SignatureValidator();
-		signatureValidator.setSignProperties(signProperties);
-		return signatureValidator;
+		return new HMacMD5SignatureValidator(signProperties);
 	}
 
 }

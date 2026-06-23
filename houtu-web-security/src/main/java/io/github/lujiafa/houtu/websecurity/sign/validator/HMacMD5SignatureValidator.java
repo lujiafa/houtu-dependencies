@@ -17,14 +17,17 @@ import java.util.Map;
  * HMacMD5签名验证器
  */
 public class HMacMD5SignatureValidator extends AbstractSignatureValidator {
-	
+
 	private final static Logger logger = LoggerFactory.getLogger(HMacMD5SignatureValidator.class);
 
-	protected SignProperties signProperties;
+	public HMacMD5SignatureValidator(SignProperties signProperties) {
+		super(signProperties);
+	}
 
 	@Override
 	protected void doVerify(SecurityContext securityContext, Map<String, String> params, String sign) throws SignatureException {
 		try {
+			params.remove(signProperties.getSignName());
 			String signKey = SignContext.getSignKey(securityContext.getSession());
 			if (signKey == null && (signProperties == null || (signKey = signProperties.getSignKey()) == null))
 				throw new SignatureException(ErrorCode.build(ErrorCodeConstant.INVALID_SIGNATURE_INFO));
@@ -37,9 +40,5 @@ public class HMacMD5SignatureValidator extends AbstractSignatureValidator {
 			}
 			throw new SignatureException(ErrorCode.build(ErrorCodeConstant.INVALID_SIGNATURE_INFO));
 		}
-	}
-
-	public void setSignProperties(SignProperties signProperties) {
-		this.signProperties = signProperties;
 	}
 }
