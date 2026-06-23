@@ -86,10 +86,16 @@
       "defaultValue": "sign"
     },
     {
-      "name": "houtu.web.sign.sign-source",
-      "type": "io.github.lujiafa.houtu.websecurity.sign.SignSource",
+      "name": "houtu.web.sign.source",
+      "type": "io.github.lujiafa.houtu.websecurity.prop.Source",
       "description": "Where to read the signature from: HEADER, BODY, or BOTH (request header first, then request parameters).",
       "defaultValue": "BOTH"
+    },
+    {
+      "name": "houtu.web.sign.additional-params",
+      "type": "java.util.List<java.lang.String>",
+      "description": "Additional required parameters resolved via source and included in signature computation. Empty list means none.",
+      "defaultValue": ["nonce", "timestamp"]
     },
     {
       "name": "houtu.web.repeat.expire",
@@ -105,15 +111,9 @@
     },
     {
       "name": "houtu.web.repeat.source",
-      "type": "io.github.lujiafa.houtu.websecurity.sign.SignSource",
+      "type": "io.github.lujiafa.houtu.websecurity.prop.Source",
       "description": "Where to read anti-replay fields from: HEADER, BODY, or BOTH (request header first, then request parameters).",
       "defaultValue": "BOTH"
-    },
-    {
-      "name": "houtu.web.sign.additional-params",
-      "type": "java.util.List<java.lang.String>",
-      "description": "Additional required parameters resolved via signSource and included in signature computation. Empty list means none.",
-      "defaultValue": ["nonce", "timestamp"]
     }
   ]
 }
