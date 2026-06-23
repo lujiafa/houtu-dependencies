@@ -195,7 +195,7 @@ public class SignUtils {
 	public static StringBuilder buildParam(Map<String, String> paramMap, boolean encode) {
 		Assert.notNull(paramMap, "parameter paramMap cannot be null.");
 		StringBuilder stringBuilder = new StringBuilder();
-		Map<String, String> tmap = new TreeMap<String, String>(paramMap);
+		Map<String, String> tmap = paramMap instanceof TreeMap ? paramMap : new TreeMap<String, String>(paramMap);
 		for (String k : tmap.keySet()) {
 			String val = tmap.get(k);
 			if (k == null
