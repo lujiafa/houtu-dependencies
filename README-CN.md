@@ -281,6 +281,12 @@ public ResponseData<Order> createOrder(OrderForm form) {
 | `houtu.web.session.jwt-signature-algorithm` | JWT 签名算法 | HS256 |
 | `houtu.web.security.enabled` | 是否启用安全模块 | true |
 | `houtu.web.sign.sign-key` | HMacMD5 验签密钥（**必填**） | - |
+| `houtu.web.sign.sign-name` | 签名字段名（请求头/请求参数中的键名） | `sign` |
+| `houtu.web.sign.source` | 签名取值来源：`HEADER`/`BODY`/`BOTH`（BOTH 先取请求头再取请求参数） | BOTH |
+| `houtu.web.sign.additional-params` | 附加必填参数，按 `source` 取值并参与签名计算；空列表表示无附加必填参数 | `nonce,timestamp` |
+| `houtu.web.repeat.expire` | 防重放时间窗口 | 900s |
+| `houtu.web.repeat.fields` | 参与防重放 key 的字段（取值拼接为缓存 key）；空列表表示关闭防重放 | `nonce,timestamp,sign` |
+| `houtu.web.repeat.source` | 防重放字段取值来源（语义同 `houtu.web.sign.source`） | BOTH |
 
 </details>
 

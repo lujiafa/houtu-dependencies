@@ -281,6 +281,12 @@ public ResponseData<Order> createOrder(OrderForm form) {
 | `houtu.web.session.jwt-signature-algorithm` | JWT signing algorithm | HS256 |
 | `houtu.web.security.enabled` | Whether to enable the security module | true |
 | `houtu.web.sign.sign-key` | HMacMD5 signature key (**required**) | - |
+| `houtu.web.sign.sign-name` | Signature field name (key in request header / request parameters) | `sign` |
+| `houtu.web.sign.source` | Where to read the signature from: `HEADER`/`BODY`/`BOTH` (BOTH reads header first, then request parameters) | BOTH |
+| `houtu.web.sign.additional-params` | Additional required parameters, resolved via `source` and included in signature computation; empty list means none | `nonce,timestamp` |
+| `houtu.web.repeat.expire` | Anti-replay time window | 900s |
+| `houtu.web.repeat.fields` | Fields whose values are concatenated as the anti-replay cache key; empty list disables anti-replay | `nonce,timestamp,sign` |
+| `houtu.web.repeat.source` | Where to read anti-replay fields from (same semantics as `houtu.web.sign.source`) | BOTH |
 
 </details>
 
