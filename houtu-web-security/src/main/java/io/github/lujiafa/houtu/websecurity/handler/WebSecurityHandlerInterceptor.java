@@ -4,16 +4,14 @@ import io.github.lujiafa.houtu.core.constant.ErrorCodeConstant;
 import io.github.lujiafa.houtu.core.exception.BusinessException;
 import io.github.lujiafa.houtu.core.exception.ErrorCode;
 import io.github.lujiafa.houtu.util.common.AnnotationUtils;
-import io.github.lujiafa.houtu.util.constant.CharConstant;
 import io.github.lujiafa.houtu.util.web.WebUtils;
 import io.github.lujiafa.houtu.web.util.WebCombineParametersSupport;
 import io.github.lujiafa.houtu.web.view.SmartErrorView;
 import io.github.lujiafa.houtu.websecurity.annotation.*;
-import io.github.lujiafa.houtu.websecurity.constant.SecurityConstant;
 import io.github.lujiafa.houtu.websecurity.exception.SessionException;
-import io.github.lujiafa.houtu.websecurity.exception.SignatureException;
 import io.github.lujiafa.houtu.websecurity.permission.PermissionValidator;
 import io.github.lujiafa.houtu.websecurity.prop.SessionProperties;
+import io.github.lujiafa.houtu.websecurity.repeat.RepeatRequestValidator;
 import io.github.lujiafa.houtu.websecurity.session.Session;
 import io.github.lujiafa.houtu.websecurity.session.SessionContext;
 import io.github.lujiafa.houtu.websecurity.session.SessionValidator;
@@ -21,8 +19,6 @@ import io.github.lujiafa.houtu.websecurity.sign.SignatureValidator;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.core.Ordered;
-import org.springframework.core.env.Environment;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.util.StringUtils;
 import org.springframework.web.method.HandlerMethod;
@@ -34,33 +30,28 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Method;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 public class WebSecurityHandlerInterceptor implements HandlerInterceptor, Ordered {
 
     private static final Map<Method, SecurityAnnotation> CACHE_MAP = new java.util.concurrent.ConcurrentHashMap<>();
     private static final SecurityAnnotation EMPTY_ANNOTATION_INFO = new SecurityAnnotation();
 
-    private SessionProperties sessionProperties;
-    private SessionValidator sessionValidator;
-    private PermissionValidator permissionValidator;
-    private SignatureValidator signatureValidator;
-    private RedisTemplate<String, Object> redisTemplate;
-    private String applicationName;
+    private final SessionProperties sessionProperties;
+    private final SessionValidator sessionValidator;
+    private final PermissionValidator permissionValidator;
+    private final SignatureValidator signatureValidator;
+    private final RepeatRequestValidator repeatRequestValidator;
 
-    @SuppressWarnings("unchecked")
-    public WebSecurityHandlerInterceptor(Environment env,
-                                         SessionProperties sessionProperties,
+    public WebSecurityHandlerInterceptor(SessionProperties sessionProperties,
                                          SessionValidator sessionValidator,
                                          SignatureValidator signatureValidator,
                                          PermissionValidator permissionValidator,
-                                         RedisTemplate<String, ?> redisTemplate) {
+                                         RepeatRequestValidator repeatRequestValidator) {
         this.sessionProperties = sessionProperties;
         this.sessionValidator = sessionValidator;
         this.permissionValidator = permissionValidator;
         this.signatureValidator = signatureValidator;
-        this.redisTemplate = (RedisTemplate<String, Object>) redisTemplate;
-        applicationName = env.getProperty("spring.application.name", CharConstant.HYPHEN);
+        this.repeatRequestValidator = repeatRequestValidator;
     }
 
     @Override
@@ -76,7 +67,7 @@ public class WebSecurityHandlerInterceptor implements HandlerInterceptor, Ordere
                     securityContext.setParameterMap(WebCombineParametersSupport.getCombineParameterMap(request, response));
                     checkSign(securityContext);
                 }
-                if (securityContext.getCheckRepeatRequest() != null) {
+                if (securityContext.getCheckRepeatRequest() != null && repeatRequestValidator != null) {
                     if (securityContext.getParameterMap() == null) {
                         securityContext.setParameterMap(WebCombineParametersSupport.getCombineParameterMap(request, response));
                     }
@@ -140,20 +131,7 @@ public class WebSecurityHandlerInterceptor implements HandlerInterceptor, Ordere
     }
 
     protected void checkRepeatRequest(SecurityContext securityContext) {
-        if (redisTemplate == null) return;
-        Map<String, Object> parameterMap = securityContext.getParameterMap();
-        Object requestId = parameterMap.get(SecurityConstant.PARAM_REQUEST_ID_NAME);
-        if (requestId == null) {
-            requestId = securityContext.getRequest().getHeader(SecurityConstant.PARAM_REQUEST_ID_NAME);
-        }
-        if (requestId == null || !StringUtils.hasLength(requestId.toString())) {
-            throw new SignatureException(ErrorCode.build(ErrorCodeConstant.PARAMETER_ERROR, new Object[]{SecurityConstant.PARAM_REQUEST_ID_NAME}));
-        }
-        // 防重放验证
-        String cacheKey = String.format("web:security:request:repeat:check:%s:%s", applicationName, requestId);
-        if (!redisTemplate.boundValueOps(cacheKey).setIfAbsent(CharConstant.EMPTY, 900, TimeUnit.SECONDS)) {
-            throw new SignatureException(ErrorCode.build(ErrorCodeConstant.REQUEST_REPEAT));
-        }
+        repeatRequestValidator.verify(securityContext);
     }
 
     public int getOrder() {
