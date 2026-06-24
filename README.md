@@ -334,7 +334,7 @@ The major and minor version numbers of the project align with Spring Boot, makin
 
 | Dependency | Version |
 |------------|---------|
-| Redisson | 3.51.0 |
+| Redisson | 4.6.1 |
 | Cache2k | 2.6.1.Final |
 | JJWT | 0.12.7 |
 | Bouncy Castle | 1.82 |
