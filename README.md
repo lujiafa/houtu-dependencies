@@ -359,7 +359,7 @@ The major and minor version numbers of the project align with Spring Boot, makin
 | Cache2k | 2.6.1.Final |
 | JJWT | 0.13.0 |
 | Bouncy Castle | 1.84 |
-| SpringDoc OpenAPI | 2.8.9 |
+| SpringDoc OpenAPI | 2.8.17 |
 | Apache SkyWalking | 9.5.0 |
 
 ---
