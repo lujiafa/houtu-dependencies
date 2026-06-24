@@ -10,6 +10,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.util.StringValueResolver;
+import org.springframework.web.accept.ApiVersionStrategy;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
 import java.util.Collections;
@@ -33,6 +34,11 @@ public class FeignProviderAutoConfiguration {
         mapping.setUrlPathHelper(requestMappingHandlerMapping.getUrlPathHelper());
         if (requestMappingHandlerMapping.getCorsConfigurationSource() != null) {
             mapping.setCorsConfigurationSource(requestMappingHandlerMapping.getCorsConfigurationSource());
+        }
+        // Spring Framework 7：沿用父 HandlerMapping 的 ApiVersionStrategy，使声明了 version 的 feign 端点在配置了 API 版本机制时可用
+        ApiVersionStrategy apiVersionStrategy = requestMappingHandlerMapping.getApiVersionStrategy();
+        if (apiVersionStrategy != null) {
+            mapping.setApiVersionStrategy(apiVersionStrategy);
         }
         mapping.setCorsProcessor(requestMappingHandlerMapping.getCorsProcessor());
         mapping.setDefaultHandler(requestMappingHandlerMapping.getDefaultHandler());
