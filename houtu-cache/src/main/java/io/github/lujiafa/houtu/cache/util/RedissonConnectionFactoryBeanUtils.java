@@ -36,17 +36,9 @@ public class RedissonConnectionFactoryBeanUtils {
      */
     public static RedissonClient redisson(String config) {
         Assert.notNull(config, "redisson config can not be null.");
-        Config cfg;
-        try {
-            cfg = Config.fromYAML(config);
-        } catch (IOException e) {
-            try {
-                cfg = Config.fromJSON(config);
-            } catch (IOException ie) {
-                ie.addSuppressed(e);
-                throw new IllegalArgumentException("Can't parse config", ie);
-            }
-        }
+        // Redisson 4.x 已移除 JSON 配置支持；YAML 是 JSON 的超集，fromYAML 同样可解析 JSON 内容
+        // Redisson 4.x 的 Config.fromYAML(String) 不再抛出 IOException
+        Config cfg = Config.fromYAML(config);
         return Redisson.create(cfg);
     }
 
@@ -61,12 +53,7 @@ public class RedissonConnectionFactoryBeanUtils {
         try (FileInputStream fis = new FileInputStream(configFile)) {
             cfg = Config.fromYAML(fis);
         } catch (IOException e) {
-            try (FileInputStream fis = new FileInputStream(configFile)) {
-                cfg = Config.fromJSON(fis);
-            } catch (IOException ie) {
-                ie.addSuppressed(e);
-                throw new IllegalArgumentException("Can't parse config", ie);
-            }
+            throw new IllegalArgumentException("Can't parse config", e);
         }
         return Redisson.create(cfg);
     }
