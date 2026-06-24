@@ -4,7 +4,7 @@ import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.*;
 import org.redisson.spring.data.connection.RedissonConnectionFactory;
-import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
+import org.springframework.boot.data.redis.autoconfigure.DataRedisProperties;
 import org.springframework.boot.ssl.SslBundle;
 import org.springframework.data.redis.connection.RedisClusterConfiguration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -20,7 +20,7 @@ public class RedissonConnectionFactoryBeanUtils {
 
     /**
      * 获取RedisConnectionFactory，主要适用于实例化对象到Spring容器中。
-     * 参考：org.springframework.boot.autoconfigure.data.redis.RedisConnectionConfiguration、org.springframework.boot.autoconfigure.data.redis.JedisConnectionConfiguration
+     * 参考：org.springframework.boot.data.redis.autoconfigure.RedisConnectionConfiguration、org.springframework.boot.data.redis.autoconfigure.JedisConnectionConfiguration
      *
      * @param redisson redisson客户端对象
      * @return RedisConnectionFactory
@@ -37,17 +37,9 @@ public class RedissonConnectionFactoryBeanUtils {
      */
     public static RedissonClient redisson(String config) {
         Assert.notNull(config, "redisson config can not be null.");
-        Config cfg;
-        try {
-            cfg = Config.fromYAML(config);
-        } catch (IOException e) {
-            try {
-                cfg = Config.fromJSON(config);
-            } catch (IOException ie) {
-                ie.addSuppressed(e);
-                throw new IllegalArgumentException("Can't parse config", ie);
-            }
-        }
+        // Redisson 4.x 已移除 JSON 配置支持；YAML 是 JSON 的超集，fromYAML 同样可解析 JSON 内容
+        // Redisson 4.x 的 Config.fromYAML(String) 不再抛出 IOException
+        Config cfg = Config.fromYAML(config);
         return Redisson.create(cfg);
     }
 
@@ -62,12 +54,7 @@ public class RedissonConnectionFactoryBeanUtils {
         try (FileInputStream fis = new FileInputStream(configFile)) {
             cfg = Config.fromYAML(fis);
         } catch (IOException e) {
-            try (FileInputStream fis = new FileInputStream(configFile)) {
-                cfg = Config.fromJSON(fis);
-            } catch (IOException ie) {
-                ie.addSuppressed(e);
-                throw new IllegalArgumentException("Can't parse config", ie);
-            }
+            throw new IllegalArgumentException("Can't parse config", e);
         }
         return Redisson.create(cfg);
     }
@@ -79,7 +66,7 @@ public class RedissonConnectionFactoryBeanUtils {
      * @return RedissonClient
      * @throws IOException
      */
-    public static RedissonClient redisson(RedisProperties redisProperties) {
+    public static RedissonClient redisson(DataRedisProperties redisProperties) {
         Config config = new Config();
         SslBundle sslBundle = RedisConfigUtils.getSslBundle(redisProperties);
         String addressPrefix = sslBundle == null ? "redis://" : "rediss://";

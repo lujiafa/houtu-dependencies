@@ -5,8 +5,8 @@ import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
-import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
+import org.springframework.boot.data.redis.autoconfigure.DataRedisAutoConfiguration;
+import org.springframework.boot.data.redis.autoconfigure.DataRedisProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,10 +23,10 @@ import org.springframework.util.StringUtils;
  * @author jon
  * @date 2020年12月17日
  */
-@AutoConfigureAfter(RedisAutoConfiguration.class)
+@AutoConfigureAfter(DataRedisAutoConfiguration.class)
 @ConditionalOnClass(RedisOperations.class)
 @AutoConfigureOrder(Ordered.LOWEST_PRECEDENCE)
-@EnableConfigurationProperties({RedisProperties.class})
+@EnableConfigurationProperties({DataRedisProperties.class})
 public class CacheAutoConfiguration {
 
     @Configuration
@@ -36,7 +36,7 @@ public class CacheAutoConfiguration {
 
         @Bean(destroyMethod = "shutdown")
         @ConditionalOnMissingBean
-        public static org.redisson.api.RedissonClient redissonClient(Environment environment, RedisProperties redisProperties) {
+        public static org.redisson.api.RedissonClient redissonClient(Environment environment, DataRedisProperties redisProperties) {
             String config = environment.getProperty("spring.redis.redisson.config");
             if (StringUtils.hasLength(config)) {
                 try {

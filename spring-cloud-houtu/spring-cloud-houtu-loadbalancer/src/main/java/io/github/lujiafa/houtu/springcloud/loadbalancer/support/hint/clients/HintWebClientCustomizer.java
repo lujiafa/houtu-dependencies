@@ -2,7 +2,7 @@ package io.github.lujiafa.houtu.springcloud.loadbalancer.support.hint.clients;
 
 import io.github.lujiafa.houtu.springcloud.loadbalancer.constant.LoadBalancerConstant;
 import io.github.lujiafa.houtu.springcloud.loadbalancer.support.hint.HintContext;
-import org.springframework.boot.web.reactive.function.client.WebClientCustomizer;
+import org.springframework.boot.webclient.WebClientCustomizer;
 import org.springframework.web.reactive.function.client.ClientRequest;
 import org.springframework.web.reactive.function.client.WebClient;
 

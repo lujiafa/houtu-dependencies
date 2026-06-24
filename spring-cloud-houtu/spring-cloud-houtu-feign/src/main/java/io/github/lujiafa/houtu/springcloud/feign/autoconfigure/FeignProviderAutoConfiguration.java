@@ -37,13 +37,10 @@ public class FeignProviderAutoConfiguration {
         mapping.setCorsProcessor(requestMappingHandlerMapping.getCorsProcessor());
         mapping.setDefaultHandler(requestMappingHandlerMapping.getDefaultHandler());
         mapping.setEmbeddedValueResolver(ReflectionUtils.getField(requestMappingHandlerMapping, "embeddedValueResolver", StringValueResolver.class, null));
-        mapping.setUseTrailingSlashMatch(requestMappingHandlerMapping.useTrailingSlashMatch());
+        // Spring Framework 7 已移除 useTrailingSlashMatch / useSuffixPatternMatch / useRegisteredSuffixPatternMatch（后缀与尾斜杠匹配自 6.0 起废弃）
         mapping.setDetectHandlerMethodsInAncestorContexts(ReflectionUtils.getField(requestMappingHandlerMapping, "detectHandlerMethodsInAncestorContexts", Boolean.class, false));
         mapping.setHandlerMethodMappingNamingStrategy(requestMappingHandlerMapping.getNamingStrategy());
         mapping.setPatternParser(requestMappingHandlerMapping.getPatternParser());
-
-        mapping.setUseSuffixPatternMatch(requestMappingHandlerMapping.useSuffixPatternMatch());
-        mapping.setUseRegisteredSuffixPatternMatch(requestMappingHandlerMapping.useRegisteredSuffixPatternMatch());
 
         return mapping;
     }

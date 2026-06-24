@@ -5,7 +5,7 @@
     <parent>
         <artifactId>houtu-dependencies</artifactId>
         <groupId>io.github.lujiafa</groupId>
-        <version>3.5.3</version>
+        <version>4.0.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -24,7 +24,7 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-aop</artifactId>
+            <artifactId>spring-boot-starter-aspectj</artifactId>
             <optional>true</optional>
         </dependency>
         <dependency>
@@ -34,7 +34,7 @@
         </dependency>
         <dependency>
             <groupId>org.redisson</groupId>
-            <artifactId>redisson-spring-data-35</artifactId>
+            <artifactId>redisson-spring-data-40</artifactId>
             <optional>true</optional>
         </dependency>
         <dependency>

@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Bean;
 
 public class ServiceStatusHealthConfiguration {
 
-    @ConditionalOnClass(org.springframework.boot.actuate.health.HealthEndpoint.class)
+    @ConditionalOnClass(org.springframework.boot.health.actuate.endpoint.HealthEndpoint.class)
     static class ActuatorServiceStatusHealthConfiguration {
         @Bean
         @ConditionalOnBean({ServiceContext.class})

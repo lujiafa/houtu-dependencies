@@ -1,6 +1,6 @@
 package io.github.lujiafa.houtu.cache.util;
 
-import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
+import org.springframework.boot.data.redis.autoconfigure.DataRedisProperties;
 import org.springframework.boot.context.properties.PropertyMapper;
 import org.springframework.boot.ssl.SslBundle;
 import org.springframework.boot.ssl.SslOptions;
@@ -19,12 +19,12 @@ public final class JedisConnectionFactoryBeanUtils {
 
     /**
      * 获取RedisConnectionFactory，主要适用于实例化对象到Spring容器中。
-     * 参考：org.springframework.boot.autoconfigure.data.redis.RedisConnectionConfiguration、org.springframework.boot.autoconfigure.data.redis.JedisConnectionConfiguration
+     * 参考：org.springframework.boot.data.redis.autoconfigure.RedisConnectionConfiguration、org.springframework.boot.data.redis.autoconfigure.JedisConnectionConfiguration
      * @param redisProperties redis配置
      * @param virtualThreads 是否使用虚拟线程
      * @return RedisConnectionFactory 对象
      */
-    public static RedisConnectionFactory getRedisConnectionFactory(RedisProperties redisProperties, boolean virtualThreads) {
+    public static RedisConnectionFactory getRedisConnectionFactory(DataRedisProperties redisProperties, boolean virtualThreads) {
         JedisClientConfiguration clientConfiguration = getJedisClientConfiguration(redisProperties);
         JedisConnectionFactory connectionFactory;
         if (redisProperties.getSentinel() != null) {
@@ -44,14 +44,19 @@ public final class JedisConnectionFactoryBeanUtils {
 
     /**
      * 获取 jedis ClientConfiguration
-     * 参考：org.springframework.boot.autoconfigure.data.redis.RedisConnectionConfiguration、org.springframework.boot.autoconfigure.data.redis.JedisConnectionConfiguration
+     * 参考：org.springframework.boot.data.redis.autoconfigure.RedisConnectionConfiguration、org.springframework.boot.data.redis.autoconfigure.JedisConnectionConfiguration
      * @param redisProperties redis配置
      * @return JedisClientConfiguration
      */
-    private static JedisClientConfiguration getJedisClientConfiguration(RedisProperties redisProperties) {
+    private static JedisClientConfiguration getJedisClientConfiguration(DataRedisProperties redisProperties) {
         // 参考 JedisConnectionConfiguration
         JedisClientConfiguration.JedisClientConfigurationBuilder builder = JedisClientConfiguration.builder();
-        PropertyMapper map = PropertyMapper.get().alwaysApplyingWhenNonNull();
+        PropertyMapper map = PropertyMapper.get().alwaysApplying(new PropertyMapper.SourceOperator() {
+            @Override
+            public <T> PropertyMapper.Source<T> apply(PropertyMapper.Source<T> source) {
+                return source.when(java.util.Objects::nonNull);
+            }
+        });
         map.from(redisProperties.getTimeout()).to(builder::readTimeout);
         map.from(redisProperties.getConnectTimeout()).to(builder::connectTimeout);
         map.from(redisProperties.getClientName()).whenHasText().to(builder::clientName);
@@ -68,7 +73,7 @@ public final class JedisConnectionFactoryBeanUtils {
         boolean poolEnabled = redisProperties.getJedis().getPool().getEnabled() != null ? redisProperties.getJedis().getPool().getEnabled() : ClassUtils.isPresent("org.apache.commons.pool2.ObjectPool",
                 redisProperties.getClass().getClassLoader());
         if (poolEnabled) {
-            RedisProperties.Pool pool = redisProperties.getJedis().getPool();
+            DataRedisProperties.Pool pool = redisProperties.getJedis().getPool();
             JedisPoolConfig config = new JedisPoolConfig();
             config.setMaxTotal(redisProperties.getJedis().getPool().getMaxActive());
             config.setMaxIdle(redisProperties.getJedis().getPool().getMaxIdle());

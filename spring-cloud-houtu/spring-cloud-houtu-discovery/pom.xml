@@ -5,7 +5,7 @@
     <parent>
         <groupId>io.github.lujiafa</groupId>
         <artifactId>spring-cloud-houtu</artifactId>
-        <version>3.5.3</version>
+        <version>4.0.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -21,6 +21,12 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-actuator</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <!-- Spring Boot 4 将健康检查 API（HealthIndicator/Health/HealthEndpoint）拆分到 spring-boot-health -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-health</artifactId>
             <optional>true</optional>
         </dependency>
 

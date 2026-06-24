@@ -1,6 +1,6 @@
 package io.github.lujiafa.houtu.websecurity.session.repository;
 
-import com.fasterxml.jackson.core.type.TypeReference;
+import tools.jackson.core.type.TypeReference;
 import io.github.lujiafa.houtu.util.common.CodeUtils;
 import io.github.lujiafa.houtu.util.common.CodecData;
 import io.github.lujiafa.houtu.util.common.DateUtils;

@@ -1,8 +1,8 @@
 package io.github.lujiafa.houtu.websecurity.prop;
 
-import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
+import org.springframework.boot.data.redis.autoconfigure.DataRedisProperties;
 
-public class SessionRedisProperties extends RedisProperties {
+public class SessionRedisProperties extends DataRedisProperties {
 
     private Ssl ssl;
 

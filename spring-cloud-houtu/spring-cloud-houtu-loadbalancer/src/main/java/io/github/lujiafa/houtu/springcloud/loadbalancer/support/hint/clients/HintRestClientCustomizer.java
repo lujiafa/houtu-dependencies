@@ -2,7 +2,7 @@ package io.github.lujiafa.houtu.springcloud.loadbalancer.support.hint.clients;
 
 import io.github.lujiafa.houtu.springcloud.loadbalancer.constant.LoadBalancerConstant;
 import io.github.lujiafa.houtu.springcloud.loadbalancer.support.hint.HintContext;
-import org.springframework.boot.web.client.RestClientCustomizer;
+import org.springframework.boot.restclient.RestClientCustomizer;
 import org.springframework.web.client.RestClient;
 
 public class HintRestClientCustomizer implements RestClientCustomizer {

@@ -6,7 +6,7 @@
 
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![JDK](https://img.shields.io/badge/JDK-17+-green.svg)](https://openjdk.org/)
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.x-brightgreen.svg)](https://spring.io/projects/spring-boot)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.0.x-brightgreen.svg)](https://spring.io/projects/spring-boot)
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.lujiafa/houtu-dependencies.svg)](https://central.sonatype.com/artifact/io.github.lujiafa/houtu-dependencies)
 
 *取名自中国传统文化"黄天后土"中的大地之神 —— 象征稳固承载、滋养万物的力量*
@@ -78,7 +78,7 @@
         <dependency>
             <groupId>io.github.lujiafa</groupId>
             <artifactId>houtu-dependencies</artifactId>
-            <version>3.5.3</version>
+            <version>4.0.0</version>
             <type>pom</type>
             <scope>import</scope>
         </dependency>
@@ -336,7 +336,8 @@ public ResponseData<Order> createOrder(OrderForm form) {
 
 |   Houtu   | JDK | Spring Boot | Spring Cloud | Spring Cloud Alibaba |
 |:---------:|:---:|:-----------:|:------------:|:--------------------:|
-| **3.5.3** | 17 |   3.5.15    | 2025.0.3 | 2025.0.0.0 |
+| **4.0.0** | 17 |   4.0.7     | 2025.1.0 | 2025.1.0.0 |
+|   3.5.3   | 17 |   3.5.15    | 2025.0.3 | 2025.0.0.0 |
 |   3.5.2   | 17 |   3.5.13    | 2025.0.2 | 2025.0.0.0 |
 |   3.5.1   | 17 |   3.5.11    | 2025.0.1 | 2025.0.0.0 |
 |   3.5.0   | 17 |   3.5.11    | 2025.0.0 ~ 2025.0.1 | 2023.0.1.2 ~ 2025.0.0.0 |
@@ -354,11 +355,11 @@ public ResponseData<Order> createOrder(OrderForm form) {
 
 | 依赖 | 版本 |
 |------|------|
-| Redisson | 3.52.0 |
+| Redisson | 4.6.1 |
 | Cache2k | 2.6.1.Final |
 | JJWT | 0.13.0 |
 | Bouncy Castle | 1.84 |
-| SpringDoc OpenAPI | 2.8.9 |
+| SpringDoc OpenAPI | 3.0.3 |
 | Apache SkyWalking | 9.5.0 |
 
 ---

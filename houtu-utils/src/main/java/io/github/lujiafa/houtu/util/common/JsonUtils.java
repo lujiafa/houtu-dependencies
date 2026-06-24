@@ -3,7 +3,7 @@ package io.github.lujiafa.houtu.util.common;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONWriter;
-import com.fasterxml.jackson.core.type.TypeReference;
+import tools.jackson.core.type.TypeReference;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -21,7 +21,7 @@ import java.nio.charset.StandardCharsets;
  *
  * <p>泛型类型：涉及泛型（如 {@code List<User>}、{@code Map<String,Object>}）的方法同时提供两种 {@code TypeReference}
  * 重载，分别接受 Fastjson2 的 {@link com.alibaba.fastjson2.TypeReference} 与 Jackson 的
- * {@link com.fasterxml.jackson.core.type.TypeReference}，便于在已引入二者之一的代码中直接使用。</p>
+ * {@link tools.jackson.core.type.TypeReference}，便于在已引入二者之一的代码中直接使用。</p>
  */
 public class JsonUtils {
 
@@ -107,7 +107,7 @@ public class JsonUtils {
 	}
 
 	/**
-	 * 将 JSON 字符串反序列化为带泛型参数的对象，使用 Jackson 的 {@link com.fasterxml.jackson.core.type.TypeReference} 描述目标类型。
+	 * 将 JSON 字符串反序列化为带泛型参数的对象，使用 Jackson 的 {@link tools.jackson.core.type.TypeReference} 描述目标类型。
 	 *
 	 * <p>适用场景：与 {@link #parseObject(String, com.alibaba.fastjson2.TypeReference)} 功能一致，
 	 * 仅在于接受 Jackson 的 {@code TypeReference}，便于在已使用 Jackson（Spring Boot 默认）的代码中直接调用，无需额外引入 Fastjson2 类型。</p>
@@ -115,7 +115,7 @@ public class JsonUtils {
 	 * <p>示例：</p>
 	 * <pre>{@code
 	 * Map<String, Object> map = JsonUtils.parseObject(json,
-	 *         new com.fasterxml.jackson.core.type.TypeReference<Map<String, Object>>() {});
+	 *         new tools.jackson.core.type.TypeReference<Map<String, Object>>() {});
 	 * }</pre>
 	 *
 	 * @param jsonString    JSON 字符串
@@ -179,7 +179,7 @@ public class JsonUtils {
 	}
 
 	/**
-	 * 将一个对象转换为带泛型参数的目标类型，<b>保留</b>源对象的 null 字段，使用 Jackson 的 {@link com.fasterxml.jackson.core.type.TypeReference} 描述目标类型。
+	 * 将一个对象转换为带泛型参数的目标类型，<b>保留</b>源对象的 null 字段，使用 Jackson 的 {@link tools.jackson.core.type.TypeReference} 描述目标类型。
 	 *
 	 * <p>适用场景：目标类型含泛型（如 {@code Map<String,Object>}、{@code List<User>}）的对象互转；
 	 * 在已使用 Jackson 的代码中可直接传入其 {@code TypeReference}。</p>
@@ -187,7 +187,7 @@ public class JsonUtils {
 	 * <p>示例：</p>
 	 * <pre>{@code
 	 * Map<String, Object> map = JsonUtils.convertValue(bean,
-	 *         new com.fasterxml.jackson.core.type.TypeReference<Map<String, Object>>() {});
+	 *         new tools.jackson.core.type.TypeReference<Map<String, Object>>() {});
 	 * }</pre>
 	 *
 	 * @param fromValue      源对象
@@ -226,7 +226,7 @@ public class JsonUtils {
 	}
 
 	/**
-	 * 将一个对象转换为带泛型参数的目标类型，转换时<b>忽略</b>源对象的 null 字段，使用 Jackson 的 {@link com.fasterxml.jackson.core.type.TypeReference} 描述目标类型。
+	 * 将一个对象转换为带泛型参数的目标类型，转换时<b>忽略</b>源对象的 null 字段，使用 Jackson 的 {@link tools.jackson.core.type.TypeReference} 描述目标类型。
 	 *
 	 * <p>适用场景：{@link #convertValueIgnoreNull(Object, Class)} 的泛型版本，
 	 * 用于目标类型含泛型且需忽略源对象 null 字段的场景；在已使用 Jackson 的代码中可直接传入其 {@code TypeReference}。</p>
@@ -234,7 +234,7 @@ public class JsonUtils {
 	 * <p>示例：</p>
 	 * <pre>{@code
 	 * Map<String, Object> map = JsonUtils.convertValueIgnoreNull(bean,
-	 *         new com.fasterxml.jackson.core.type.TypeReference<Map<String, Object>>() {});
+	 *         new tools.jackson.core.type.TypeReference<Map<String, Object>>() {});
 	 * }</pre>
 	 *
 	 * @param fromValue      源对象
@@ -303,7 +303,7 @@ public class JsonUtils {
 	}
 
 	/**
-	 * 从 {@code TypeReference} 中提取泛型的原始类型（raw type），使用 Jackson 的 {@link com.fasterxml.jackson.core.type.TypeReference}。
+	 * 从 {@code TypeReference} 中提取泛型的原始类型（raw type），使用 Jackson 的 {@link tools.jackson.core.type.TypeReference}。
 	 *
 	 * <p>适用场景：与 {@link #getRawType(com.alibaba.fastjson2.TypeReference)} 功能一致，
 	 * 仅在于接受 Jackson 的 {@code TypeReference}，便于在已使用 Jackson 的代码中直接调用。</p>
@@ -311,7 +311,7 @@ public class JsonUtils {
 	 * <p>示例：</p>
 	 * <pre>{@code
 	 * Class<?> raw = JsonUtils.getRawType(
-	 *         new com.fasterxml.jackson.core.type.TypeReference<Map<String, Object>>() {}); // => Map.class
+	 *         new tools.jackson.core.type.TypeReference<Map<String, Object>>() {}); // => Map.class
 	 * }</pre>
 	 *
 	 * @param typeReference 目标类型引用（含泛型参数）

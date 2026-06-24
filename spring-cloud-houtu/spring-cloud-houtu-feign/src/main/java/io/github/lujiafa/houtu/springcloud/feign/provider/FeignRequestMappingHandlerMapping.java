@@ -172,6 +172,8 @@ public class FeignRequestMappingHandlerMapping extends RequestMappingHandlerMapp
 				public String[] headers() {return new String[0];}
 				@Override
 				public String[] consumes() {return new String[0];}
+				@Override
+				public String version() {return CharConstant.EMPTY;}
 			};
 		}
 		RequestCondition<?> condition = getCustomTypeCondition((Class<?>) element);

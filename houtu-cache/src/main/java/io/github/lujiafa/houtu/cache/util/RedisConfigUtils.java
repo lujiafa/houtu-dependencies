@@ -1,7 +1,7 @@
 package io.github.lujiafa.houtu.cache.util;
 
 import io.github.lujiafa.houtu.core.context.SpringApplicationContext;
-import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
+import org.springframework.boot.data.redis.autoconfigure.DataRedisProperties;
 import org.springframework.boot.ssl.SslBundle;
 import org.springframework.boot.ssl.SslBundles;
 import org.springframework.data.redis.connection.*;
@@ -13,8 +13,8 @@ import java.util.List;
 
 public final class RedisConfigUtils {
 
-    public static SslBundle getSslBundle(RedisProperties redisProperties) {
-        RedisProperties.Ssl ssl = redisProperties.getSsl();
+    public static SslBundle getSslBundle(DataRedisProperties redisProperties) {
+        DataRedisProperties.Ssl ssl = redisProperties.getSsl();
         if (ssl == null || !ssl.isEnabled()) {
             return null;
         }
@@ -32,7 +32,7 @@ public final class RedisConfigUtils {
      * @param redisProperties redis配置
      * @return 配置 RedisSentinelConfiguration
      */
-    public static RedisSentinelConfiguration getSentinelConfig(RedisProperties redisProperties) {
+    public static RedisSentinelConfiguration getSentinelConfig(DataRedisProperties redisProperties) {
         if (redisProperties.getSentinel() != null) {
             RedisSentinelConfiguration config = new RedisSentinelConfiguration();
             config.master(redisProperties.getSentinel().getMaster());
@@ -66,9 +66,9 @@ public final class RedisConfigUtils {
      * @param redisProperties redis配置
      * @return 配置 RedisClusterConfiguration
      */
-    public static RedisClusterConfiguration getClusterConfiguration(RedisProperties redisProperties) {
+    public static RedisClusterConfiguration getClusterConfiguration(DataRedisProperties redisProperties) {
         if (redisProperties.getCluster() != null) {
-            RedisProperties.Cluster clusterProperties = redisProperties.getCluster();
+            DataRedisProperties.Cluster clusterProperties = redisProperties.getCluster();
             RedisClusterConfiguration config = new RedisClusterConfiguration();
             List<RedisNode> nodes = new ArrayList<>();
             List<String> hostPortStringList = redisProperties.getCluster().getNodes();
@@ -95,7 +95,7 @@ public final class RedisConfigUtils {
      * @param redisProperties redis配置
      * @return 配置 RedisStandaloneConfiguration
      */
-    public static RedisStandaloneConfiguration getStandaloneConfig(RedisProperties redisProperties) {
+    public static RedisStandaloneConfiguration getStandaloneConfig(DataRedisProperties redisProperties) {
         RedisStandaloneConfiguration config = new RedisStandaloneConfiguration();
         String host = redisProperties.getHost();
         int port = redisProperties.getPort();

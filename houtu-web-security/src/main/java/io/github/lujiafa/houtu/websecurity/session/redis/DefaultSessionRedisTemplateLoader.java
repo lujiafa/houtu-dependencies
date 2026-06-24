@@ -6,7 +6,7 @@ import io.github.lujiafa.houtu.websecurity.prop.SessionProperties;
 import io.github.lujiafa.houtu.websecurity.prop.SessionRedisProperties;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
+import org.springframework.boot.data.redis.autoconfigure.DataRedisProperties;
 import org.springframework.context.Lifecycle;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -23,7 +23,7 @@ public class DefaultSessionRedisTemplateLoader implements SessionRedisTemplateLo
         Assert.notNull(redisTemplate, "redisTemplate is null");
         if (sessionProperties.getRedis() != null) {
             SessionRedisProperties redisProperties = sessionProperties.getRedis();
-            RedisProperties.ClientType clientType = redisProperties.getClientType() == null ? RedisProperties.ClientType.LETTUCE : redisProperties.getClientType();
+            DataRedisProperties.ClientType clientType = redisProperties.getClientType() == null ? DataRedisProperties.ClientType.LETTUCE : redisProperties.getClientType();
             RedisConnectionFactory redisConnectionFactory = null;
             switch (clientType) {
                 case LETTUCE:

@@ -2,8 +2,8 @@ package io.github.lujiafa.houtu.springcloud.discovery.health;
 
 import io.github.lujiafa.houtu.springcloud.discovery.context.ServiceContext;
 import io.github.lujiafa.houtu.springcloud.discovery.type.ServiceStatus;
-import org.springframework.boot.actuate.health.AbstractHealthIndicator;
-import org.springframework.boot.actuate.health.Health;
+import org.springframework.boot.health.contributor.AbstractHealthIndicator;
+import org.springframework.boot.health.contributor.Health;
 
 /**
  * Actuator健康检查接入服务状态

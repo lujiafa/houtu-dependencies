@@ -5,7 +5,7 @@
     <parent>
         <artifactId>houtu-dependencies</artifactId>
         <groupId>io.github.lujiafa</groupId>
-        <version>3.5.3</version>
+        <version>4.0.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -14,8 +14,8 @@
     <packaging>pom</packaging>
 
     <properties>
-        <spring-cloud-dependencies.version>2025.0.3</spring-cloud-dependencies.version>
-        <spring-cloud-alibaba-dependencies.version>2025.0.0.0</spring-cloud-alibaba-dependencies.version>
+        <spring-cloud-dependencies.version>2025.1.0</spring-cloud-dependencies.version>
+        <spring-cloud-alibaba-dependencies.version>2025.1.0.0</spring-cloud-alibaba-dependencies.version>
     </properties>
 
     <modules>

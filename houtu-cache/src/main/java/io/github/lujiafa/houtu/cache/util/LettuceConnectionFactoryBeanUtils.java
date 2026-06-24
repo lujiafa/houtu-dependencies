@@ -3,7 +3,7 @@ package io.github.lujiafa.houtu.cache.util;
 import io.lettuce.core.ReadFrom;
 import io.lettuce.core.api.StatefulConnection;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
-import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
+import org.springframework.boot.data.redis.autoconfigure.DataRedisProperties;
 import org.springframework.boot.ssl.SslBundle;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -19,12 +19,12 @@ public final class LettuceConnectionFactoryBeanUtils {
 
     /**
      * 获取RedisConnectionFactory，主要适用于实例化对象到Spring容器中。
-     * 参考：org.springframework.boot.autoconfigure.data.redis.RedisConnectionConfiguration、org.springframework.boot.autoconfigure.data.redis.JedisConnectionConfiguration
+     * 参考：org.springframework.boot.data.redis.autoconfigure.RedisConnectionConfiguration、org.springframework.boot.data.redis.autoconfigure.JedisConnectionConfiguration
      * @param redisProperties redis配置
      * @param virtualThreads 是否使用虚拟线程
      * @return RedisConnectionFactory
      */
-    public static RedisConnectionFactory getRedisConnectionFactory(RedisProperties redisProperties, boolean virtualThreads) {
+    public static RedisConnectionFactory getRedisConnectionFactory(DataRedisProperties redisProperties, boolean virtualThreads) {
         LettuceClientConfiguration clientConfiguration = getLettuceClientConfiguration(redisProperties);
         LettuceConnectionFactory connectionFactory;
         if (redisProperties.getSentinel() != null) {
@@ -42,14 +42,14 @@ public final class LettuceConnectionFactoryBeanUtils {
         return connectionFactory;
     }
 
-    private static LettuceClientConfiguration getLettuceClientConfiguration(RedisProperties redisProperties) {
+    private static LettuceClientConfiguration getLettuceClientConfiguration(DataRedisProperties redisProperties) {
         // 参考 LettuceConnectionConfiguration
         LettuceClientConfiguration.LettuceClientConfigurationBuilder builder;
         boolean poolEnabled = redisProperties.getLettuce().getPool().getEnabled() != null ? redisProperties.getLettuce().getPool().getEnabled() : ClassUtils.isPresent("org.apache.commons.pool2.ObjectPool",
                 redisProperties.getClass().getClassLoader());
         if (poolEnabled) {
             GenericObjectPoolConfig<StatefulConnection<?, ?>> config = new GenericObjectPoolConfig<>();
-            RedisProperties.Pool pool = redisProperties.getLettuce().getPool();
+            DataRedisProperties.Pool pool = redisProperties.getLettuce().getPool();
             config.setMaxTotal(pool.getMaxActive());
             config.setMaxIdle(pool.getMaxIdle());
             config.setMinIdle(pool.getMinIdle());
@@ -81,7 +81,7 @@ public final class LettuceConnectionFactoryBeanUtils {
             builder.commandTimeout(redisProperties.getTimeout());
         }
         if (redisProperties.getLettuce() != null) {
-            RedisProperties.Lettuce lettuce = redisProperties.getLettuce();
+            DataRedisProperties.Lettuce lettuce = redisProperties.getLettuce();
             if (lettuce.getShutdownTimeout() != null && !lettuce.getShutdownTimeout().isZero()) {
                 builder.shutdownTimeout(lettuce.getShutdownTimeout());
             }

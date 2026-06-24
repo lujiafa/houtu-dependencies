@@ -5,14 +5,14 @@
     <parent>
         <groupId>io.github.lujiafa</groupId>
         <artifactId>houtu-dependencies</artifactId>
-        <version>3.5.3</version>
+        <version>4.0.0</version>
     </parent>
 
     <artifactId>houtu-web-swagger</artifactId>
     <name>houtu-web-swagger</name>
 
     <properties>
-        <org.springdoc.version>2.8.9</org.springdoc.version>
+        <org.springdoc.version>3.0.3</org.springdoc.version>
     </properties>
 
     <dependencies>

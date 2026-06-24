@@ -5,7 +5,7 @@
     <parent>
         <artifactId>houtu-dependencies</artifactId>
         <groupId>io.github.lujiafa</groupId>
-        <version>3.5.3</version>
+        <version>4.0.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -26,6 +26,12 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-jdbc</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <!-- Spring Boot 4 将 RestTemplateAutoConfiguration 拆分到 spring-boot-restclient（用于指标自动配置的装配顺序） -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-restclient</artifactId>
             <optional>true</optional>
         </dependency>
 
