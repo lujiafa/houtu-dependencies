@@ -43,7 +43,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <skipTests>true</skipTests>
         <spring-boot-starter-parent.version>3.5.15</spring-boot-starter-parent.version>
-        <jakarta.xml.bind-api.version>4.0.2</jakarta.xml.bind-api.version>
+        <jakarta.xml.bind-api.version>4.0.5</jakarta.xml.bind-api.version>
         <cache2k.version>2.6.1.Final</cache2k.version>
         <io.jsonwebtoken.version>0.13.0</io.jsonwebtoken.version>
         <redisson.version>4.6.1</redisson.version>
