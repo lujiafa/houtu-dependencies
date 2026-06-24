@@ -6,7 +6,7 @@
 
     <groupId>io.github.lujiafa</groupId>
     <artifactId>houtu-dependencies</artifactId>
-    <version>3.5.3</version>
+    <version>3.5.4</version>
     <packaging>pom</packaging>
 
     <name>Houtu Dependencies</name>
@@ -48,7 +48,7 @@
         <io.jsonwebtoken.version>0.13.0</io.jsonwebtoken.version>
         <redisson.version>3.52.0</redisson.version>
         <fastjson2.version>2.0.62</fastjson2.version>
-        <io.github.lujiafa.houtu.version>3.5.3</io.github.lujiafa.houtu.version>
+        <io.github.lujiafa.houtu.version>3.5.4</io.github.lujiafa.houtu.version>
     </properties>
 
     <modules>
