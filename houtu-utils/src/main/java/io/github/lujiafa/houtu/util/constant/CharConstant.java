@@ -8,10 +8,8 @@ package io.github.lujiafa.houtu.util.constant;
  */
 public interface CharConstant {
 
-    /** 英文空''字符 **/
-    char EMPTY_CHAR = 0x00;
     /** 英文空""字符串 **/
-    String EMPTY = Character.toString(EMPTY_CHAR);
+    String EMPTY = "";
 
     /** 英文空格" "字符 **/
     char SPACE_CHAR = 0x20;
