@@ -355,7 +355,7 @@ public ResponseData<Order> createOrder(OrderForm form) {
 
 | 依赖 | 版本 |
 |------|------|
-| Redisson | 3.52.0 |
+| Redisson | 4.6.1 |
 | Cache2k | 2.6.1.Final |
 | JJWT | 0.13.0 |
 | Bouncy Castle | 1.84 |
