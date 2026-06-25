@@ -47,15 +47,6 @@ public class ResponseData<T> implements BaseResponseData, Serializable {
 		this.data = data;
 	}
 
-	/**
-	 * @Title hasSuccess
-	 * @Description 判断状态是否为成功
-	 * @return true-成功
-	 */
-	public boolean hasSuccess() {
-		return ErrorCodeConstant.SUCCESS.equals(code);
-	}
-	
 	public static <T> ResponseData<T> success() {
 		return new ResponseData<T>();
 	}

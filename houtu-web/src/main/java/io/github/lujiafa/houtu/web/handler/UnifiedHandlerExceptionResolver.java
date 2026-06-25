@@ -9,12 +9,14 @@ import io.github.lujiafa.houtu.web.view.SmartErrorView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.Ordered;
+import org.springframework.util.Assert;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.View;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -29,19 +31,24 @@ public class UnifiedHandlerExceptionResolver implements HandlerExceptionResolver
 
     protected final Logger logger = LoggerFactory.getLogger(UnifiedHandlerExceptionResolver.class);
 
-    private final List<HandlerExceptionResolverCustomizer> customizers = new ArrayList<>();
+    protected final List<HandlerExceptionResolverCustomizer> customizers = new ArrayList<>();
+    protected ExceptionViewBuilder exceptionViewBuilder;
 
     /**
      * 是否对未知异常启用统一兜底。关闭后未知异常将向上抛出，便于上游服务通过链路追踪发现。
      */
-    private boolean exceptionFallback = true;
+    protected boolean exceptionFallback = true;
 
-    public UnifiedHandlerExceptionResolver() {}
+    public UnifiedHandlerExceptionResolver(ExceptionViewBuilder exceptionViewBuilder) {
+        this(null, exceptionViewBuilder);
+    }
 
-    public UnifiedHandlerExceptionResolver(List<HandlerExceptionResolverCustomizer> customizers) {
+    public UnifiedHandlerExceptionResolver(List<HandlerExceptionResolverCustomizer> customizers, ExceptionViewBuilder exceptionViewBuilder) {
         if (customizers != null && !customizers.isEmpty()) {
             this.customizers.addAll(customizers);
         }
+        Assert.notNull(exceptionViewBuilder, "exceptionViewBuilder cannot be null");
+        this.exceptionViewBuilder = exceptionViewBuilder;
     }
 
     @Override
@@ -77,7 +84,7 @@ public class UnifiedHandlerExceptionResolver implements HandlerExceptionResolver
             businessException = new BusinessException(ErrorCode.build(ErrorCodeConstant.SERVER_BUSY, request.getLocale()), ex);
         }
         request.setAttribute(DispatcherServlet.EXCEPTION_ATTRIBUTE, businessException);
-        return new ModelAndView(new SmartErrorView(wrapErrorCode(businessException.getErrorCode())));
+        return new ModelAndView(exceptionViewBuilder.build(businessException.getErrorCode()));
     }
 
     /**
@@ -109,10 +116,6 @@ public class UnifiedHandlerExceptionResolver implements HandlerExceptionResolver
      */
     protected BusinessException resolveBusinessException(Throwable throwable) {
         return ThrowableUtils.getThrowable(throwable, BusinessException.class);
-    }
-
-    protected ErrorCode wrapErrorCode(ErrorCode errorCode) {
-        return errorCode;
     }
 
     public void setExceptionFallback(boolean exceptionFallback) {

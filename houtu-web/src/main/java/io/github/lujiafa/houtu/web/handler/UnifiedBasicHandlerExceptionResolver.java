@@ -1,6 +1,6 @@
 package io.github.lujiafa.houtu.web.handler;
 
-import io.github.lujiafa.houtu.web.view.SmartErrorView;
+import io.github.lujiafa.houtu.web.view.SmartView;
 import org.springframework.core.Ordered;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.servlet.HandlerExceptionResolver;
@@ -23,10 +23,10 @@ public class UnifiedBasicHandlerExceptionResolver implements HandlerExceptionRes
                                          Exception ex) {
         if (ex instanceof HttpRequestMethodNotSupportedException) {
             response.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
-            return new ModelAndView(new SmartErrorView());
+            return new ModelAndView(new SmartView());
         } else if (ex instanceof UnavailableException) {
             response.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
-            return new ModelAndView(new SmartErrorView());
+            return new ModelAndView(new SmartView());
         }
         return null;
     }
