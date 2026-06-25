@@ -16,7 +16,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
-import org.springframework.core.env.Environment;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
@@ -56,6 +55,12 @@ public class WebAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
+    public ExceptionViewBuilder exceptionViewBuilder() {
+        return new ExceptionViewBuilder();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
     @ConditionalOnProperty(prefix = WebProperties.PROPERTIES_PREFIX, value = "exception-resolver", havingValue = "true", matchIfMissing = true)
     public UnifiedBasicHandlerExceptionResolver unifiedBasicHandlerExceptionResolver() {
         return new UnifiedBasicHandlerExceptionResolver();
@@ -64,11 +69,10 @@ public class WebAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     @ConditionalOnProperty(prefix = WebProperties.PROPERTIES_PREFIX, value = "exception-resolver", havingValue = "true", matchIfMissing = true)
-    public UnifiedHandlerExceptionResolver unifiedHandlerExceptionResolver(ObjectProvider<List<HandlerExceptionResolverCustomizer>> customizersObjectProvider) {
-        List<HandlerExceptionResolverCustomizer> exceptionResolverCustomizers = customizersObjectProvider.getIfAvailable();
-        UnifiedHandlerExceptionResolver resolver = (exceptionResolverCustomizers == null || exceptionResolverCustomizers.isEmpty())
-                ? new UnifiedHandlerExceptionResolver()
-                : new UnifiedHandlerExceptionResolver(exceptionResolverCustomizers);
+    public UnifiedHandlerExceptionResolver unifiedHandlerExceptionResolver(ObjectProvider<HandlerExceptionResolverCustomizer> customizersObjectProvider,
+                                                                           ExceptionViewBuilder exceptionViewBuilder) {
+        List<HandlerExceptionResolverCustomizer> exceptionResolverCustomizers = customizersObjectProvider.stream().toList();
+        UnifiedHandlerExceptionResolver resolver = new UnifiedHandlerExceptionResolver(exceptionResolverCustomizers, exceptionViewBuilder);
         resolver.setExceptionFallback(webProperties.isExceptionFallback());
         return resolver;
     }
