@@ -23,6 +23,8 @@ public class SmartView implements View {
 
     protected static volatile ExtensionHandlerMethodReturnValueHandler returnValueHandler;
 
+    public SmartView() {}
+
     public SmartView(Object data) {
         this.data = data;
     }
@@ -31,9 +33,14 @@ public class SmartView implements View {
     public void render(Map<String, ?> model, HttpServletRequest request, HttpServletResponse response)
             throws Exception {
         if (data == null) return;
+        write(data, model, request, response);
+    }
+
+    protected void write(Object data, Map<String, ?> model, HttpServletRequest request, HttpServletResponse response) throws Exception {
         response.setHeader("Pragma", "no-cache");
         response.setHeader("Cache-Control", "no-cache");
         getReturnValueHandler().write(data, new ServletServerHttpRequest(request), new ServletServerHttpResponse(response));
+
     }
 
     private ExtensionHandlerMethodReturnValueHandler getReturnValueHandler() {

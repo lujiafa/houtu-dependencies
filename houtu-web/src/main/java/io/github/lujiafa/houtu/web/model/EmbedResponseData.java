@@ -41,15 +41,6 @@ public class EmbedResponseData extends LinkedHashMap<String, Object> implements 
 		return this;
 	}
 
-	/**
-	 * @Title hasSuccess
-	 * @Description 判断状态是否为成功
-	 * @return true-成功
-	 */
-	public boolean hasSuccess() {
-		return ErrorCodeConstant.SUCCESS.equals(get(CODE_NAME));
-	}
-
 	public static EmbedResponseData success() {
 		EmbedResponseData responseData = new EmbedResponseData();
 		responseData.put(CODE_NAME,ErrorCodeConstant.SUCCESS);
