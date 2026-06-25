@@ -46,7 +46,7 @@ public class SmartErrorView extends SmartView {
 			}
 			return;
 		}
-		super.write(model, model, request, response);
+		super.write(data, model, request, response);
 	}
 
 }
