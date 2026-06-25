@@ -56,6 +56,7 @@ public class WebAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
+    @ConditionalOnProperty(prefix = WebProperties.PROPERTIES_PREFIX, value = "exception-resolver", havingValue = "true", matchIfMissing = true)
     public ExceptionViewBuilder exceptionViewBuilder() {
         return new ExceptionViewBuilder();
     }
